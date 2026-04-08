@@ -52,9 +52,9 @@ class LeaveApplicationSeeder extends Seeder
                 'total_days' => 5,
                 'reason' => 'Family vacation planned during winter holidays.',
                 'status' => 'approved',
-                'approved_by' => $adminUser?->id,
-                'approved_at' => '2026-01-03 10:00:00',
-                'approval_remarks' => 'Approved. Enjoy your vacation!',
+                'final_approved_by' => $adminUser?->id,
+                'final_approved_at' => '2026-01-03 10:00:00',
+                'final_approval_remarks' => 'Approved. Enjoy your vacation!',
             ],
             // Employee 1 - Approved sick leave (past)
             [
@@ -65,9 +65,9 @@ class LeaveApplicationSeeder extends Seeder
                 'total_days' => 2,
                 'reason' => 'Feeling unwell, need to visit doctor.',
                 'status' => 'approved',
-                'approved_by' => $adminUser?->id,
-                'approved_at' => '2026-01-20 08:30:00',
-                'approval_remarks' => 'Get well soon.',
+                'final_approved_by' => $adminUser?->id,
+                'final_approved_at' => '2026-01-20 08:30:00',
+                'final_approval_remarks' => 'Get well soon.',
             ],
             // Employee 2 - Pending casual leave (upcoming)
             [
@@ -88,9 +88,9 @@ class LeaveApplicationSeeder extends Seeder
                 'total_days' => 5,
                 'reason' => 'Planning a short trip.',
                 'status' => 'rejected',
-                'approved_by' => $adminUser?->id,
-                'approved_at' => '2026-01-30 14:00:00',
-                'approval_remarks' => 'Critical project deadline during this period. Please reschedule.',
+                'final_approved_by' => $adminUser?->id,
+                'final_approved_at' => '2026-01-30 14:00:00',
+                'final_approval_remarks' => 'Critical project deadline during this period. Please reschedule.',
             ],
             // Employee 3 - Pending sick leave
             [
@@ -121,9 +121,9 @@ class LeaveApplicationSeeder extends Seeder
                 'total_days' => 1,
                 'reason' => 'Moving to new apartment.',
                 'status' => 'approved',
-                'approved_by' => $adminUser?->id,
-                'approved_at' => '2026-01-14 09:00:00',
-                'approval_remarks' => 'Approved.',
+                'final_approved_by' => $adminUser?->id,
+                'final_approved_at' => '2026-01-14 09:00:00',
+                'final_approval_remarks' => 'Approved.',
             ],
             // Employee 2 - Approved sick leave
             [
@@ -134,9 +134,9 @@ class LeaveApplicationSeeder extends Seeder
                 'total_days' => 2,
                 'reason' => 'Flu symptoms, resting at home.',
                 'status' => 'approved',
-                'approved_by' => $adminUser?->id,
-                'approved_at' => '2026-01-27 08:00:00',
-                'approval_remarks' => 'Take care and rest well.',
+                'final_approved_by' => $adminUser?->id,
+                'final_approved_at' => '2026-01-27 08:00:00',
+                'final_approval_remarks' => 'Take care and rest well.',
             ],
             // Employee 1 - Cancelled leave
             [

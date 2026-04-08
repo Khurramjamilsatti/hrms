@@ -1,0 +1,1 @@
+import{c as s,a as e,o as r}from"./index-D7FP6TL8.js";const n={__name:"Profile",setup(t){return(a,l)=>(r(),s("div",null,[...l[0]||(l[0]=[e("h2",{class:"text-2xl font-bold mb-6"},"My Profile",-1),e("div",{class:"card"},[e("p",null,"User profile and settings will be displayed here")],-1)])]))}};export{n as default};

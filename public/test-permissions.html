@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Permissions API</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Permissions API Test</h1>
+    <button onclick="testAPI()">Test API Call</button>
+    <div id="results"></div>
+
+    <script>
+        async function testAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                // Get token from localStorage (like the Vue app does)
+                const token = localStorage.getItem('auth_token');
+                
+                if (!token) {
+                    resultsDiv.innerHTML = '<p style="color: red;">No auth token found in localStorage. Please login first at <a href="http://localhost:5173">http://localhost:5173</a></p>';
+                    return;
+                }
+                
+                // Make the same API call the Vue component makes
+                const response = await axios.get('/api/permissions', {
+                    params: { grouped: true },
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                console.log('Full response:', response);
+                console.log('response.data:', response.data);
+                console.log('response.data.data:', response.data.data);
+                console.log('Is response.data an array?', Array.isArray(response.data));
+                console.log('Is response.data.data an array?', Array.isArray(response.data.data));
+                
+                // Display results
+                let html = '<h2>API Response Structure:</h2>';
+                html += '<pre>' + JSON.stringify(response, null, 2).substring(0, 2000) + '...</pre>';
+                html += '<h3>Analysis:</h3>';
+                html += '<ul>';
+                html += '<li>response.data type: ' + typeof response.data + '</li>';
+                html += '<li>response.data is array: ' + Array.isArray(response.data) + '</li>';
+                if (response.data.data) {
+                    html += '<li>response.data.data type: ' + typeof response.data.data + '</li>';
+                    html += '<li>response.data.data is array: ' + Array.isArray(response.data.data) + '</li>';
+                    if (Array.isArray(response.data.data)) {
+                        html += '<li>response.data.data length: ' + response.data.data.length + '</li>';
+                    }
+                }
+                if (Array.isArray(response.data)) {
+                    html += '<li>response.data length: ' + response.data.length + '</li>';
+                }
+                html += '</ul>';
+                
+                html += '<h3>What the Vue component should do:</h3>';
+                if (Array.isArray(response.data)) {
+                    html += '<p style="color: green;">✓ Use: response.data (it\'s already an array)</p>';
+                } else if (Array.isArray(response.data.data)) {
+                    html += '<p style="color: green;">✓ Use: response.data.data (array is nested)</p>';
+                }
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                let html = '<h2 style="color: red;">Error!</h2>';
+                html += '<pre>' + JSON.stringify(error.response || error.message, null, 2) + '</pre>';
+                resultsDiv.innerHTML = html;
+            }
+        }
+    </script>
+</body>
+</html>

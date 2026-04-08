@@ -1,0 +1,1 @@
+import{c as a,a as e,o as s}from"./index-D7FP6TL8.js";const o={__name:"DepartmentList",setup(l){return(n,t)=>(s(),a("div",null,[...t[0]||(t[0]=[e("h2",{class:"text-2xl font-bold mb-6"},"Departments",-1),e("div",{class:"card"},[e("p",null,"Department management will be displayed here")],-1)])]))}};export{o as default};

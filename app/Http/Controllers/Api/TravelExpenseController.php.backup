@@ -1,0 +1,315 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\TravelRequest;
+use App\Models\ExpenseCategory;
+use App\Models\ExpenseClaim;
+use App\Models\AdvanceRequest;
+use Illuminate\Http\Request;
+
+class TravelExpenseController extends Controller
+{
+    // Travel Requests
+    public function getTravelRequests(Request $request)
+    {
+        $query = TravelRequest::with(['employee', 'approver']);
+
+        if ($request->user()->role === 'employee') {
+            $query->where('employee_id', $request->user()->employee->id);
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $requests = $query->latest()->paginate(50);
+        return response()->json($requests);
+    }
+
+    public function storeTravelRequest(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'purpose' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'from_location' => 'required|string|max:255',
+            'to_location' => 'required|string|max:255',
+            'departure_date' => 'required|date',
+            'return_date' => 'required|date|after_or_equal:departure_date',
+            'travel_mode' => 'required|in:flight,train,bus,car,other',
+            'estimated_cost' => 'required|numeric|min:0',
+        ]);
+
+        $validated['request_number'] = 'TR-' . strtoupper(uniqid());
+        $validated['status'] = 'draft';
+
+        $travelRequest = TravelRequest::create($validated);
+        return response()->json($travelRequest->load('employee'), 201);
+    }
+
+    public function updateTravelRequest(Request $request, $id)
+    {
+        $travelRequest = TravelRequest::findOrFail($id);
+        
+        $validated = $request->validate([
+            'purpose' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'from_location' => 'sometimes|string|max:255',
+            'to_location' => 'sometimes|string|max:255',
+            'departure_date' => 'sometimes|date',
+            'return_date' => 'sometimes|date',
+            'travel_mode' => 'sometimes|in:flight,train,bus,car,other',
+            'estimated_cost' => 'sometimes|numeric|min:0',
+            'status' => 'sometimes|in:draft,submitted,approved,rejected,completed,cancelled',
+        ]);
+
+        $travelRequest->update($validated);
+        return response()->json($travelRequest->load('employee'));
+    }
+
+    public function submitTravelRequest($id)
+    {
+        $travelRequest = TravelRequest::findOrFail($id);
+        $travelRequest->update(['status' => 'submitted']);
+        return response()->json($travelRequest);
+    }
+
+    public function approveTravelRequest(Request $request, $id)
+    {
+        $travelRequest = TravelRequest::findOrFail($id);
+        $travelRequest->update([
+            'status' => 'approved',
+            'approved_by' => $request->user()->id,
+            'approved_at' => now(),
+        ]);
+        return response()->json($travelRequest);
+    }
+
+    public function rejectTravelRequest(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string',
+        ]);
+
+        $travelRequest = TravelRequest::findOrFail($id);
+        $travelRequest->update([
+            'status' => 'rejected',
+            'approved_by' => $request->user()->id,
+            'approved_at' => now(),
+            'rejection_reason' => $validated['rejection_reason'],
+        ]);
+        return response()->json($travelRequest);
+    }
+
+    // Expense Categories
+    public function getExpenseCategories()
+    {
+        $categories = ExpenseCategory::where('is_active', true)->get();
+        return response()->json($categories);
+    }
+
+    public function storeExpenseCategory(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'requires_receipt' => 'nullable|boolean',
+            'max_amount' => 'nullable|numeric|min:0',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $category = ExpenseCategory::create($validated);
+        return response()->json($category, 201);
+    }
+
+    // Expense Claims
+    public function getExpenseClaims(Request $request)
+    {
+        $query = ExpenseClaim::with(['employee', 'travelRequest', 'category', 'approver']);
+
+        if ($request->user()->role === 'employee') {
+            $query->where('employee_id', $request->user()->employee->id);
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('travel_request_id')) {
+            $query->where('travel_request_id', $request->travel_request_id);
+        }
+
+        $claims = $query->latest()->paginate(50);
+        return response()->json($claims);
+    }
+
+    public function storeExpenseClaim(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'travel_request_id' => 'nullable|exists:travel_requests,id',
+            'category_id' => 'required|exists:expense_categories,id',
+            'expense_date' => 'required|date',
+            'merchant_name' => 'nullable|string|max:255',
+            'description' => 'required|string',
+            'amount' => 'required|numeric|min:0',
+            'currency' => 'nullable|string|max:3',
+            'receipt_file' => 'nullable|string',
+        ]);
+
+        $validated['claim_number'] = 'EXP-' . strtoupper(uniqid());
+        $validated['status'] = 'draft';
+        $validated['currency'] = $validated['currency'] ?? 'PKR';
+
+        $claim = ExpenseClaim::create($validated);
+        return response()->json($claim->load(['employee', 'category']), 201);
+    }
+
+    public function updateExpenseClaim(Request $request, $id)
+    {
+        $claim = ExpenseClaim::findOrFail($id);
+        
+        $validated = $request->validate([
+            'category_id' => 'sometimes|exists:expense_categories,id',
+            'expense_date' => 'sometimes|date',
+            'merchant_name' => 'nullable|string|max:255',
+            'description' => 'sometimes|string',
+            'amount' => 'sometimes|numeric|min:0',
+            'receipt_file' => 'nullable|string',
+        ]);
+
+        $claim->update($validated);
+        return response()->json($claim->load(['employee', 'category']));
+    }
+
+    public function submitExpenseClaim($id)
+    {
+        $claim = ExpenseClaim::findOrFail($id);
+        $claim->update(['status' => 'submitted']);
+        return response()->json($claim);
+    }
+
+    public function approveExpenseClaim(Request $request, $id)
+    {
+        $claim = ExpenseClaim::findOrFail($id);
+        $claim->update([
+            'status' => 'approved',
+            'approved_by' => $request->user()->id,
+            'approved_at' => now(),
+        ]);
+        return response()->json($claim);
+    }
+
+    public function rejectExpenseClaim(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string',
+        ]);
+
+        $claim = ExpenseClaim::findOrFail($id);
+        $claim->update([
+            'status' => 'rejected',
+            'approved_by' => $request->user()->id,
+            'approved_at' => now(),
+            'rejection_reason' => $validated['rejection_reason'],
+        ]);
+        return response()->json($claim);
+    }
+
+    public function markExpensePaid(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'payment_date' => 'required|date',
+        ]);
+
+        $claim = ExpenseClaim::findOrFail($id);
+        $claim->update([
+            'status' => 'paid',
+            'payment_date' => $validated['payment_date'],
+        ]);
+        return response()->json($claim);
+    }
+
+    // Advance Requests
+    public function getAdvanceRequests(Request $request)
+    {
+        $query = AdvanceRequest::with(['employee', 'travelRequest', 'approver']);
+
+        if ($request->user()->role === 'employee') {
+            $query->where('employee_id', $request->user()->employee->id);
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $advances = $query->latest()->paginate(50);
+        return response()->json($advances);
+    }
+
+    public function storeAdvanceRequest(Request $request)
+    {
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'travel_request_id' => 'nullable|exists:travel_requests,id',
+            'purpose' => 'required|string',
+            'amount' => 'required|numeric|min:0',
+            'required_date' => 'required|date',
+        ]);
+
+        $validated['request_number'] = 'ADV-' . strtoupper(uniqid());
+        $validated['status'] = 'pending';
+
+        $advance = AdvanceRequest::create($validated);
+        return response()->json($advance->load('employee'), 201);
+    }
+
+    public function approveAdvanceRequest(Request $request, $id)
+    {
+        $advance = AdvanceRequest::findOrFail($id);
+        $advance->update([
+            'status' => 'approved',
+            'approved_by' => $request->user()->id,
+            'approved_at' => now(),
+        ]);
+        return response()->json($advance);
+    }
+
+    public function rejectAdvanceRequest($id)
+    {
+        $advance = AdvanceRequest::findOrFail($id);
+        $advance->update(['status' => 'rejected']);
+        return response()->json($advance);
+    }
+
+    public function markAdvancePaid(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'payment_date' => 'required|date',
+        ]);
+
+        $advance = AdvanceRequest::findOrFail($id);
+        $advance->update([
+            'status' => 'paid',
+            'payment_date' => $validated['payment_date'],
+        ]);
+        return response()->json($advance);
+    }
+
+    public function settleAdvance(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'settled_amount' => 'required|numeric|min:0',
+        ]);
+
+        $advance = AdvanceRequest::findOrFail($id);
+        $advance->update([
+            'status' => 'settled',
+            'settlement_date' => now(),
+            'settled_amount' => $validated['settled_amount'],
+        ]);
+        return response()->json($advance);
+    }
+}

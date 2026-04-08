@@ -1,0 +1,1 @@
+import{c as l,a as e,o as t}from"./index-D7FP6TL8.js";const s={__name:"PayrollList",setup(n){return(o,a)=>(t(),l("div",null,[...a[0]||(a[0]=[e("h2",{class:"text-2xl font-bold mb-6"},"Payroll Management",-1),e("div",{class:"card"},[e("p",null,"Payroll generation and management will be displayed here")],-1)])]))}};export{s as default};

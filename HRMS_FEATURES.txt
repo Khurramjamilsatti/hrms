@@ -1,0 +1,710 @@
+===============================================================================
+                   HR MANAGEMENT SYSTEM (HRMS)
+              Complete Application Features Documentation
+===============================================================================
+
+Version: 1.0
+Date: February 16, 2026
+Currency: Pakistani Rupees (PKR)
+
+TECHNOLOGY STACK:
+  • Backend: Laravel 11 (PHP 8.2+)
+  • Frontend: VueJS 3 (Composition API)
+  • Database: PostgreSQL 16
+  • Authentication: Laravel Sanctum (Token-based)
+  • UI Framework: Tailwind CSS
+  • State Management: Pinia
+  • Build Tool: Vite
+
+===============================================================================
+                            TABLE OF CONTENTS
+===============================================================================
+
+1. Core HR Modules
+2. Recruitment & Onboarding
+3. Time & Attendance
+4. Payroll & Financial Management
+5. Performance & Training
+6. Leave Management
+7. Employee Self-Service
+8. Administrative Tools
+9. System Features
+10. Integration & Extensibility
+11. System Statistics
+12. Deployment Information
+
+===============================================================================
+                        1. CORE HR MODULES
+===============================================================================
+
+1.1 EMPLOYEE MANAGEMENT
+------------------------
+  • Complete employee database with personal and employment information
+  • Employee profile creation and management
+  • Department and designation assignment
+  • Employment status tracking (active, inactive, terminated)
+  • Employee ID generation and management
+  • Reporting hierarchy setup
+  • Employee photo management
+  • Contact information management
+  • Emergency contact details
+  • Bank account information for payroll
+  • National ID (CNIC) and passport tracking
+  • Search and filter employees by multiple criteria
+  • Pagination support (50 records/page)
+  • Employee export functionality
+
+1.2 DEPARTMENT MANAGEMENT
+--------------------------
+  • Department creation and hierarchy
+  • Department manager assignment
+  • Employee count per department
+  • Department budget tracking
+  • Department location assignment
+  • Active/inactive department status
+  • Department description and objectives
+
+1.3 DESIGNATION/POSITION MANAGEMENT
+------------------------------------
+  • Job position creation and management
+  • Position description and requirements
+  • Salary range per position
+  • Position level and category
+  • Employee count per position
+
+1.4 ORGANIZATION CHART
+-----------------------
+  • Interactive organizational hierarchy visualization
+  • Department-wise structure view
+  • Manager-subordinate relationships
+  • Employee photos in org chart
+  • Click to view employee details
+  • Zoom and pan functionality
+  • Export org chart as image
+
+===============================================================================
+                    2. RECRUITMENT & ONBOARDING
+===============================================================================
+
+2.1 RECRUITMENT MANAGEMENT
+---------------------------
+  • Job position creation and posting
+  • Application tracking system (ATS)
+  • Candidate profile management
+  • Application status workflow (Applied → Screening → Interview → Offered → Hired/Rejected)
+  • Interview scheduling
+  • Interview feedback and notes
+  • Multiple interview rounds support
+  • Offer letter generation
+  • Offer acceptance/rejection tracking
+  • Salary negotiation tracking
+  • Candidate source tracking (LinkedIn, Indeed, Referral, etc.)
+  • Job opening management
+  • Hiring pipeline reports
+
+2.2 ONBOARDING MANAGEMENT
+--------------------------
+  • Onboarding templates by department
+  • Customizable onboarding tasks
+  • Day-wise task scheduling
+  • Task types (Document, Training, Meeting, System Access, Policy Review)
+  • Mandatory vs optional tasks
+  • Buddy/mentor assignment for new hires
+  • Role-based task assignment (HR, IT, Manager)
+  • Automatic task generation on employee hire
+  • Task completion tracking
+  • Progress percentage calculation
+  • Overdue task alerts
+  • Task completion notes
+  • Onboarding checklist
+  • First day preparation
+  • Equipment and asset assignment
+
+===============================================================================
+                       3. TIME & ATTENDANCE
+===============================================================================
+
+3.1 ATTENDANCE TRACKING
+------------------------
+  • Daily check-in/check-out functionality
+  • IP-based location verification
+  • GPS location capture (if applicable)
+  • Multiple shift support (Morning, Evening, Night, Flexible)
+  • Late arrival tracking and alerts
+  • Early departure tracking
+  • Working hours calculation
+  • Break time management
+  • Attendance regularization requests
+  • Manager approval for regularization
+  • Monthly attendance summary
+  • Attendance reports by employee/department
+  • Attendance analytics and insights
+  • Absenteeism tracking
+  • Attendance calendar view
+
+3.2 SHIFT MANAGEMENT
+---------------------
+  • Predefined shift templates
+  • Custom shift creation
+  • Shift timing configuration
+  • Grace period for check-in
+  • Shift roster creation
+  • Department-wise roster planning
+  • Date range shift assignments
+  • Bulk employee shift assignment
+  • Day-off management in roster
+  • Shift swap requests
+  • Employee-to-employee shift exchange
+  • Manager approval for shift swaps
+  • Shift conflict prevention
+  • Published roster tracking
+  • Shift history and audit trail
+
+3.3 OVERTIME MANAGEMENT
+------------------------
+  • Overtime request submission
+  • Overtime approval workflow
+  • Overtime hours tracking
+  • Overtime rate configuration
+  • Overtime calculation (1.5x, 2x rates)
+  • Weekend overtime tracking
+  • Holiday overtime premium
+  • Overtime reports
+  • Overtime compensation tracking
+
+3.4 TIMESHEET MANAGEMENT
+-------------------------
+  • Project-based time tracking
+  • Task-wise time logging
+  • Daily time entry
+  • Start/end time recording
+  • Automatic hour calculation
+  • Billable vs non-billable hours
+  • Timesheet submission workflow
+  • Manager approval/rejection
+  • Timesheet correction and resubmission
+  • Weekly/monthly timesheet summary
+  • Project-wise time reports
+  • Client billing integration
+  • Productivity analytics
+
+===============================================================================
+                   4. PAYROLL & FINANCIAL MANAGEMENT
+===============================================================================
+
+4.1 PAYROLL PROCESSING (PKR)
+-----------------------------
+  • Automated monthly payroll generation
+  • Employee salary master management
+  • Multiple salary components support
+  • Basic salary configuration
+  • Allowances (HRA, Medical, Transport, etc.)
+  • Deductions (Tax, EOBI, Social Security, Loan)
+  • Bonus calculation and distribution
+  • Overtime pay integration
+  • Leave deduction calculation
+  • Advance salary adjustment
+  • Payroll workflow (Draft → Review → Process → Paid)
+  • Gross salary calculation
+  • Net salary calculation
+  • Payroll approval process
+  • Bank transfer file generation
+  • Payslip generation (PDF ready)
+  • Payroll history per employee
+  • Month-wise payroll reports
+  • Department-wise payroll summary
+  • Payroll cost analytics
+  • Currency format: Rs. 50,000 (PKR with comma separators)
+
+4.2 SALARY COMPONENTS MANAGEMENT
+---------------------------------
+  • Component creation (Earnings/Deductions)
+  • Fixed amount vs percentage-based components
+  • Taxable vs non-taxable components
+  • Statutory components (Tax, EOBI, SS)
+  • Component assignment to employees
+  • Component calculation formulas
+  • Component history tracking
+
+4.3 ADVANCE & LOAN MANAGEMENT
+------------------------------
+  • Advance salary request
+  • Loan request submission
+  • Approval workflow
+  • Installment calculation
+  • Monthly deduction from salary
+  • Outstanding balance tracking
+  • Payment history
+  • Early settlement option
+
+4.4 EXPENSE MANAGEMENT
+-----------------------
+  • Expense category management
+  • Expense claim submission
+  • Receipt upload (up to 10MB)
+  • Merchant tracking
+  • Multi-currency support (default: PKR)
+  • Category-wise expense limits
+  • Approval workflow
+  • Reimbursement status tracking
+  • Payment tracking
+  • Travel-linked expenses
+  • Expense reports and analytics
+
+4.5 TRAVEL MANAGEMENT
+----------------------
+  • Travel request creation
+  • Travel purpose and itinerary
+  • Travel mode selection (Air, Train, Bus, Car)
+  • Cost estimation
+  • Travel approval workflow
+  • Travel advance request
+  • Travel expense linkage
+  • Travel history and reports
+
+===============================================================================
+                     5. PERFORMANCE & TRAINING
+===============================================================================
+
+5.1 PERFORMANCE MANAGEMENT
+---------------------------
+  • Performance review cycles (Annual, Semi-annual, Quarterly)
+  • Review period configuration
+  • Goal setting (SMART goals)
+  • Goal progress tracking
+  • Self-assessment
+  • Manager assessment
+  • 360-degree feedback support
+  • Rating scale (1-5 stars)
+  • Competency-based evaluation
+  • Strengths and improvement areas
+  • Performance improvement plans (PIP)
+  • Review history comparison
+  • Performance analytics
+  • Top performers identification
+  • Performance reports
+
+5.2 GOAL MANAGEMENT
+--------------------
+  • Individual goal setting
+  • Team goal setting
+  • Department goals
+  • Goal alignment with company objectives
+  • Goal progress tracking (0-100%)
+  • Milestone tracking
+  • Goal status (Not Started, In Progress, Completed)
+  • Goal deadline monitoring
+  • Goal achievement reports
+
+5.3 TRAINING MANAGEMENT
+------------------------
+  • Training course catalog
+  • Course creation with details
+  • Multiple delivery modes (Online, Classroom, Hybrid, Self-paced)
+  • Course categorization (Technical, Soft Skills, Leadership, Compliance)
+  • Department-specific course assignment
+  • Training session scheduling
+  • Session date and time management
+  • Location/meeting link
+  • Available seats management
+  • Employee enrollment system
+  • Searchable employee selection
+  • Department-based course filtering
+  • Training attendance tracking
+  • Training score and rating
+  • Training completion status
+  • Certificate generation
+  • Certificate number generation
+  • Certificate expiry tracking
+  • Training history per employee
+  • Instructor assignment
+  • External training provider tracking
+  • Training cost tracking (PKR)
+  • Training effectiveness reports
+  • Skills gap analysis
+
+===============================================================================
+                        6. LEAVE MANAGEMENT
+===============================================================================
+
+6.1 LEAVE TYPES
+----------------
+  • Annual Leave (Paid)
+  • Sick Leave
+  • Casual Leave
+  • Maternity Leave
+  • Paternity Leave
+  • Unpaid Leave
+  • Bereavement Leave
+  • Study Leave
+  • Compensatory Off
+  • Custom leave types
+
+6.2 LEAVE MANAGEMENT FEATURES
+-------------------------------
+  • Leave balance per employee
+  • Leave balance by type
+  • Leave application submission
+  • Leave reason and notes
+  • Attachment upload support
+  • Leave approval workflow
+  • Manager approval/rejection
+  • Approval remarks
+  • Leave cancellation by employee
+  • Leave balance deduction on approval
+  • Leave carry-forward to next year
+  • Leave encashment
+  • Half-day leave support
+  • Leave calendar view
+  • Team leave visibility for managers
+  • Leave conflict checking
+  • Leave reports (individual/department/company)
+  • Leave analytics and trends
+  • Email notifications for leave actions
+
+6.3 LEAVE POLICY CONFIGURATION
+-------------------------------
+  • Leave policy per department
+  • Leave accrual rules
+  • Monthly/yearly accrual
+  • Probation period leave rules
+  • Minimum/maximum leave limits
+  • Notice period requirement
+  • Backdated leave restrictions
+
+===============================================================================
+                      7. EMPLOYEE SELF-SERVICE
+===============================================================================
+
+7.1 EMPLOYEE PORTAL
+--------------------
+  • Personal dashboard
+  • Profile view and update
+  • Photo upload
+  • Personal information update
+  • Emergency contact management
+  • Bank details update
+  • Document upload
+  • View organizational chart
+  • View team members
+
+7.2 ATTENDANCE & LEAVE
+-----------------------
+  • Quick check-in/check-out
+  • View attendance history
+  • Apply for leave
+  • View leave balance
+  • Leave application history
+  • Cancel pending leave
+  • Request attendance regularization
+  • View shift schedule
+  • Request shift swap
+
+7.3 FINANCIAL
+--------------
+  • View payslips
+  • Download payslips
+  • View salary structure
+  • Request advance
+  • Submit expense claims
+  • View expense status
+  • Travel request submission
+
+7.4 LEARNING & DEVELOPMENT
+----------------------------
+  • Browse training catalog
+  • View enrolled courses
+  • Training schedule
+  • View certificates
+  • Download certificates
+  • View performance reviews
+  • Update goal progress
+
+7.5 COMMUNICATION
+------------------
+  • View company announcements
+  • View calendar events
+  • RSVP to events
+  • Create helpdesk tickets
+  • Track ticket status
+  • Notification center
+  • Read/unread notifications
+
+===============================================================================
+                       8. ADMINISTRATIVE TOOLS
+===============================================================================
+
+8.1 DOCUMENT MANAGEMENT
+------------------------
+  • Centralized document repository
+  • File category hierarchy
+  • Employee-specific documents
+  • Company-wide documents
+  • Confidential file marking
+  • File expiry date tracking
+  • Version control (v1, v2, v3...)
+  • File upload (10MB max per file)
+  • Multiple file format support
+  • File download tracking
+  • Access logging (view, download, edit, delete)
+  • File search and filtering
+  • Metadata management
+  • Secure file storage
+
+8.2 ASSET MANAGEMENT
+---------------------
+  • Asset catalog management
+  • Asset categories (Laptop, Phone, Vehicle, etc.)
+  • Asset details (Serial number, Purchase date, Value)
+  • Asset condition tracking
+  • Asset assignment to employees
+  • Assignment date tracking
+  • Asset return management
+  • Return condition notes
+  • Asset maintenance scheduling
+  • Asset depreciation tracking
+  • Asset history per employee
+  • Available assets inventory
+
+8.3 HELPDESK MANAGEMENT
+------------------------
+  • Ticket category management
+  • Priority levels (Low, Medium, High, Urgent)
+  • Ticket assignment to HR staff
+  • Status workflow (Open → In Progress → Resolved → Closed)
+  • Ticket conversation thread
+  • Internal notes (not visible to employee)
+  • Resolution tracking
+  • Ticket rating and feedback
+  • Reopen functionality
+  • Attachment support
+  • Response time tracking
+  • SLA monitoring
+  • Ticket reports and analytics
+
+8.4 CALENDAR & EVENTS
+----------------------
+  • Company-wide calendar
+  • Event creation and management
+  • Event types (Meeting, Training, Company Event, Holiday)
+  • Event location and description
+  • Event reminders
+  • Event attendee management
+  • RSVP functionality
+  • Event notifications
+  • Recurring events
+  • Holiday calendar
+  • Birthday and anniversary tracking
+
+8.5 ANNOUNCEMENTS
+------------------
+  • Company-wide announcements
+  • Department-specific announcements
+  • Announcement categories
+  • Priority announcements (pinned)
+  • Announcement publish date
+  • Announcement expiry
+  • File attachments
+  • Read/unread tracking
+  • Announcement archive
+
+8.6 NOTIFICATION SYSTEM
+------------------------
+  • Real-time notifications
+  • Email notifications
+  • In-app notifications
+  • Notification categories
+  • Read/unread status
+  • Notification history
+  • Notification preferences
+  • Notification muting options
+
+===============================================================================
+                         9. SYSTEM FEATURES
+===============================================================================
+
+9.1 SECURITY & AUTHENTICATION
+-------------------------------
+  • Token-based authentication (Laravel Sanctum)
+  • Secure password hashing
+  • Password reset functionality
+  • Session management
+  • Auto-logout on token expiry
+  • Role-based access control (RBAC)
+  • Permission-based features
+  • API authentication
+  • CSRF protection
+  • SQL injection prevention
+  • XSS protection
+
+9.2 USER ROLES & PERMISSIONS
+------------------------------
+  • Admin role (full system access)
+  • Manager role (department management)
+  • Employee role (self-service)
+  • HR role (HR operations)
+  • Custom role creation
+  • Permission assignment
+  • Module-wise access control
+
+9.3 DASHBOARD & ANALYTICS
+--------------------------
+  • Role-based dashboard
+  • Key metrics display
+  • Total employee count
+  • Active employees
+  • Department-wise distribution
+  • Today's attendance summary
+  • Pending leave applications
+  • Pending approvals
+  • Upcoming events
+  • Recent activities
+  • Quick action buttons
+  • Visual charts and graphs
+
+9.4 REPORTING SYSTEM
+---------------------
+  • Employee reports
+  • Attendance reports
+  • Leave reports
+  • Payroll reports
+  • Performance reports
+  • Training reports
+  • Department-wise reports
+  • Custom date range selection
+  • Export to PDF
+  • Export to Excel
+  • Scheduled reports
+  • Report templates
+
+9.5 USER INTERFACE FEATURES
+-----------------------------
+  • Responsive design (mobile, tablet, desktop)
+  • Modern UI with Tailwind CSS
+  • Intuitive navigation
+  • Sidebar menu
+  • Breadcrumb navigation
+  • Search functionality
+  • Advanced filters
+  • Pagination support
+  • Loading states
+  • Error handling
+  • Success/error notifications
+  • Modal dialogs
+  • Confirmation prompts
+  • Tooltips and help text
+  • Form validation
+
+9.6 API FEATURES
+-----------------
+  • RESTful API architecture
+  • JSON response format
+  • Consistent error handling
+  • HTTP status codes
+  • Request validation
+  • Rate limiting
+  • API versioning support
+  • Comprehensive API documentation
+  • Pagination in list endpoints
+  • Filtering and sorting
+
+9.7 PERFORMANCE & OPTIMIZATION
+-------------------------------
+  • Database query optimization
+  • Eager loading relationships
+  • Efficient pagination
+  • Caching mechanisms
+  • Asset optimization (CSS/JS minification)
+  • Lazy loading
+  • Image optimization
+
+9.8 DATA MANAGEMENT
+--------------------
+  • Database migrations
+  • Seeders for test data
+  • Soft deletes
+  • Audit trail
+  • Data export functionality
+  • Data import functionality
+  • Backup and restore
+
+===============================================================================
+                  10. INTEGRATION & EXTENSIBILITY
+===============================================================================
+
+10.1 CURRENT INTEGRATIONS
+--------------------------
+  • PostgreSQL database
+  • File storage system
+  • Email service (configurable)
+
+10.2 EXTENSIBILITY FEATURES
+----------------------------
+  • Modular architecture
+  • Custom module development support
+  • API endpoints for external integration
+  • Webhook support (ready)
+  • Plugin architecture (ready)
+
+===============================================================================
+                        11. SYSTEM STATISTICS
+===============================================================================
+
+MODULE COUNT:
+  • Total Modules: 20+
+  • Core HR Modules: 8
+  • Self-Service Modules: 5
+  • Administrative Modules: 7
+
+DATABASE:
+  • Total Models: 60+
+  • Database Tables: 60+
+  • Relationships: 100+
+
+API ENDPOINTS:
+  • Total API Endpoints: 150+
+  • Public Endpoints: 1 (login)
+  • Protected Endpoints: 149+
+
+FRONTEND COMPONENTS:
+  • Vue Components: 30+
+  • Pages/Views: 25+
+  • Pinia Stores: 3
+
+FEATURE SUMMARY:
+  • Total Features: 500+
+  • CRUD Operations: 20+ modules
+  • Workflow Systems: 10+ (Leave, Payroll, Recruitment, etc.)
+  • Report Types: 15+
+
+===============================================================================
+                     12. DEPLOYMENT INFORMATION
+===============================================================================
+
+SYSTEM REQUIREMENTS:
+  • PHP: 8.2 or higher
+  • PostgreSQL: 14 or higher
+  • Node.js: 18 or higher
+  • Composer: Latest version
+  • Web Server: Apache/Nginx
+
+DEFAULT USER ACCOUNTS:
+  • Admin: admin@hrms.com / password
+  • Manager: manager@hrms.com / password
+  • Employee: employee@hrms.com / password
+
+SERVER PORTS:
+  • Backend API: http://localhost:8001
+  • Frontend App: http://localhost:5173
+  • Database: localhost:5432
+
+===============================================================================
+
+                            END OF DOCUMENT
+
+This document contains all features of the HRMS application.
+For technical documentation, please refer to README.md and API.md
+
+© 2026 HRMS - Human Resource Management System
+
+===============================================================================

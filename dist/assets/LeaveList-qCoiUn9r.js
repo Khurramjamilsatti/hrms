@@ -1,0 +1,1 @@
+import{c as l,a as e,o as s}from"./index-D7FP6TL8.js";const r={__name:"LeaveList",setup(t){return(n,a)=>(s(),l("div",null,[...a[0]||(a[0]=[e("h2",{class:"text-2xl font-bold mb-6"},"Leave Management",-1),e("div",{class:"card"},[e("p",null,"Leave applications and approvals will be displayed here")],-1)])]))}};export{r as default};

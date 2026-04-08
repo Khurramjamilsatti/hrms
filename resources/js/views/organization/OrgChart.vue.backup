@@ -1,0 +1,222 @@
+<template>
+  <div>
+    <div class="mb-6">
+      <div class="flex space-x-4 border-b">
+        <button 
+          v-for="tab in tabs" 
+          :key="tab.key"
+          @click="activeTab = tab.key"
+          class="px-4 py-2 font-medium transition-colors"
+          :class="activeTab === tab.key ? 'border-b-2 border-primary-600 text-primary-600' : 'text-gray-600 hover:text-gray-900'"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Organization Chart Tab -->
+    <div v-if="activeTab === 'chart'">
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold mb-6">Organization Hierarchy</h3>
+        
+        <div class="overflow-x-auto">
+          <div class="inline-block min-w-full">
+            <div class="flex flex-col items-center">
+              <div v-if="orgChart" class="org-node">
+                <OrgNode :node="orgChart" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Department Stats Tab -->
+    <div v-if="activeTab === 'departments'">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="dept in departmentStats" :key="dept.id" class="bg-white rounded-lg shadow p-6">
+          <h4 class="font-semibold text-lg mb-4">{{ dept.name }}</h4>
+          
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Total Employees</span>
+              <span class="font-bold text-2xl text-primary-600">{{ dept.employee_count }}</span>
+            </div>
+            
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Manager</span>
+              <span class="font-medium">{{ dept.manager?.name || 'N/A' }}</span>
+            </div>
+            
+            <div class="border-t pt-3">
+              <p class="text-xs text-gray-500">Active Projects: {{ dept.active_projects || 0 }}</p>
+              <p class="text-xs text-gray-500">Open Positions: {{ dept.open_positions || 0 }}</p>
+            </div>
+          </div>
+          
+          <button @click="viewDepartmentDetails(dept)" class="mt-4 w-full btn btn-sm btn-primary">
+            View Details
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee Directory Tab -->
+    <div v-if="activeTab === 'directory'">
+      <div class="bg-white rounded-lg shadow mb-6 p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <input type="text" v-model="searchQuery" placeholder="Search by name or email..." class="form-input" />
+          <select v-model="filterDepartment" class="form-input">
+            <option value="">All Departments</option>
+            <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+              {{ dept.name }}
+            </option>
+          </select>
+          <button @click="fetchDirectory" class="btn btn-primary">Search</button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Designation</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Manager</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="emp in directory" :key="emp.id">
+              <td class="px-6 py-4 text-sm font-medium">{{ emp.name }}</td>
+              <td class="px-6 py-4 text-sm">{{ emp.email }}</td>
+              <td class="px-6 py-4 text-sm">{{ emp.employee?.department?.name || '-' }}</td>
+              <td class="px-6 py-4 text-sm">{{ emp.employee?.designation?.title || '-' }}</td>
+              <td class="px-6 py-4 text-sm">{{ emp.employee?.manager?.name || '-' }}</td>
+              <td class="px-6 py-4 text-sm">{{ emp.employee?.phone || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, defineComponent, h } from 'vue';
+import axios from 'axios';
+
+const activeTab = ref('chart');
+const orgChart = ref(null);
+const departmentStats = ref([]);
+const directory = ref([]);
+const departments = ref([]);
+const searchQuery = ref('');
+const filterDepartment = ref('');
+
+const tabs = [
+  { key: 'chart', label: 'Organization Chart' },
+  { key: 'departments', label: 'Department Stats' },
+  { key: 'directory', label: 'Employee Directory' }
+];
+
+// Org Node Component
+const OrgNode = defineComponent({
+  props: ['node'],
+  setup(props) {
+    return () => {
+      const node = props.node;
+      return h('div', { class: 'flex flex-col items-center' }, [
+        h('div', { class: 'bg-white border-2 border-primary-500 rounded-lg p-4 mb-4 shadow-md min-w-48 text-center' }, [
+          h('div', { class: 'font-semibold text-lg' }, node.name),
+          h('div', { class: 'text-sm text-gray-600' }, node.designation),
+          h('div', { class: 'text-xs text-gray-500 mt-1' }, node.department),
+          node.email && h('div', { class: 'text-xs text-primary-600 mt-1' }, node.email)
+        ]),
+        node.subordinates && node.subordinates.length > 0 && h('div', { class: 'flex space-x-8' }, 
+          node.subordinates.map(sub => h(OrgNode, { key: sub.id, node: sub }))
+        )
+      ]);
+    };
+  }
+});
+
+const fetchOrgChart = async () => {
+  try {
+    const response = await axios.get('/api/organization/chart');
+    orgChart.value = response.data;
+  } catch (error) {
+    console.error('Failed to fetch org chart:', error);
+  }
+};
+
+const fetchDepartmentStats = async () => {
+  try {
+    const response = await axios.get('/api/organization/department-stats');
+    departmentStats.value = response.data.data || response.data;
+  } catch (error) {
+    console.error('Failed to fetch department stats:', error);
+  }
+};
+
+const fetchDirectory = async () => {
+  try {
+    const params = new URLSearchParams();
+    if (searchQuery.value) params.append('search', searchQuery.value);
+    if (filterDepartment.value) params.append('department_id', filterDepartment.value);
+    
+    const response = await axios.get(`/api/organization/directory?${params.toString()}`);
+    directory.value = response.data.data || response.data;
+  } catch (error) {
+    console.error('Failed to fetch directory:', error);
+  }
+};
+
+const fetchDepartments = async () => {
+  try {
+    const response = await axios.get('/api/departments');
+    departments.value = response.data.data || response.data;
+  } catch (error) {
+    console.error('Failed to fetch departments:', error);
+  }
+};
+
+const viewDepartmentDetails = (dept) => {
+  alert(`Department: ${dept.name}\n\nManager: ${dept.manager?.name || 'N/A'}\nEmployees: ${dept.employee_count}\n\n(Detailed view to be implemented)`);
+};
+
+onMounted(() => {
+  fetchOrgChart();
+  fetchDepartmentStats();
+  fetchDirectory();
+  fetchDepartments();
+});
+</script>
+
+<style scoped>
+.org-node {
+  position: relative;
+}
+
+.org-node::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  width: 2px;
+  height: 20px;
+  background-color: #e5e7eb;
+}
+
+.org-node::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #e5e7eb;
+}
+</style>

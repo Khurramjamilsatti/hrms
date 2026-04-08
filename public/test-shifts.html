@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift Assignment Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">🔧 Shift Assignment Test Page</h1>
+            
+            <div class="space-y-4">
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <h2 class="text-xl font-semibold text-blue-700">Step 1: Check Servers</h2>
+                    <div class="mt-2 space-y-2">
+                        <div>
+                            <button onclick="checkLaravel()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Test Laravel API (Port 8003)
+                            </button>
+                            <span id="laravel-status" class="ml-3"></span>
+                        </div>
+                        <div>
+                            <button onclick="checkVite()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                                Test Vite Dev Server (Port 5173)
+                            </button>
+                            <span id="vite-status" class="ml-3"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-l-4 border-green-500 pl-4">
+                    <h2 class="text-xl font-semibold text-green-700">Step 2: Login</h2>
+                    <div class="mt-2">
+                        <input type="email" id="email" value="admin@hrms.com" placeholder="Email" 
+                               class="border rounded px-3 py-2 w-64">
+                        <input type="password" id="password" value="password" placeholder="Password" 
+                               class="border rounded px-3 py-2 w-64 ml-2">
+                        <button onclick="login()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 ml-2">
+                            Login
+                        </button>
+                        <div id="login-status" class="mt-2"></div>
+                    </div>
+                </div>
+
+                <div class="border-l-4 border-amber-500 pl-4">
+                    <h2 class="text-xl font-semibold text-amber-700">Step 3: Test Shifts API</h2>
+                    <div class="mt-2">
+                        <button onclick="fetchShifts()" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700">
+                            Fetch Shifts
+                        </button>
+                        <button onclick="fetchAvailableEmployees()" class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 ml-2">
+                            Fetch Available Employees
+                        </button>
+                        <div id="shifts-status" class="mt-2"></div>
+                    </div>
+                </div>
+
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <h2 class="text-xl font-semibold text-purple-700">Step 4: Component Check</h2>
+                    <div class="mt-2">
+                        <button onclick="openTestModal()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                            Test Modal Display
+                        </button>
+                        <div id="component-status" class="mt-2"></div>
+                    </div>
+                </div>
+
+                <div class="border-l-4 border-red-500 pl-4">
+                    <h2 class="text-xl font-semibold text-red-700">Diagnostic Info</h2>
+                    <div id="diagnostic-info" class="mt-2 bg-gray-100 p-4 rounded text-sm font-mono">
+                        Click buttons above to run tests...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Modal -->
+    <div id="test-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-500 bg-opacity-75">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4 rounded-t-lg">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-white">✅ Modal Works!</h2>
+                        <button onclick="closeTestModal()" class="text-white hover:text-gray-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-lg text-gray-700">
+                        If you can see this modal with the purple gradient header, then the modal component is working correctly!
+                    </p>
+                    <p class="text-sm text-gray-500 mt-4">
+                        The issue might be with:
+                        <ul class="list-disc list-inside mt-2">
+                            <li>Wrong URL (use localhost:5173, not localhost:8003)</li>
+                            <li>Browser cache (press Cmd+Shift+R)</li>
+                            <li>Not logged in or wrong role</li>
+                            <li>API endpoint issues</li>
+                        </ul>
+                    </p>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end">
+                    <button onclick="closeTestModal()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = localStorage.getItem('auth_token');
+
+        function updateDiagnostic(message) {
+            const div = document.getElementById('diagnostic-info');
+            div.innerHTML += message + '<br>';
+            div.scrollTop = div.scrollHeight;
+        }
+
+        async function checkLaravel() {
+            updateDiagnostic('Testing Laravel API...');
+            try {
+                const response = await fetch('http://localhost:8003/api/shifts', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const status = document.getElementById('laravel-status');
+                if (response.status === 401) {
+                    status.innerHTML = '<span class="text-green-600">✅ API Running (needs auth)</span>';
+                    updateDiagnostic('✅ Laravel API is responding on port 8003');
+                } else if (response.ok) {
+                    status.innerHTML = '<span class="text-green-600">✅ API Running</span>';
+                    updateDiagnostic('✅ Laravel API is working perfectly');
+                } else {
+                    status.innerHTML = `<span class="text-red-600">❌ Status ${response.status}</span>`;
+                    updateDiagnostic(`❌ Laravel API returned status ${response.status}`);
+                }
+            } catch (error) {
+                document.getElementById('laravel-status').innerHTML = '<span class="text-red-600">❌ Not Running</span>';
+                updateDiagnostic('❌ Cannot connect to Laravel API - is it running?');
+            }
+        }
+
+        async function checkVite() {
+            updateDiagnostic('Checking Vite dev server...');
+            const currentPort = window.location.port;
+            const status = document.getElementById('vite-status');
+            
+            if (currentPort === '5173' || currentPort === '5174') {
+                status.innerHTML = '<span class="text-green-600">✅ You are on Vite server</span>';
+                updateDiagnostic(`✅ Accessing via Vite dev server (port ${currentPort})`);
+            } else {
+                status.innerHTML = '<span class="text-red-600">❌ Wrong port! You should use localhost:5173</span>';
+                updateDiagnostic(`❌ You're on port ${currentPort}. Use localhost:5173 instead!`);
+            }
+        }
+
+        async function login() {
+            updateDiagnostic('Attempting login...');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('http://localhost:8003/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                const statusDiv = document.getElementById('login-status');
+
+                if (response.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('auth_token', authToken);
+                    statusDiv.innerHTML = `<span class="text-green-600">✅ Logged in as ${data.user.role}</span>`;
+                    updateDiagnostic(`✅ Logged in successfully as ${data.user.email} (${data.user.role})`);
+                    updateDiagnostic(`Token: ${authToken.substring(0, 20)}...`);
+                } else {
+                    statusDiv.innerHTML = '<span class="text-red-600">❌ Login failed</span>';
+                    updateDiagnostic(`❌ Login failed: ${data.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                updateDiagnostic(`❌ Login error: ${error.message}`);
+            }
+        }
+
+        async function fetchShifts() {
+            if (!authToken) {
+                alert('Please login first!');
+                return;
+            }
+
+            updateDiagnostic('Fetching shifts...');
+            try {
+                const response = await fetch('http://localhost:8003/api/shifts', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const statusDiv = document.getElementById('shifts-status');
+                if (response.ok) {
+                    const data = await response.json();
+                    const count = data.data ? data.data.length : 0;
+                    statusDiv.innerHTML = `<span class="text-green-600">✅ Found ${count} shifts</span>`;
+                    updateDiagnostic(`✅ Fetched ${count} shifts successfully`);
+                    if (count > 0) {
+                        updateDiagnostic(`First shift: ${data.data[0].name} (ID: ${data.data[0].id})`);
+                    }
+                } else {
+                    statusDiv.innerHTML = `<span class="text-red-600">❌ Status ${response.status}</span>`;
+                    updateDiagnostic(`❌ Failed to fetch shifts: HTTP ${response.status}`);
+                    
+                    if (response.status === 403) {
+                        updateDiagnostic('❌ You need admin or manager role!');
+                    }
+                }
+            } catch (error) {
+                updateDiagnostic(`❌ Error fetching shifts: ${error.message}`);
+            }
+        }
+
+        async function fetchAvailableEmployees() {
+            if (!authToken) {
+                alert('Please login first!');
+                return;
+            }
+
+            // Use first shift ID (1) for testing
+            const shiftId = 1;
+            const today = new Date().toISOString().split('T')[0];
+            
+            updateDiagnostic(`Fetching available employees for shift ${shiftId}...`);
+            try {
+                const url = `http://localhost:8003/api/shifts/${shiftId}/available-employees?effective_from=${today}`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const statusDiv = document.getElementById('shifts-status');
+                if (response.ok) {
+                    const data = await response.json();
+                    const count = data.data ? data.data.length : 0;
+                    statusDiv.innerHTML = `<span class="text-green-600">✅ Found ${count} available employees</span>`;
+                    updateDiagnostic(`✅ Found ${count} available employees`);
+                } else {
+                    const errorData = await response.json();
+                    statusDiv.innerHTML = `<span class="text-red-600">❌ Error ${response.status}</span>`;
+                    updateDiagnostic(`❌ Error: ${errorData.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                updateDiagnostic(`❌ Error: ${error.message}`);
+            }
+        }
+
+        function openTestModal() {
+            document.getElementById('test-modal').classList.remove('hidden');
+            updateDiagnostic('✅ Test modal opened successfully');
+        }
+
+        function closeTestModal() {
+            document.getElementById('test-modal').classList.add('hidden');
+            updateDiagnostic('Modal closed');
+        }
+
+        // Auto-check on load
+        window.onload = function() {
+            updateDiagnostic('=== Shift Assignment Diagnostics ===');
+            updateDiagnostic(`Current URL: ${window.location.href}`);
+            updateDiagnostic(`Port: ${window.location.port || '80'}`);
+            
+            const savedToken = localStorage.getItem('auth_token');
+            if (savedToken) {
+                updateDiagnostic('✅ Auth token found in localStorage');
+                authToken = savedToken;
+            } else {
+                updateDiagnostic('⚠️  No auth token found - please login');
+            }
+            
+            checkVite();
+        };
+    </script>
+</body>
+</html>

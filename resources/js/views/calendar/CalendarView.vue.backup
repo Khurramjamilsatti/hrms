@@ -1,0 +1,335 @@
+<template>
+  <div>
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-lg font-semibold">Company Calendar</h3>
+      <button v-if="isManager" @click="showEventForm = true" class="btn btn-primary">Create Event</button>
+    </div>
+
+    <!-- Calendar Navigation -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <div class="flex justify-between items-center">
+        <button @click="previousMonth" class="btn btn-secondary">← Previous</button>
+        <h4 class="text-lg font-semibold">{{ currentMonthName }} {{ currentYear }}</h4>
+        <button @click="nextMonth" class="btn btn-secondary">Next →</button>
+      </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <div class="grid grid-cols-7 gap-2">
+        <div v-for="day in ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']" :key="day" class="text-center text-sm font-semibold text-gray-700 py-2">
+          {{ day }}
+        </div>
+        
+        <div v-for="date in calendarDates" :key="date.toString()" class="border rounded p-2 min-h-32" :class="[
+          date.getMonth() !== currentMonth ? 'bg-gray-50' : '',
+          isToday(date) ? 'bg-primary-50 border-primary-500' : ''
+        ]">
+          <div class="text-sm font-medium mb-2">{{ date.getDate() }}</div>
+          <div class="space-y-1">
+            <div v-for="event in getEventsForDate(date)" :key="event.id" @click="viewEvent(event)" class="text-xs rounded px-2 py-1 cursor-pointer truncate" :class="getEventTypeClass(event.event_type)">
+              {{ event.start_datetime.substr(11, 5) }} {{ event.title }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h4 class="font-semibold mb-4">Upcoming Events</h4>
+      <div class="space-y-3">
+        <div v-for="event in upcomingEvents" :key="event.id" class="border-l-4 pl-4 py-2 cursor-pointer hover:bg-gray-50" :class="getEventTypeBorder(event.event_type)" @click="viewEvent(event)">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <p class="font-medium">{{ event.title }}</p>
+              <p class="text-sm text-gray-600">{{ formatDateTime(event.start_datetime) }}</p>
+              <p v-if="event.location" class="text-xs text-gray-500">📍 {{ event.location }}</p>
+            </div>
+            <span class="px-2 py-1 text-xs rounded-full" :class="getEventTypeClass(event.event_type)">
+              {{ event.event_type.replace('_', ' ') }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Event Modal -->
+    <div v-if="showEventForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
+        <h3 class="text-xl font-semibold mb-4">Create Event</h3>
+        
+        <form @submit.prevent="createEvent">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
+              <input type="text" v-model="eventForm.title" required class="form-input" />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
+              <select v-model="eventForm.event_type" required class="form-input">
+                <option value="meeting">Meeting</option>
+                <option value="training">Training</option>
+                <option value="interview">Interview</option>
+                <option value="holiday">Holiday</option>
+                <option value="company_event">Company Event</option>
+              </select>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date & Time</label>
+                <input type="datetime-local" v-model="eventForm.start_datetime" required class="form-input" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">End Date & Time</label>
+                <input type="datetime-local" v-model="eventForm.end_datetime" required class="form-input" />
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Location (Optional)</label>
+              <input type="text" v-model="eventForm.location" class="form-input" />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Meeting Link (Optional)</label>
+              <input type="url" v-model="eventForm.meeting_link" placeholder="https://meet.google.com/..." class="form-input" />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea v-model="eventForm.description" rows="3" class="form-input"></textarea>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Attendees (Select multiple)</label>
+              <select v-model="eventForm.attendees" multiple class="form-input h-32">
+                <option v-for="employee in employees" :key="employee.id" :value="employee.id">
+                  {{ employee.name }}
+                </option>
+              </select>
+              <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+            </div>
+          </div>
+          
+          <div class="flex justify-end space-x-3 mt-6">
+            <button type="button" @click="showEventForm = false" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Event</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- View Event Modal -->
+    <div v-if="selectedEvent" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+        <div class="flex justify-between items-start mb-4">
+          <h3 class="text-xl font-semibold">{{ selectedEvent.title }}</h3>
+          <button @click="selectedEvent = null" class="text-gray-500 hover:text-gray-700">&times;</button>
+        </div>
+        
+        <div class="space-y-3 text-sm">
+          <div><span class="font-medium">Type:</span> {{ selectedEvent.event_type.replace('_', ' ') }}</div>
+          <div><span class="font-medium">Start:</span> {{ formatDateTime(selectedEvent.start_datetime) }}</div>
+          <div><span class="font-medium">End:</span> {{ formatDateTime(selectedEvent.end_datetime) }}</div>
+          <div v-if="selectedEvent.location"><span class="font-medium">Location:</span> {{ selectedEvent.location }}</div>
+          <div v-if="selectedEvent.meeting_link"><span class="font-medium">Meeting Link:</span> <a :href="selectedEvent.meeting_link" target="_blank" class="text-primary-600 hover:underline">Join Meeting</a></div>
+          <div v-if="selectedEvent.description"><span class="font-medium">Description:</span> {{ selectedEvent.description }}</div>
+          <div><span class="font-medium">Attendees:</span> {{ selectedEvent.attendees?.length || 0 }} people</div>
+        </div>
+
+        <div class="mt-6">
+          <button @click="respondToEvent('accepted')" class="btn btn-primary mr-2">Accept</button>
+          <button @click="respondToEvent('declined')" class="btn btn-secondary mr-2">Decline</button>
+          <button @click="respondToEvent('maybe')" class="btn btn-secondary">Maybe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed, reactive } from 'vue';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
+const events = ref([]);
+const employees = ref([]);
+const currentMonth = ref(new Date().getMonth());
+const currentYear = ref(new Date().getFullYear());
+const showEventForm = ref(false);
+const selectedEvent = ref(null);
+
+const isManager = computed(() => authStore.isAdmin || authStore.isManager);
+
+const currentMonthName = computed(() => {
+  return new Date(currentYear.value, currentMonth.value).toLocaleString('en-US', { month: 'long' });
+});
+
+const calendarDates = computed(() => {
+  const firstDay = new Date(currentYear.value, currentMonth.value, 1);
+  const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0);
+  const dates = [];
+  
+  const startDay = firstDay.getDay();
+  for (let i = startDay - 1; i >= 0; i--) {
+    dates.push(new Date(currentYear.value, currentMonth.value, -i));
+  }
+  
+  for (let i = 1; i <= lastDay.getDate(); i++) {
+    dates.push(new Date(currentYear.value, currentMonth.value, i));
+  }
+  
+  const remainingDays = 42 - dates.length;
+  for (let i = 1; i <= remainingDays; i++) {
+    dates.push(new Date(currentYear.value, currentMonth.value + 1, i));
+  }
+  
+  return dates;
+});
+
+const upcomingEvents = computed(() => {
+  const now = new Date();
+  return events.value
+    .filter(e => new Date(e.start_datetime) >= now)
+    .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
+    .slice(0, 5);
+});
+
+const eventForm = reactive({
+  title: '',
+  event_type: 'meeting',
+  start_datetime: '',
+  end_datetime: '',
+  location: '',
+  meeting_link: '',
+  description: '',
+  attendees: []
+});
+
+const fetchEvents = async () => {
+  try {
+    const startDate = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}-01`;
+    const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+    const endDate = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}-${lastDay}`;
+    
+    const response = await axios.get(`/api/calendar/events?start_date=${startDate}&end_date=${endDate}`);
+    events.value = response.data.data || response.data;
+  } catch (error) {
+    console.error('Failed to fetch events:', error);
+  }
+};
+
+const fetchEmployees = async () => {
+  try {
+    const response = await axios.get('/api/employees');
+    employees.value = response.data.data || response.data;
+  } catch (error) {
+    console.error('Failed to fetch employees:', error);
+  }
+};
+
+const createEvent = async () => {
+  try {
+    await axios.post('/api/calendar/events', eventForm);
+    showEventForm.value = false;
+    Object.assign(eventForm, {
+      title: '',
+      event_type: 'meeting',
+      start_datetime: '',
+      end_datetime: '',
+      location: '',
+      meeting_link: '',
+      description: '',
+      attendees: []
+    });
+    fetchEvents();
+  } catch (error) {
+    console.error('Failed to create event:', error);
+    alert('Error creating event');
+  }
+};
+
+const viewEvent = async (event) => {
+  try {
+    const response = await axios.get(`/api/calendar/events/${event.id}`);
+    selectedEvent.value = response.data;
+  } catch (error) {
+    console.error('Failed to fetch event details:', error);
+  }
+};
+
+const respondToEvent = async (status) => {
+  try {
+    await axios.post(`/api/calendar/events/${selectedEvent.value.id}/respond`, { status });
+    selectedEvent.value = null;
+    fetchEvents();
+  } catch (error) {
+    console.error('Failed to respond to event:', error);
+  }
+};
+
+const previousMonth = () => {
+  if (currentMonth.value === 0) {
+    currentMonth.value = 11;
+    currentYear.value--;
+  } else {
+    currentMonth.value--;
+  }
+  fetchEvents();
+};
+
+const nextMonth = () => {
+  if (currentMonth.value === 11) {
+    currentMonth.value = 0;
+    currentYear.value++;
+  } else {
+    currentMonth.value++;
+  }
+  fetchEvents();
+};
+
+const getEventsForDate = (date) => {
+  const dateStr = date.toISOString().substr(0, 10);
+  return events.value.filter(event => event.start_datetime.substr(0, 10) === dateStr);
+};
+
+const isToday = (date) => {
+  const today = new Date();
+  return date.toDateString() === today.toDateString();
+};
+
+const formatDateTime = (datetime) => {
+  return new Date(datetime).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' });
+};
+
+const getEventTypeClass = (type) => {
+  const classes = {
+    meeting: 'bg-blue-100 text-blue-800',
+    training: 'bg-purple-100 text-purple-800',
+    interview: 'bg-green-100 text-green-800',
+    holiday: 'bg-red-100 text-red-800',
+    company_event: 'bg-yellow-100 text-yellow-800'
+  };
+  return classes[type] || 'bg-gray-100 text-gray-800';
+};
+
+const getEventTypeBorder = (type) => {
+  const borders = {
+    meeting: 'border-blue-500',
+    training: 'border-purple-500',
+    interview: 'border-green-500',
+    holiday: 'border-red-500',
+    company_event: 'border-yellow-500'
+  };
+  return borders[type] || 'border-gray-500';
+};
+
+onMounted(() => {
+  fetchEvents();
+  fetchEmployees();
+});
+</script>

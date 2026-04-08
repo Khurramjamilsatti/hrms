@@ -1,0 +1,215 @@
+<template>
+  <div>
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-lg font-semibold">Files & Documents</h3>
+      <button @click="showUploadForm = true" class="btn btn-primary">Upload File</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white p-4 rounded-lg shadow mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <select v-model="filters.category_id" class="form-input">
+          <option value="">All Categories</option>
+          <option v-for="category in categories" :key="category.id" :value="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+        <input type="text" v-model="filters.search" placeholder="Search files..." class="form-input" />
+        <button @click="fetchFiles" class="btn btn-primary">Filter</button>
+      </div>
+    </div>
+
+    <!-- Files Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-for="file in files" :key="file.id" class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex-1">
+            <h4 class="font-semibold">{{ file.title }}</h4>
+            <p class="text-xs text-gray-500">{{ file.file_name }}</p>
+          </div>
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        
+        <p class="text-sm text-gray-600 mb-3">{{ file.description }}</p>
+        
+        <div class="text-xs text-gray-500 space-y-1 mb-4">
+          <div><span class="font-medium">Category:</span> {{ file.category?.name }}</div>
+          <div><span class="font-medium">Version:</span> {{ file.version }}</div>
+          <div><span class="font-medium">Uploaded:</span> {{ formatDate(file.created_at) }}</div>
+          <div v-if="file.is_confidential" class="text-red-600">🔒 Confidential</div>
+        </div>
+        
+        <div class="flex space-x-2">
+          <button @click="downloadFile(file)" class="btn btn-sm btn-primary">Download</button>
+          <button @click="viewFileDetails(file)" class="btn btn-sm btn-secondary">Details</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload File Modal -->
+    <div v-if="showUploadForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+        <h3 class="text-xl font-semibold mb-4">Upload File</h3>
+        
+        <form @submit.prevent="uploadFile">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <input type="text" v-model="uploadForm.title" required class="form-input" />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea v-model="uploadForm.description" rows="2" class="form-input"></textarea>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select v-model="uploadForm.category_id" required class="form-input">
+                <option value="">Select Category</option>
+                <option v-for="category in categories" :key="category.id" :value="category.id">
+                  {{ category.name }}
+                </option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">File (Max 10MB)</label>
+              <input type="file" @change="handleFileSelect" required class="form-input" />
+            </div>
+            
+            <div>
+              <label class="flex items-center">
+                <input type="checkbox" v-model="uploadForm.is_confidential" class="mr-2" />
+                <span class="text-sm text-gray-700">Mark as Confidential</span>
+              </label>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date (Optional)</label>
+              <input type="date" v-model="uploadForm.expiry_date" class="form-input" />
+            </div>
+          </div>
+          
+          <div class="flex justify-end space-x-3 mt-6">
+            <button type="button" @click="showUploadForm = false" class="btn btn-secondary">Cancel</button>
+            <button type="submit" :disabled="uploading" class="btn btn-primary">
+              {{ uploading ? 'Uploading...' : 'Upload' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, reactive } from 'vue';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
+const files = ref([]);
+const categories = ref([]);
+const showUploadForm = ref(false);
+const uploading = ref(false);
+const selectedFile = ref(null);
+
+const filters = reactive({
+  category_id: '',
+  search: ''
+});
+
+const uploadForm = reactive({
+  title: '',
+  description: '',
+  category_id: '',
+  is_confidential: false,
+  expiry_date: ''
+});
+
+const fetchFiles = async () => {
+  try {
+    const params = new URLSearchParams();
+    if (filters.category_id) params.append('category_id', filters.category_id);
+    if (filters.search) params.append('search', filters.search);
+    
+    const response = await axios.get(`/api/files?${params.toString()}`);
+    files.value = response.data.data || response.data;
+  } catch (error) {
+    console.error('Failed to fetch files:', error);
+  }
+};
+
+const fetchCategories = async () => {
+  try {
+    const response = await axios.get('/api/files/categories');
+    categories.value = response.data.data || response.data;
+  } catch (error) {
+    console.error('Failed to fetch categories:', error);
+  }
+};
+
+const handleFileSelect = (event) => {
+  selectedFile.value = event.target.files[0];
+};
+
+const uploadFile = async () => {
+  if (!selectedFile.value) return;
+  
+  uploading.value = true;
+  const formData = new FormData();
+  formData.append('file', selectedFile.value);
+  formData.append('title', uploadForm.title);
+  formData.append('description', uploadForm.description || '');
+  formData.append('category_id', uploadForm.category_id);
+  formData.append('employee_id', authStore.user.id);
+  formData.append('is_confidential', uploadForm.is_confidential ? '1' : '0');
+  if (uploadForm.expiry_date) formData.append('expiry_date', uploadForm.expiry_date);
+  
+  try {
+    await axios.post('/api/files', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    showUploadForm.value = false;
+    selectedFile.value = null;
+    Object.assign(uploadForm, { title: '', description: '', category_id: '', is_confidential: false, expiry_date: '' });
+    fetchFiles();
+  } catch (error) {
+    console.error('Failed to upload file:', error);
+    alert('Error uploading file');
+  } finally {
+    uploading.value = false;
+  }
+};
+
+const downloadFile = async (file) => {
+  try {
+    const response = await axios.get(`/api/files/${file.id}/download`, { responseType: 'blob' });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', file.file_name);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error('Failed to download file:', error);
+  }
+};
+
+const viewFileDetails = (file) => {
+  alert(`File: ${file.title}\n\nDescription: ${file.description}\nCategory: ${file.category?.name}\nVersion: ${file.version}\nUploaded: ${formatDate(file.created_at)}`);
+};
+
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('en-PK');
+};
+
+onMounted(() => {
+  fetchFiles();
+  fetchCategories();
+});
+</script>

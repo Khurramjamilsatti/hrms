@@ -1,0 +1,1 @@
+import{c as a,a as e,o as n}from"./index-D7FP6TL8.js";const r={__name:"AttendanceList",setup(l){return(s,t)=>(n(),a("div",null,[...t[0]||(t[0]=[e("h2",{class:"text-2xl font-bold mb-6"},"Attendance Management",-1),e("div",{class:"card"},[e("p",null,"Attendance tracking will be displayed here")],-1)])]))}};export{r as default};

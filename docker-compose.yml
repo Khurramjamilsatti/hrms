@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hrms-postgres
+    environment:
+      POSTGRES_DB: hrms
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hrms-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: hrms-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@hrms.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - hrms-network
+
+volumes:
+  postgres_data:
+
+networks:
+  hrms-network:
+    driver: bridge

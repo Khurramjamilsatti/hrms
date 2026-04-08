@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Employee;
 use App\Models\TrainingCourse;
 use App\Models\TrainingSession;
 use App\Models\TrainingEnrollment;
@@ -13,7 +14,7 @@ class TrainingSeeder extends Seeder
 {
     public function run(): void
     {
-        $employees = User::where('role', 'employee')->get();
+        $employees = Employee::all();
 
         // Create Training Courses
         $courses = [

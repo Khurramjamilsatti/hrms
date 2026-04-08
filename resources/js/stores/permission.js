@@ -8,6 +8,7 @@ export const usePermissionStore = defineStore('permission', {
     allowedModules: [],
     role: null,
     isSuperAdmin: false,
+    loaded: false,
     loading: false,
     error: null,
   }),
@@ -56,6 +57,7 @@ export const usePermissionStore = defineStore('permission', {
         this.allowedModules = data.allowed_modules
         this.role = data.role
         this.isSuperAdmin = data.is_super_admin
+        this.loaded = true
         
         return data
       } catch (error) {
@@ -84,6 +86,7 @@ export const usePermissionStore = defineStore('permission', {
       this.allowedModules = []
       this.role = null
       this.isSuperAdmin = false
+      this.loaded = false
     },
   },
 })

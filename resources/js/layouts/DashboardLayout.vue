@@ -327,7 +327,7 @@ const menuItems = computed(() => {
   }
 
   // Use permission-based filtering
-  if (permissionStore.permissions.length > 0) {
+  if (permissionStore.loaded) {
     return allMenuItems.filter(item => {
       // Dashboard and profile are always accessible
       if (['dashboard', 'profile'].includes(item.name)) {

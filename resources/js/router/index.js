@@ -289,7 +289,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // If authenticated and permissions not loaded yet, fetch them
-  if (isAuthenticated && permissionStore.permissions.length === 0) {
+  if (isAuthenticated && !permissionStore.loaded) {
     try {
       await permissionStore.fetchMyPermissions();
     } catch (error) {

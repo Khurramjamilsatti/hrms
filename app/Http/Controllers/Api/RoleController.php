@@ -113,8 +113,8 @@ class RoleController extends Controller
      */
     public function update(Request $request, Role $role)
     {
-        // Prevent modification of system roles
-        if ($role->is_system_role) {
+        // Prevent modification of system roles (except by super admin)
+        if ($role->is_system_role && $request->user()->role !== 'super_admin') {
             return response()->json([
                 'message' => 'System roles cannot be modified'
             ], 403);
@@ -162,8 +162,8 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        // Prevent deletion of system roles
-        if ($role->is_system_role) {
+        // Prevent deletion of system roles (except by super admin)
+        if ($role->is_system_role && request()->user()->role !== 'super_admin') {
             return response()->json([
                 'message' => 'System roles cannot be deleted'
             ], 403);

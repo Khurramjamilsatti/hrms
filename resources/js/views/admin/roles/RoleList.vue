@@ -103,10 +103,10 @@
                 </button>
                 <button
                   @click="editRole(role)"
-                  :disabled="role.is_system_role"
+                  :disabled="role.is_system_role && !isSuperAdmin"
                   :class="[
                     'mr-4 font-medium',
-                    role.is_system_role
+                    role.is_system_role && !isSuperAdmin
                       ? 'text-gray-400 cursor-not-allowed'
                       : 'text-gray-900 hover:text-gray-700'
                   ]"
@@ -115,10 +115,10 @@
                 </button>
                 <button
                   @click="deleteRole(role)"
-                  :disabled="role.is_system_role"
+                  :disabled="role.is_system_role && !isSuperAdmin"
                   :class="[
                     'font-medium',
-                    role.is_system_role
+                    role.is_system_role && !isSuperAdmin
                       ? 'text-gray-400 cursor-not-allowed'
                       : 'text-red-600 hover:text-red-900'
                   ]"
@@ -530,8 +530,11 @@
 <script setup>
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoleStore } from '../../../stores/role'
+import { usePermissionStore } from '../../../stores/permission'
 
 const roleStore = useRoleStore()
+const permissionStore = usePermissionStore()
+const isSuperAdmin = computed(() => permissionStore.isSuperAdmin)
 
 const roles = ref([])
 const allPermissions = ref([])

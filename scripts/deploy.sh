@@ -13,7 +13,7 @@ BRANCH="${1:-$(git rev-parse --abbrev-ref HEAD)}"
 echo "==> Pulling latest code ($BRANCH)"
 git fetch --all --prune
 git checkout "$BRANCH"
-git pull --ff-only origin "$BRANCH"
+git reset --hard "origin/$BRANCH"
 
 echo "==> Running migrations"
 php artisan migrate --force --no-interaction

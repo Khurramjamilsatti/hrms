@@ -75,7 +75,8 @@ jobs:
             git remote set-url origin "$AUTH_ORIGIN"
             git fetch --all --prune
             git checkout "${{ github.ref_name }}"
-            git pull --ff-only origin "${{ github.ref_name }}"
+            # Discard local changes to tracked runtime files (e.g. laravel.log) before sync
+            git reset --hard "origin/${{ github.ref_name }}"
             git remote set-url origin "$CLEAN_ORIGIN"
 
             echo "==> Running migrations"

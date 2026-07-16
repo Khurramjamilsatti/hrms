@@ -502,7 +502,7 @@
         <form @submit.prevent="submitTravelRequest" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Employee Search -->
-            <div class="md:col-span-2 relative">
+            <div v-if="showEmployeePicker" class="md:col-span-2 relative">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Employee <span class="text-red-500">*</span></label>
               <input
                 v-model="employeeSearch"
@@ -510,8 +510,7 @@
                 @focus="showEmployeeDropdown = true"
                 type="text"
                 required
-                :disabled="isEmployee"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 placeholder="Search employee by name or ID..."
               />
               <div
@@ -608,7 +607,7 @@
         <form @submit.prevent="submitExpenseClaim" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Employee Search -->
-            <div class="md:col-span-2 relative">
+            <div v-if="showEmployeePicker" class="md:col-span-2 relative">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Employee <span class="text-red-500">*</span></label>
               <input
                 v-model="employeeSearch"
@@ -616,8 +615,7 @@
                 @focus="showEmployeeDropdown = true"
                 type="text"
                 required
-                :disabled="isEmployee"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 placeholder="Search employee by name or ID..."
               />
               <div
@@ -698,7 +696,7 @@
         <form @submit.prevent="submitAdvanceRequest" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Employee Search -->
-            <div class="md:col-span-2 relative">
+            <div v-if="showEmployeePicker" class="md:col-span-2 relative">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Employee <span class="text-red-500">*</span></label>
               <input
                 v-model="employeeSearch"
@@ -706,8 +704,7 @@
                 @focus="showEmployeeDropdown = true"
                 type="text"
                 required
-                :disabled="isEmployee"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 placeholder="Search employee by name or ID..."
               />
               <div
@@ -772,7 +769,7 @@
         <form @submit.prevent="submitMileageClaim" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Employee Search -->
-            <div class="md:col-span-2 relative">
+            <div v-if="showEmployeePicker" class="md:col-span-2 relative">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Employee <span class="text-red-500">*</span></label>
               <input
                 v-model="employeeSearch"
@@ -780,8 +777,7 @@
                 @focus="showEmployeeDropdown = true"
                 type="text"
                 required
-                :disabled="isEmployee"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 placeholder="Search employee by name or ID..."
               />
               <div
@@ -1363,12 +1359,16 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useNotification } from '@/composables/useNotification';
 import { useDialog } from '@/composables/useDialog';
+import { useEmployeeRecordPicker } from '@/composables/useEmployeeRecordPicker';
 
 const authStore = useAuthStore();
 const { success, error: showError } = useNotification();
 const { confirm } = useDialog();
-const isEmployee = computed(() => authStore.user?.role === 'employee');
-const currentEmployeeId = computed(() => authStore.user?.employee?.id || null);
+const {
+  showEmployeePicker,
+  applyOwnEmployeeToForm,
+  currentEmployeeId,
+} = useEmployeeRecordPicker('travel');
 const activeTab = ref('travel');
 const loading = ref(false);
 const error = ref(null);
@@ -1756,10 +1756,18 @@ const closePolicyModal = () => {
   resetPolicyForm();
 };
 
+const buildTravelPayload = (form) => {
+  const payload = { ...form };
+  if (!showEmployeePicker.value) {
+    delete payload.employee_id;
+  }
+  return payload;
+};
+
 const submitTravelRequest = async () => {
   submitting.value = true;
   try {
-    const payload = { ...travelForm };
+    const payload = buildTravelPayload(travelForm);
 
     if (editingTravel.value) {
       await axios.put(`/travel-expenses/travel-requests/${editingTravel.value.id}`, payload);
@@ -1782,7 +1790,7 @@ const submitTravelRequest = async () => {
 const submitExpenseClaim = async () => {
   submitting.value = true;
   try {
-    const payload = { ...expenseForm };
+    const payload = buildTravelPayload(expenseForm);
 
     if (editingExpense.value) {
       await axios.put(`/travel-expenses/expense-claims/${editingExpense.value.id}`, payload);
@@ -1805,7 +1813,7 @@ const submitExpenseClaim = async () => {
 const submitAdvanceRequest = async () => {
   submitting.value = true;
   try {
-    const payload = { ...advanceForm };
+    const payload = buildTravelPayload(advanceForm);
 
     await axios.post('/travel-expenses/advance-requests', payload);
     success('Advance request created successfully!');
@@ -1823,7 +1831,7 @@ const submitAdvanceRequest = async () => {
 const submitMileageClaim = async () => {
   submitting.value = true;
   try {
-    const payload = { ...mileageForm };
+    const payload = buildTravelPayload(mileageForm);
 
     if (editingMileage.value) {
       await axios.put(`/travel-expenses/mileage-claims/${editingMileage.value.id}`, payload);
@@ -2015,16 +2023,9 @@ const getStatusClass = (status) => {
 
 onMounted(async () => {
   loadData();
-  await fetchEmployees();
-  loadPolicies();
-  
-  // Pre-fill employee_id for employee role
-  if (isEmployee.value && currentEmployeeId.value) {
-    // Find the employee in the loaded list
-    const employee = employees.value.find(e => e.id === currentEmployeeId.value);
-    if (employee) {
-      selectEmployee(employee);
-    }
+  if (showEmployeePicker.value) {
+    await fetchEmployees();
   }
+  loadPolicies();
 });
 </script>

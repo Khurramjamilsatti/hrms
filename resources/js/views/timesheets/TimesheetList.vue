@@ -270,9 +270,18 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useNotification } from '@/composables/useNotification';
+import { useEmployeeRecordPicker } from '@/composables/useEmployeeRecordPicker';
+import { usePermissions } from '@/composables/usePermissions';
 
 const authStore = useAuthStore();
 const { success, error: showError } = useNotification();
+const { can } = usePermissions();
+const {
+  canCreateForOthers: canManageOthers,
+  showEmployeePicker,
+  applyOwnEmployeeToForm,
+  validateEmployeeForSubmit,
+} = useEmployeeRecordPicker('timesheets');
 
 const timesheets = ref([]);
 const projects = ref([]);
@@ -292,23 +301,27 @@ const rejectingEntry = ref(null);
 const user = computed(() => authStore.user || JSON.parse(localStorage.getItem('user') || '{}'));
 const role = computed(() => user.value?.role || '');
 const isEmployee = computed(() => role.value === 'employee');
-const canManageOthers = computed(() => ['admin', 'hr_admin', 'super_admin', 'manager', 'section_head'].includes(role.value));
-const canApprove = computed(() => ['admin', 'hr_admin', 'super_admin', 'manager', 'section_head'].includes(role.value));
-const showEmployeePicker = computed(() => canManageOthers.value || !user.value?.employee?.id);
+const canApprove = computed(() => can('timesheets.approve'));
 
 let searchTimer = null;
 const filters = ref({ search: '', project_id: '', status: '' });
 
-const emptyForm = () => ({
-  employee_id: user.value?.employee?.id || '',
-  date: new Date().toISOString().split('T')[0],
-  project_id: '',
-  task_id: '',
-  start_time: '09:00',
-  end_time: '17:00',
-  description: '',
-  billable: true,
-});
+const emptyForm = () => {
+  const base = {
+    employee_id: '',
+    date: new Date().toISOString().split('T')[0],
+    project_id: '',
+    task_id: '',
+    start_time: '09:00',
+    end_time: '17:00',
+    description: '',
+    billable: true,
+  };
+  if (!showEmployeePicker.value && authStore.user?.employee?.id) {
+    base.employee_id = authStore.user.employee.id;
+  }
+  return base;
+};
 
 const form = ref(emptyForm());
 
@@ -433,8 +446,9 @@ const openAddModal = async () => {
 const saveEntry = async (status = 'draft') => {
   formError.value = null;
 
-  if (showEmployeePicker.value && !form.value.employee_id) {
-    formError.value = 'Please select an employee';
+  const employeeCheck = validateEmployeeForSubmit(form);
+  if (!employeeCheck.valid) {
+    formError.value = employeeCheck.message;
     return;
   }
   if (!form.value.date || !form.value.project_id || !form.value.start_time || !form.value.end_time) {
@@ -458,7 +472,9 @@ const saveEntry = async (status = 'draft') => {
       status,
     };
 
-    if (form.value.employee_id) payload.employee_id = form.value.employee_id;
+    if (showEmployeePicker.value) {
+      payload.employee_id = employeeCheck.employeeId;
+    }
     if (form.value.task_id) payload.task_id = form.value.task_id;
 
     if (editingId.value) {

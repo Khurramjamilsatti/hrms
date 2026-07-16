@@ -200,7 +200,7 @@
         </div>
         <div class="px-6 py-5 space-y-4">
           <!-- Employee Selector (HR/Admin apply on behalf of others, or users without employee profile) -->
-          <div v-if="showEmployeePicker">
+          <div v-if="showEmployeePickerForLeave">
             <label class="block text-sm font-semibold text-gray-700 mb-1">Employee *</label>
             <div class="relative">
               <input 
@@ -289,12 +289,14 @@ import { usePermissions } from '@/composables/usePermissions';
 import { useNotification } from '@/composables/useNotification';
 import { useDialog } from '@/composables/useDialog';
 import { useAuthStore } from '@/stores/auth';
+import { useEmployeeRecordPicker } from '@/composables/useEmployeeRecordPicker';
 import axios from 'axios';
 
 const { can } = usePermissions();
 const { success, error: showError } = useNotification();
 const { confirm } = useDialog();
 const authStore = useAuthStore();
+const { showEmployeePicker, validateEmployeeForSubmit } = useEmployeeRecordPicker('leaves');
 
 const leaves = ref([]);
 const leaveTypes = ref([]);
@@ -335,15 +337,8 @@ const stats = computed(() => {
   };
 });
 
-// HR/Admin can apply leave on behalf of employees
-const canApplyForOthers = computed(() =>
-  ['admin', 'hr_admin', 'super_admin'].includes(role.value)
-);
-
-// Show employee picker when applying for others, or account has no linked employee
-const showEmployeePicker = computed(() =>
-  can('leaves.apply') && (canApplyForOthers.value || !user.value?.employee?.id)
-);
+// Show employee picker only when user can apply leave for others
+const showEmployeePickerForLeave = computed(() => can('leaves.apply') && showEmployeePicker.value);
 
 const loadLeaves = async (page = 1) => {
   loading.value = true;
@@ -418,8 +413,9 @@ const getEmployeeFullName = (emp) => {
 const submitLeave = async () => {
   formError.value = null;
 
-  if (showEmployeePicker.value && !form.value.employee_id) {
-    formError.value = 'Please select an employee';
+  const employeeCheck = validateEmployeeForSubmit(form);
+  if (!employeeCheck.valid) {
+    formError.value = employeeCheck.message;
     return;
   }
 
@@ -435,11 +431,8 @@ const submitLeave = async () => {
     reason: form.value.reason,
   };
 
-  // Self-service employees omit employee_id (backend uses linked profile)
-  if (form.value.employee_id) {
-    payload.employee_id = form.value.employee_id;
-  } else if (user.value?.employee?.id) {
-    payload.employee_id = user.value.employee.id;
+  if (showEmployeePicker.value) {
+    payload.employee_id = employeeCheck.employeeId;
   }
   
   submitting.value = true;

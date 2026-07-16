@@ -242,10 +242,10 @@
             <div class="relative top-20 mx-auto p-8 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Apply for Loan</h3>
                 <form @submit.prevent="submitLoanApplication" class="space-y-4">
-                    <div>
+                    <div v-if="showEmployeePicker">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Employee*</label>
                         <SearchableSelect v-model="loanForm.employee_id" :options="employeeOptions"
-                            placeholder="Select employee..." search-placeholder="Search by name or code..." :disabled="isEmployee" />
+                            placeholder="Select employee..." search-placeholder="Search by name or code..." />
                     </div>
 
                     <div>
@@ -309,10 +309,10 @@
             <div class="relative top-20 mx-auto p-8 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Edit Loan Application</h3>
                 <form @submit.prevent="updateLoan" class="space-y-4">
-                    <div>
+                    <div v-if="showEmployeePicker">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Employee*</label>
                         <SearchableSelect v-model="loanForm.employee_id" :options="employeeOptions"
-                            placeholder="Select employee..." search-placeholder="Search by name or code..." :disabled="isEmployee" />
+                            placeholder="Select employee..." search-placeholder="Search by name or code..." />
                     </div>
 
                     <div>
@@ -503,14 +503,22 @@ import axios from 'axios';
 import Pagination from '@/components/Pagination.vue';
 import SearchableSelect from '@/components/SearchableSelect.vue';
 import { useNotification } from '@/composables/useNotification';
+import { usePermissions } from '@/composables/usePermissions';
+import { useEmployeeRecordPicker } from '@/composables/useEmployeeRecordPicker';
 
 const { success, error: showError } = useNotification();
+const { can, canAny } = usePermissions();
+const {
+  currentEmployeeId,
+  showEmployeePicker,
+  applyOwnEmployeeToForm,
+  buildPayload,
+} = useEmployeeRecordPicker('loans');
 
 const authStore = useAuthStore();
 const router = useRouter();
-const isAdminOrManager = computed(() => ['admin', 'manager'].includes(authStore.user?.role));
-const isEmployee = computed(() => authStore.user?.role === 'employee');
-const currentEmployeeId = computed(() => authStore.user?.employee?.id || null);
+const isAdminOrManager = computed(() => canAny(['loans.manage', 'loans.approve']));
+const canApplyLoan = computed(() => can('loans.apply'));
 
 const loans = ref([]);
 const employees = ref([]);
@@ -616,6 +624,7 @@ const handleSearch = () => {
 };
 
 const fetchEmployees = async () => {
+    if (!showEmployeePicker.value) return;
     try {
         const response = await axios.get('/employees/dropdown');
         employees.value = response.data || [];
@@ -658,14 +667,14 @@ const closeEditModal = () => {
 };
 
 const submitLoanApplication = async () => {
-    // Validate employee selection
-    if (!loanForm.value.employee_id) {
-        showError('Please select an employee');
+    const { payload, error: validationError } = buildPayload(loanForm);
+    if (validationError) {
+        showError(validationError);
         return;
     }
 
     try {
-        await axios.post('/loans', loanForm.value);
+        await axios.post('/loans', payload);
         showApplyModal.value = false;
         loanForm.value = {
             employee_id: '',
@@ -692,13 +701,14 @@ const submitLoanApplication = async () => {
 };
 
 const updateLoan = async () => {
-    if (!loanForm.value.employee_id) {
-        showError('Please select an employee');
+    const { payload, error: validationError } = buildPayload(loanForm);
+    if (validationError) {
+        showError(validationError);
         return;
     }
 
     try {
-        await axios.put(`/loans/${editingLoan.value.id}`, loanForm.value);
+        await axios.put(`/loans/${editingLoan.value.id}`, payload);
         closeEditModal();
         fetchLoans();
         success('Loan updated successfully!');
@@ -812,9 +822,6 @@ const getStatusClass = (status) => {
 onMounted(() => {
     fetchLoans();
     fetchEmployees();
-    // Pre-fill employee_id for employee role
-    if (isEmployee.value && currentEmployeeId.value) {
-        loanForm.value.employee_id = currentEmployeeId.value;
-    }
+    applyOwnEmployeeToForm(loanForm);
 });
 </script>

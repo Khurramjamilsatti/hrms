@@ -17,26 +17,7 @@ class OvertimeRequestController extends Controller
         $user = $request->user();
         $query = OvertimeRequest::with(['employee.user', 'employee.department', 'firstApprover', 'finalApprover']);
 
-        if ($user->hasRole('employee')) {
-            if ($user->employee) {
-                $query->where('employee_id', $user->employee->id);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-        } elseif ($user->hasRole('section_head')) {
-            $teamEmployeeIds = Employee::where('manager_id', $user->id)->pluck('id')->toArray();
-            if ($user->employee) {
-                $teamEmployeeIds[] = $user->employee->id;
-            }
-            if (!empty($teamEmployeeIds)) {
-                $query->whereIn('employee_id', $teamEmployeeIds);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-        } elseif ($user->hasRole('manager')) {
-            $teamEmployeeIds = Employee::where('manager_id', $user->id)->pluck('id');
-            $query->whereIn('employee_id', $teamEmployeeIds);
-        }
+        $this->scopeToAccessibleEmployees($query, $request, 'overtime');
 
         if ($request->filled('employee_id')) {
             $query->where('employee_id', $request->employee_id);
@@ -92,7 +73,7 @@ class OvertimeRequestController extends Controller
 
     public function show(Request $request, OvertimeRequest $overtimeRequest)
     {
-        $this->assertCanAccessEmployeeRecord($request, $overtimeRequest->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $overtimeRequest->employee_id, 'overtime');
 
         return response()->json($overtimeRequest->load([
             'employee.user',

@@ -154,9 +154,17 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useDialog } from '@/composables/useDialog';
+import { usePermissions } from '@/composables/usePermissions';
+import { useEmployeeRecordPicker } from '@/composables/useEmployeeRecordPicker';
 
 const authStore = useAuthStore();
 const { alert } = useDialog();
+const { can } = usePermissions();
+const {
+  showEmployeePicker: needsEmployeePicker,
+  applyOwnEmployeeToForm,
+  validateEmployeeForSubmit,
+} = useEmployeeRecordPicker('overtime');
 const requests = ref([]);
 const employees = ref([]);
 const loading = ref(false);
@@ -172,14 +180,7 @@ const filters = reactive({ status: '' });
 
 const form = reactive({ employee_id: '', date: '', hours: '', reason: '' });
 
-const adminRoles = ['admin', 'hr_admin', 'super_admin', 'manager', 'section_head'];
-
-const canApprove = computed(() => adminRoles.includes(authStore.user?.role));
-
-const needsEmployeePicker = computed(() => {
-  // Admins and managers usually create OT for others; also anyone without a linked employee record.
-  return canApprove.value || !authStore.user?.employee?.id;
-});
+const canApprove = computed(() => can('overtime.approve'));
 
 const stats = computed(() => {
   const list = requests.value || [];
@@ -207,6 +208,7 @@ const fetchRequests = async () => {
 };
 
 const fetchEmployees = async () => {
+  if (!needsEmployeePicker.value) return;
   try {
     const response = await axios.get('/employees/dropdown');
     employees.value = response.data.data || response.data || [];
@@ -223,11 +225,12 @@ const fetchEmployees = async () => {
 const openCreateModal = () => {
   formError.value = null;
   Object.assign(form, {
-    employee_id: authStore.user?.employee?.id || '',
+    employee_id: '',
     date: '',
     hours: '',
     reason: '',
   });
+  applyOwnEmployeeToForm(form);
   showForm.value = true;
   if (needsEmployeePicker.value && employees.value.length === 0) {
     fetchEmployees();
@@ -236,6 +239,12 @@ const openCreateModal = () => {
 
 const submitRequest = async () => {
   formError.value = null;
+  const employeeCheck = validateEmployeeForSubmit(form);
+  if (!employeeCheck.valid) {
+    formError.value = employeeCheck.message;
+    return;
+  }
+
   saving.value = true;
   try {
     const payload = {
@@ -243,8 +252,8 @@ const submitRequest = async () => {
       hours: form.hours,
       reason: form.reason,
     };
-    if (form.employee_id) {
-      payload.employee_id = form.employee_id;
+    if (needsEmployeePicker.value) {
+      payload.employee_id = employeeCheck.employeeId;
     }
     await axios.post('/overtime-requests', payload);
     showForm.value = false;

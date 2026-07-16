@@ -196,10 +196,10 @@
             <div class="relative top-20 mx-auto p-8 border w-full max-w-2xl shadow-lg rounded-lg bg-white">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Request Salary Advance</h3>
                 <form @submit.prevent="submitAdvanceRequest" class="space-y-4">
-                    <div>
+                    <div v-if="showEmployeePicker">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Employee*</label>
                         <SearchableSelect v-model="advanceForm.employee_id" :options="employeeOptions"
-                            placeholder="Select employee..." search-placeholder="Search by name or code..." :disabled="isEmployee" />
+                            placeholder="Select employee..." search-placeholder="Search by name or code..." />
                     </div>
 
                     <div>
@@ -423,11 +423,22 @@ import axios from 'axios';
 import SearchableSelect from '../../components/SearchableSelect.vue';
 import { useNotification } from '@/composables/useNotification';
 import { useDialog } from '@/composables/useDialog';
+import { usePermissions } from '@/composables/usePermissions';
+import { useAuthStore } from '@/stores/auth';
+
+import { useEmployeeRecordPicker } from '@/composables/useEmployeeRecordPicker';
 
 const { success, error: showError, info } = useNotification();
 const { confirm, alert } = useDialog();
+const { canAny } = usePermissions();
+const authStore = useAuthStore();
+const {
+  showEmployeePicker,
+  applyOwnEmployeeToForm,
+  buildPayload,
+} = useEmployeeRecordPicker('salary_advances');
 
-const advances = ref([]);
+const isAdminOrManager = computed(() => canAny(['salary_advances.approve']));
 const employees = ref([]);
 const loading = ref(false);
 const error = ref(null);
@@ -445,12 +456,7 @@ const editingAdvance = ref(null);
 const rejectionReason = ref('');
 const approvalRemarks = ref('');
 
-const user = JSON.parse(localStorage.getItem('user') || '{}');
-const isAdminOrManager = computed(() => user.role === 'admin' || user.role === 'manager');
-const isEmployee = computed(() => user.role === 'employee');
-const currentEmployeeId = computed(() => user.employee?.id || null);
-
-const advanceForm = ref({
+const advances = ref([]);
     employee_id: '',
     advance_type: 'salary',
     amount: '',
@@ -509,6 +515,7 @@ const fetchAdvances = async (page = 1) => {
 };
 
 const fetchEmployees = async () => {
+    if (!showEmployeePicker.value) return;
     try {
         const response = await axios.get('/employees/dropdown');
         employees.value = response.data.data || response.data || [];
@@ -522,10 +529,11 @@ const handleSearch = () => {
 };
 
 const submitAdvanceRequest = async () => {
-    if (!advanceForm.value.employee_id) {
+    const { payload, error: validationError } = buildPayload(advanceForm);
+    if (validationError) {
         await alert({
             title: 'Error',
-            message: 'Please select an employee',
+            message: validationError,
             confirmText: 'OK',
             cancelText: 'Close',
             variant: 'danger',
@@ -534,7 +542,7 @@ const submitAdvanceRequest = async () => {
     }
 
     try {
-        await axios.post('/salary-advances', advanceForm.value);
+        await axios.post('/salary-advances', payload);
         showApplyModal.value = false;
         resetForm();
         fetchAdvances();
@@ -719,9 +727,6 @@ const getStatusClass = (status) => {
 onMounted(() => {
     fetchAdvances();
     fetchEmployees();
-    // Pre-fill employee_id for employee role
-    if (isEmployee.value && currentEmployeeId.value) {
-        advanceForm.value.employee_id = currentEmployeeId.value;
-    }
+    applyOwnEmployeeToForm(advanceForm);
 });
 </script>

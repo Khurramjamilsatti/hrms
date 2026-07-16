@@ -327,23 +327,23 @@ const pageTitle = computed(() => {
   return match ? match[1] : 'HRMS';
 });
 
-const menuItems = computed(() => {
+  const menuItems = computed(() => {
   const allMenuItems = [
     { name: 'dashboard', path: '/', label: 'Dashboard', icon: '📊', module: 'dashboard' },
     { name: 'employees', path: '/employees', label: 'Employees', icon: '👥', module: 'employees' },
     { name: 'attendance', path: '/attendance', label: 'Attendance', icon: '📅', module: 'attendance' },
     { name: 'overtime', path: '/overtime', label: 'Overtime', icon: '⏰', module: 'overtime' },
     { name: 'leaves', path: '/leaves', label: 'Leave Requests', icon: '🏖️', module: 'leaves' },
-    { name: 'leave-settings', path: '/leave-settings', label: 'Leave Settings', icon: '📋', module: 'leaves' },
+    { name: 'leave-settings', path: '/leave-settings', label: 'Leave Settings', icon: '📋', module: 'leaves', permissions: ['leaves.manage'] },
     { name: 'payroll', path: '/payroll', label: 'Payroll', icon: '💰', module: 'payroll' },
-    { name: 'salary-components', path: '/salary-components', label: 'Salary Components', icon: '💼', module: 'salary_components' },
+    { name: 'salary-components', path: '/salary-components', label: 'Salary Components', icon: '💼', module: 'salary_components', permissions: ['salary_components.view', 'salary_components.manage'] },
     { name: 'loans', path: '/loans', label: 'Loans', icon: '💵', module: 'loans' },
     { name: 'salary-advances', path: '/salary-advances', label: 'Salary Advances', icon: '💸', module: 'salary_advances' },
     { name: 'recruitment', path: '/recruitment', label: 'Recruitment', icon: '🧑‍💼', module: 'recruitment' },
     { name: 'cvs', path: '/cvs', label: 'CV Bank', icon: '📄', module: 'cv_bank' },
     { name: 'deployments', path: '/deployments', label: 'Deployments', icon: '🌍', module: 'deployments' },
     { name: 'departments', path: '/departments', label: 'Departments', icon: '🏢', module: 'departments' },
-    { name: 'designations', path: '/designations', label: 'Designations', icon: '🏷️', module: 'departments' },
+    { name: 'designations', path: '/designations', label: 'Designations', icon: '🏷️', module: 'departments', permissions: ['departments.view', 'departments.manage'] },
     { name: 'timesheets', path: '/timesheets', label: 'Timesheets', icon: '⏱️', module: 'timesheets' },
     { name: 'onboarding', path: '/onboarding', label: 'Onboarding', icon: '🎯', module: 'onboarding' },
     { name: 'performance', path: '/performance', label: 'Performance', icon: '📈', module: 'performance' },
@@ -357,73 +357,29 @@ const menuItems = computed(() => {
     { name: 'calendar', path: '/calendar', label: 'Calendar', icon: '📆', module: 'calendar' },
     { name: 'organization', path: '/organization', label: 'Organization', icon: '🏛️', module: 'organization' },
     { name: 'profile', path: '/profile', label: 'My Profile', icon: '👤', module: 'employees' },
+    { name: 'roles', path: '/admin/roles', label: 'Roles & Permissions', icon: '🔐', module: 'roles' },
+    { name: 'user-roles', path: '/admin/user-roles', label: 'User Role Management', icon: '👥', module: 'users' },
   ];
 
-  // Super Admin - Add admin menu items
-  if (user.value?.role === 'super_admin') {
-    allMenuItems.push(
-      { name: 'roles', path: '/admin/roles', label: 'Roles & Permissions', icon: '🔐', module: 'roles' },
-      { name: 'user-roles', path: '/admin/user-roles', label: 'User Role Management', icon: '👥', module: 'users' }
-    );
-  }
+  return allMenuItems.filter((item) => {
+    if (['dashboard', 'profile'].includes(item.name)) {
+      return true;
+    }
 
-  // Use permission-based filtering
-  if (permissionStore.loaded) {
-    return allMenuItems.filter(item => {
-      // Dashboard and profile are always accessible
-      if (['dashboard', 'profile'].includes(item.name)) {
-        return true;
-      }
-      
-      // Check if user has access to this module
-      return permissionStore.canAccessModule(item.module);
-    });
-  }
+    if (!permissionStore.loaded) {
+      return false;
+    }
 
-  // Fallback to role-based for backward compatibility during transition
-  const userRole = user.value?.role;
-  
-  // Super Admin - Full access
-  if (userRole === 'super_admin') {
-    return allMenuItems;
-  }
-  
-  // HR Admin - Full HR access
-  if (userRole === 'hr_admin') {
-    return allMenuItems.filter(item => !['organization', 'roles', 'user-roles'].includes(item.name));
-  }
-  
-  // Section Head - Department management
-  if (userRole === 'section_head') {
-    return allMenuItems.filter(item => [
-      'dashboard', 'employees', 'attendance', 'overtime', 'leaves', 'leave-settings', 'timesheets',
-      'departments', 'designations', 'training', 'performance', 'announcements',
-      'shifts', 'helpdesk', 'files', 'calendar', 'profile'
-    ].includes(item.name));
-  }
-  
-  // Manager - Team management
-  if (userRole === 'manager') {
-    return allMenuItems.filter(item => [
-      'dashboard', 'employees', 'attendance', 'overtime', 'leaves', 'timesheets',
-      'performance', 'announcements', 'training', 'helpdesk', 'files', 'calendar', 'profile'
-    ].includes(item.name));
-  }
-  
-  // Admin - Legacy full access
-  if (userRole === 'admin') {
-    return allMenuItems.filter(item => !['roles', 'user-roles'].includes(item.name));
-  }
-  
-  // Employee - Self-service
-  if (userRole === 'employee') {
-    return allMenuItems.filter(item => [
-      'dashboard', 'attendance', 'overtime', 'leaves', 'loans', 'salary-advances',
-      'announcements', 'training', 'travel', 'helpdesk', 'files', 'calendar', 'profile'
-    ].includes(item.name));
-  }
-  
-  return allMenuItems.filter(item => ['dashboard', 'profile'].includes(item.name));
+    if (!permissionStore.canAccessModule(item.module)) {
+      return false;
+    }
+
+    if (item.permissions?.length) {
+      return permissionStore.hasAnyPermission(item.permissions);
+    }
+
+    return true;
+  });
 });
 
 const menuSections = computed(() => {

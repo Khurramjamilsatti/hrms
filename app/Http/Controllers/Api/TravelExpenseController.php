@@ -21,12 +21,7 @@ class TravelExpenseController extends Controller
     {
         $query = TravelRequest::with(['employee', 'approver']);
 
-        if ($request->user()->role === 'employee') {
-            if (!$request->user()->employee) {
-                return response()->json(['data' => []]);
-            }
-            $query->where('employee_id', $request->user()->employee->id);
-        }
+        $this->scopeToAccessibleEmployees($query, $request, 'travel');
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -39,7 +34,7 @@ class TravelExpenseController extends Controller
     public function storeTravelRequest(Request $request)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'employee_id' => 'nullable|exists:employees,id',
             'purpose' => 'required|string|max:255',
             'description' => 'nullable|string',
             'from_location' => 'required|string|max:255',
@@ -50,7 +45,11 @@ class TravelExpenseController extends Controller
             'estimated_cost' => 'required|numeric|min:0',
         ]);
 
-        $this->assertCanAccessEmployeeRecord($request, (int) $validated['employee_id']);
+        $validated['employee_id'] = $this->resolveStoredEmployeeId(
+            $request,
+            isset($validated['employee_id']) ? (int) $validated['employee_id'] : null,
+            'travel'
+        );
 
         $validated['request_number'] = 'TR-' . strtoupper(uniqid());
         $validated['status'] = 'draft';
@@ -62,7 +61,7 @@ class TravelExpenseController extends Controller
     public function updateTravelRequest(Request $request, $id)
     {
         $travelRequest = TravelRequest::findOrFail($id);
-        $this->assertCanAccessEmployeeRecord($request, $travelRequest->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $travelRequest->employee_id, 'travel');
 
         $validated = $request->validate([
             'purpose' => 'sometimes|string|max:255',
@@ -83,7 +82,7 @@ class TravelExpenseController extends Controller
     public function submitTravelRequest(Request $request, $id)
     {
         $travelRequest = TravelRequest::findOrFail($id);
-        $this->assertCanAccessEmployeeRecord($request, $travelRequest->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $travelRequest->employee_id, 'travel');
         $travelRequest->update(['status' => 'submitted']);
         return response()->json($travelRequest);
     }
@@ -160,7 +159,7 @@ class TravelExpenseController extends Controller
     public function storeExpenseClaim(Request $request)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'employee_id' => 'nullable|exists:employees,id',
             'travel_request_id' => 'nullable|exists:travel_requests,id',
             'category_id' => 'required|exists:expense_categories,id',
             'expense_date' => 'required|date',
@@ -170,6 +169,12 @@ class TravelExpenseController extends Controller
             'currency' => 'nullable|string|max:3',
             'receipt_file' => 'nullable|string',
         ]);
+
+        $validated['employee_id'] = $this->resolveStoredEmployeeId(
+            $request,
+            isset($validated['employee_id']) ? (int) $validated['employee_id'] : null,
+            'travel'
+        );
 
         $validated['claim_number'] = 'EXP-' . strtoupper(uniqid());
         $validated['status'] = 'draft';
@@ -271,12 +276,18 @@ class TravelExpenseController extends Controller
     public function storeAdvanceRequest(Request $request)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'employee_id' => 'nullable|exists:employees,id',
             'travel_request_id' => 'nullable|exists:travel_requests,id',
             'purpose' => 'required|string',
             'amount' => 'required|numeric|min:0',
             'required_date' => 'required|date',
         ]);
+
+        $validated['employee_id'] = $this->resolveStoredEmployeeId(
+            $request,
+            isset($validated['employee_id']) ? (int) $validated['employee_id'] : null,
+            'travel'
+        );
 
         $validated['request_number'] = 'ADV-' . strtoupper(uniqid());
         $validated['status'] = 'pending';
@@ -353,7 +364,7 @@ class TravelExpenseController extends Controller
     public function storeMileageClaim(Request $request)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'employee_id' => 'nullable|exists:employees,id',
             'travel_date' => 'required|date',
             'from_location' => 'required|string|max:255',
             'to_location' => 'required|string|max:255',
@@ -361,6 +372,12 @@ class TravelExpenseController extends Controller
             'purpose' => 'required|string',
             'vehicle_type' => 'required|in:car,motorcycle,bicycle',
         ]);
+
+        $validated['employee_id'] = $this->resolveStoredEmployeeId(
+            $request,
+            isset($validated['employee_id']) ? (int) $validated['employee_id'] : null,
+            'travel'
+        );
 
         // Get mileage rate from active policy (default to 10 PKR/km if no policy)
         $policy = TravelPolicy::where('is_active', true)->first();

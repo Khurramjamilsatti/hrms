@@ -344,8 +344,10 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useDialog } from '@/composables/useDialog';
+import { usePermissions } from '@/composables/usePermissions';
 
 const { alert } = useDialog();
+const { canAny } = usePermissions();
 const payrolls = ref([]);
 const loading = ref(false);
 const error = ref(null);
@@ -358,8 +360,7 @@ const showDetailsModal = ref(false);
 const selectedPayroll = ref(null);
 const payrollDetails = ref({ earnings: [], deductions: [], loanDeductions: [], advanceDeductions: [] });
 
-const user = JSON.parse(localStorage.getItem('user') || '{}');
-const isAdminOrManager = computed(() => user.role === 'admin' || user.role === 'manager');
+const isAdminOrManager = computed(() => canAny(['payroll.manage', 'payroll.generate', 'payroll.process']));
 
 const currentDate = new Date();
 const filters = ref({ month: '', year: '', status: '' });

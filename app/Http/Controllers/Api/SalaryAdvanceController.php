@@ -19,28 +19,7 @@ class SalaryAdvanceController extends Controller
         $query = AdvanceRequest::with(['employee.user', 'employee.department', 'approver'])
             ->whereIn('advance_type', ['salary', 'emergency_salary', 'festival']);
 
-        // Role-based filtering
-        if ($user->hasRole('employee')) {
-            // Employee can only see their own advances
-            if ($user->employee) {
-                $query->where('employee_id', $user->employee->id);
-            } else {
-                return response()->json(['data' => []]);
-            }
-        } elseif ($user->hasRole('manager')) {
-            // Manager can see their team's advances
-            $query->whereHas('employee', function($q) use ($user) {
-                $q->where('manager_id', $user->id);
-            });
-        } elseif ($user->hasRole('section_head')) {
-            // Section head can see their department's advances
-            if ($user->employee && $user->employee->department_id) {
-                $query->whereHas('employee', function($q) use ($user) {
-                    $q->where('department_id', $user->employee->department_id);
-                });
-            }
-        }
-        // hr_admin, super_admin, and admin can see all advances
+        $this->scopeToAccessibleEmployees($query, $request, 'salary_advances');
 
         // Filter by employee
         if ($request->has('employee_id')) {
@@ -84,6 +63,7 @@ class SalaryAdvanceController extends Controller
 
         // Get employee
         if (isset($validated['employee_id'])) {
+            $this->assertCanAccessEmployeeRecord($request, (int) $validated['employee_id'], 'salary_advances');
             $employee = Employee::find($validated['employee_id']);
             if (!$employee) {
                 return response()->json(['message' => 'Employee not found'], 404);
@@ -115,7 +95,7 @@ class SalaryAdvanceController extends Controller
 
     public function show(Request $request, AdvanceRequest $salaryAdvance)
     {
-        $this->assertCanAccessEmployeeRecord($request, $salaryAdvance->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $salaryAdvance->employee_id, 'salary_advances');
 
         return response()->json($salaryAdvance->load([
             'employee.user',

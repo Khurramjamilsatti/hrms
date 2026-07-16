@@ -18,25 +18,7 @@ class AttendanceController extends Controller
         $user = $request->user()->loadMissing('employee');
         $query = Attendance::query();
 
-        // Apply data scope filters based on user context
-        if ($user->hasRole('employee')) {
-            if ($user->employee) {
-                $query->where('employee_id', $user->employee->id);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-        } elseif ($user->hasRole('manager')) {
-            $teamEmployeeIds = Employee::where('manager_id', $user->id)->pluck('id');
-            $query->whereIn('employee_id', $teamEmployeeIds);
-        } elseif ($user->hasRole('section_head')) {
-            $sectionHeadEmployee = $user->employee;
-            if ($sectionHeadEmployee && $sectionHeadEmployee->department_id) {
-                $deptEmployeeIds = Employee::where('department_id', $sectionHeadEmployee->department_id)->pluck('id');
-                $query->whereIn('employee_id', $deptEmployeeIds);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-        }
+        $this->scopeToAccessibleEmployees($query, $request, 'attendance');
 
         if ($request->filled('employee_id')) {
             $query->where('employee_id', $request->employee_id);
@@ -289,7 +271,7 @@ class AttendanceController extends Controller
 
     public function show(Request $request, Attendance $attendance)
     {
-        $this->assertCanAccessEmployeeRecord($request, $attendance->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $attendance->employee_id, 'attendance');
 
         return response()->json($attendance->load(['employee.user', 'approver']));
     }

@@ -21,15 +21,7 @@ class PayrollController extends Controller
         $user = $request->user();
         $query = Payroll::with(['employee.user', 'processedBy']);
 
-        if ($user->hasRole('employee')) {
-            if ($user->employee) {
-                $query->where('employee_id', $user->employee->id);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-        } elseif ($user->hasRole('manager') || $user->hasRole('section_head')) {
-            return response()->json(['message' => 'Unauthorized access to payroll'], 403);
-        }
+        $this->scopeToAccessibleEmployees($query, $request, 'payroll');
 
         if ($request->has('employee_id')) {
             $query->where('employee_id', $request->employee_id);
@@ -103,7 +95,7 @@ class PayrollController extends Controller
 
     public function show(Request $request, Payroll $payroll)
     {
-        $this->assertCanAccessEmployeeRecord($request, $payroll->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $payroll->employee_id, 'payroll');
 
         return response()->json($payroll->load([
             'employee.user',

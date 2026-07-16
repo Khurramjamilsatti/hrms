@@ -21,6 +21,11 @@ const routes = [
         meta: { module: 'dashboard' }
       },
       {
+        path: 'permission-denied',
+        name: 'PermissionDenied',
+        component: () => import('@/views/PermissionDenied.vue'),
+      },
+      {
         path: 'employees',
         name: 'Employees',
         component: () => import('@/views/employees/EmployeeList.vue'),
@@ -60,7 +65,7 @@ const routes = [
         path: 'leave-settings',
         name: 'LeaveSettings',
         component: () => import('@/views/leaves/LeaveSettings.vue'),
-        meta: { module: 'leaves' }
+        meta: { module: 'leaves', permissions: ['leaves.manage'] }
       },
       {
         path: 'payroll',
@@ -334,17 +339,29 @@ router.beforeEach(async (to, from, next) => {
       return next();
     }
 
+    // Check granular route permissions (e.g. leave settings)
+    if (to.meta.permissions?.length && isAuthenticated) {
+      if (!permissionStore.hasAnyPermission(to.meta.permissions)) {
+        return next({
+          name: 'PermissionDenied',
+          replace: true,
+          query: {
+            message: 'You do not have permission to access this page.',
+          },
+        });
+      }
+    }
+
     // Check if user has access to this module
     if (!permissionStore.canAccessModule(module)) {
-      // User doesn't have permission, redirect to dashboard with notification
       console.warn(`Access denied to module: ${module}`);
-      return next({ 
-        name: 'Dashboard',
+      return next({
+        name: 'PermissionDenied',
         replace: true,
-        query: { 
-          denied: module,
-          message: 'You do not have permission to access this module'
-        }
+        query: {
+          module,
+          message: 'You do not have permission to access this module.',
+        },
       });
     }
   }

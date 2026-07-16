@@ -644,9 +644,15 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useNotification } from '@/composables/useNotification';
+import { useEmployeeRecordPicker } from '@/composables/useEmployeeRecordPicker';
 
 const authStore = useAuthStore();
 const { success, error: showError } = useNotification();
+const {
+  showEmployeePicker,
+  applyOwnEmployeeToForm,
+  validateEmployeeForSubmit,
+} = useEmployeeRecordPicker('helpdesk');
 
 const tickets = ref([]);
 const categories = ref([]);
@@ -698,12 +704,6 @@ const editFormData = ref({
     status: 'open',
     subject: '',
     description: ''
-});
-
-const privilegedRoles = ['admin', 'hr_admin', 'super_admin', 'manager', 'section_head'];
-const showEmployeePicker = computed(() => {
-    const role = authStore.user?.role;
-    return privilegedRoles.includes(role) || !authStore.user?.employee;
 });
 
 const canSubmitTicket = computed(() => {
@@ -856,20 +856,30 @@ const closeCreateModal = () => {
 
 const openCreateModal = async () => {
     await fetchCategories();
+    formData.value = {
+        employee_id: '',
+        category_id: '',
+        priority: 'medium',
+        subject: '',
+        description: ''
+    };
+    selectedEmployee.value = null;
+    employeeSearch.value = '';
+    applyOwnEmployeeToForm(formData);
     if (showEmployeePicker.value) {
         await fetchEmployees();
-    } else if (authStore.user?.employee) {
-        formData.value.employee_id = authStore.user.employee.id;
-        selectedEmployee.value = authStore.user.employee;
     }
     showCreateModal.value = true;
 };
 
 const createTicket = async () => {
-    if (!canSubmitTicket.value) {
-        showError(showEmployeePicker.value && !formData.value.employee_id
-            ? 'Please select an employee'
-            : 'Please fill in all required fields');
+    const employeeCheck = validateEmployeeForSubmit(formData);
+    if (!formData.value.category_id || !formData.value.subject || !formData.value.description) {
+        showError('Please fill in all required fields');
+        return;
+    }
+    if (!employeeCheck.valid) {
+        showError(employeeCheck.message);
         return;
     }
 
@@ -882,8 +892,8 @@ const createTicket = async () => {
             description: formData.value.description,
         };
 
-        if (formData.value.employee_id) {
-            payload.employee_id = formData.value.employee_id;
+        if (showEmployeePicker.value) {
+            payload.employee_id = employeeCheck.employeeId;
         }
 
         await axios.post('/helpdesk/tickets', payload);

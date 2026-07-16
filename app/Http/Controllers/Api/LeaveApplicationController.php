@@ -25,41 +25,7 @@ class LeaveApplicationController extends Controller
         $user = $request->user();
         $query = LeaveApplication::with(['employee.user', 'employee.department', 'leaveType', 'firstApprover', 'finalApprover']);
 
-        // Role-based data access control
-        if ($user->hasRole('employee')) {
-            // Employees can only see their own leave applications
-            if ($user->employee) {
-                $query->where('employee_id', $user->employee->id);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-        } elseif ($user->hasRole('section_head')) {
-            // Section heads see leave applications from employees reporting to them + their own
-            $teamEmployeeIds = Employee::where('manager_id', $user->id)->pluck('id')->toArray();
-            
-            // Include section head's own leave applications
-            if ($user->employee) {
-                $teamEmployeeIds[] = $user->employee->id;
-            }
-            
-            if (!empty($teamEmployeeIds)) {
-                $query->whereIn('employee_id', $teamEmployeeIds);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-        } elseif ($user->hasRole('manager')) {
-            // Managers see their team's leave applications + their own
-            $teamEmployeeIds = Employee::where('manager_id', $user->id)->pluck('id')->toArray();
-            if ($user->employee) {
-                $teamEmployeeIds[] = $user->employee->id;
-            }
-            if (!empty($teamEmployeeIds)) {
-                $query->whereIn('employee_id', $teamEmployeeIds);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-        }
-        // hr_admin, super_admin, and admin see all leave applications
+        $this->scopeToAccessibleEmployees($query, $request, 'leaves');
 
         if ($request->has('employee_id')) {
             $query->where('employee_id', $request->employee_id);
@@ -91,7 +57,7 @@ class LeaveApplicationController extends Controller
         ]);
 
         $user = $request->user()->loadMissing('employee');
-        $canApplyForOthers = in_array($user->role, ['admin', 'hr_admin', 'super_admin'], true);
+        $canApplyForOthers = $user->hasPermission('leaves.manage');
 
         if (empty($validated['employee_id'])) {
             if (!$user->employee) {
@@ -149,7 +115,7 @@ class LeaveApplicationController extends Controller
 
     public function show(Request $request, LeaveApplication $leaveApplication)
     {
-        $this->assertCanAccessEmployeeRecord($request, $leaveApplication->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $leaveApplication->employee_id, 'leaves');
 
         return response()->json($leaveApplication->load(['employee.user', 'employee.department', 'leaveType', 'firstApprover', 'finalApprover']));
     }

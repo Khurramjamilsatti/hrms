@@ -93,20 +93,20 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import SearchableSelect from '@/components/SearchableSelect.vue';
+import { useEmployeeRecordPicker } from '@/composables/useEmployeeRecordPicker';
 
 const authStore = useAuthStore();
+const {
+  showEmployeePicker: needsEmployeePicker,
+  applyOwnEmployeeToForm,
+  validateEmployeeForSubmit,
+} = useEmployeeRecordPicker('travel');
 const advances = ref([]);
 const employees = ref([]);
 const loading = ref(false);
 const showForm = ref(false);
 const saving = ref(false);
 const formError = ref(null);
-
-const needsEmployeePicker = computed(() => {
-  const role = authStore.user?.role;
-  return ['admin', 'super_admin', 'hr_admin', 'manager', 'section_head'].includes(role)
-    || !authStore.user?.employee?.id;
-});
 
 const employeeOptions = computed(() =>
   employees.value.map((e) => ({
@@ -147,29 +147,33 @@ const fetchEmployees = async () => {
 const openCreateModal = () => {
   formError.value = null;
   Object.assign(form, {
-    employee_id: authStore.user?.employee?.id || null,
+    employee_id: null,
     purpose: '',
     amount: '',
     required_date: '',
   });
+  applyOwnEmployeeToForm(form);
   showForm.value = true;
 };
 
 const submitAdvance = async () => {
   formError.value = null;
-  const employeeId = form.employee_id || authStore.user?.employee?.id || authStore.user?.employee_id;
-  if (!employeeId) {
-    formError.value = 'Please select an employee';
+  const employeeCheck = validateEmployeeForSubmit(form);
+  if (!employeeCheck.valid) {
+    formError.value = employeeCheck.message;
     return;
   }
   saving.value = true;
   try {
-    await axios.post('/travel-expenses/advance-requests', {
-      employee_id: employeeId,
+    const payload = {
       purpose: form.purpose,
       amount: form.amount,
       required_date: form.required_date,
-    });
+    };
+    if (needsEmployeePicker.value) {
+      payload.employee_id = employeeCheck.employeeId;
+    }
+    await axios.post('/travel-expenses/advance-requests', payload);
     showForm.value = false;
     fetchAdvances();
   } catch (error) {

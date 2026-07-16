@@ -42,28 +42,7 @@ class FileManagementController extends Controller
         $user = $request->user();
         $query = EmployeeFile::with(['employee', 'category', 'uploadedBy']);
 
-        // Role-based filtering
-        if ($user->hasRole('employee')) {
-            // Employee can only see their own files
-            if ($user->employee) {
-                $query->where('employee_id', $user->employee->id);
-            } else {
-                return response()->json(['data' => []]);
-            }
-        } elseif ($user->hasRole('manager')) {
-            // Manager can see their team's files
-            $query->whereHas('employee', function($q) use ($user) {
-                $q->where('manager_id', $user->id);
-            });
-        } elseif ($user->hasRole('section_head')) {
-            // Section head can see their department's files
-            if ($user->employee && $user->employee->department_id) {
-                $query->whereHas('employee', function($q) use ($user) {
-                    $q->where('department_id', $user->employee->department_id);
-                });
-            }
-        }
-        // hr_admin, super_admin, and admin can see all files
+        $this->scopeToAccessibleEmployees($query, $request, 'files');
 
         if ($request->has('employee_id')) {
             $query->where('employee_id', $request->employee_id);
@@ -135,7 +114,7 @@ class FileManagementController extends Controller
             'accessLogs.user',
         ])->findOrFail($id);
 
-        $this->assertCanAccessEmployeeRecord($request, $file->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $file->employee_id, 'files');
 
         FileAccessLog::create([
             'file_id' => $id,
@@ -150,7 +129,7 @@ class FileManagementController extends Controller
     public function downloadFile(Request $request, $id)
     {
         $file = EmployeeFile::findOrFail($id);
-        $this->assertCanAccessEmployeeRecord($request, $file->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $file->employee_id, 'files');
 
         FileAccessLog::create([
             'file_id' => $id,
@@ -165,7 +144,7 @@ class FileManagementController extends Controller
     public function updateFile(Request $request, $id)
     {
         $file = EmployeeFile::findOrFail($id);
-        $this->assertCanAccessEmployeeRecord($request, $file->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $file->employee_id, 'files');
 
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
@@ -189,7 +168,7 @@ class FileManagementController extends Controller
     public function deleteFile(Request $request, $id)
     {
         $file = EmployeeFile::findOrFail($id);
-        $this->assertCanAccessEmployeeRecord($request, $file->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $file->employee_id, 'files');
 
         FileAccessLog::create([
             'file_id' => $id,
@@ -208,7 +187,7 @@ class FileManagementController extends Controller
     public function uploadNewVersion(Request $request, $id)
     {
         $parentFile = EmployeeFile::findOrFail($id);
-        $this->assertCanAccessEmployeeRecord($request, $parentFile->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $parentFile->employee_id, 'files');
         
         $validated = $request->validate([
             'file' => 'required|file|max:10240',

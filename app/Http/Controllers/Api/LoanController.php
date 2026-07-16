@@ -18,28 +18,7 @@ class LoanController extends Controller
         $user = $request->user();
         $query = Loan::with(['employee.user', 'employee.department', 'approver']);
 
-        // Role-based filtering
-        if ($user->hasRole('employee')) {
-            // Employee can only see their own loans
-            if ($user->employee) {
-                $query->where('employee_id', $user->employee->id);
-            } else {
-                return response()->json(['data' => []]);
-            }
-        } elseif ($user->hasRole('manager')) {
-            // Manager can see their team's loans
-            $query->whereHas('employee', function($q) use ($user) {
-                $q->where('manager_id', $user->id);
-            });
-        } elseif ($user->hasRole('section_head')) {
-            // Section head can see their department's loans
-            if ($user->employee && $user->employee->department_id) {
-                $query->whereHas('employee', function($q) use ($user) {
-                    $q->where('department_id', $user->employee->department_id);
-                });
-            }
-        }
-        // hr_admin, super_admin, and admin can see all loans
+        $this->scopeToAccessibleEmployees($query, $request, 'loans');
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -88,6 +67,7 @@ class LoanController extends Controller
 
         // If employee_id provided (admin/manager submitting), use it; otherwise use authenticated user's employee
         if (isset($validated['employee_id'])) {
+            $this->assertCanAccessEmployeeRecord($request, (int) $validated['employee_id'], 'loans');
             $employee = \App\Models\Employee::find($validated['employee_id']);
             if (!$employee) {
                 return response()->json(['message' => 'Employee not found'], 404);
@@ -124,7 +104,7 @@ class LoanController extends Controller
 
     public function show(Request $request, Loan $loan)
     {
-        $this->assertCanAccessEmployeeRecord($request, $loan->employee_id);
+        $this->assertCanAccessEmployeeRecord($request, $loan->employee_id, 'loans');
 
         return response()->json($loan->load([
             'employee.user',
@@ -136,6 +116,8 @@ class LoanController extends Controller
 
     public function update(Request $request, Loan $loan)
     {
+        $this->assertCanAccessEmployeeRecord($request, $loan->employee_id, 'loans');
+
         $validated = $request->validate([
             'employee_id' => 'sometimes|exists:employees,id',
             'loan_type' => 'sometimes|in:personal,medical,education,housing,emergency,other',
@@ -169,6 +151,8 @@ class LoanController extends Controller
 
     public function approve(Request $request, Loan $loan)
     {
+        $this->assertCanAccessEmployeeRecord($request, $loan->employee_id, 'loans');
+
         $request->validate([
             'remarks' => 'nullable|string',
         ]);
@@ -188,6 +172,8 @@ class LoanController extends Controller
 
     public function reject(Request $request, Loan $loan)
     {
+        $this->assertCanAccessEmployeeRecord($request, $loan->employee_id, 'loans');
+
         $validated = $request->validate([
             'rejection_reason' => 'required|string',
         ]);
@@ -207,6 +193,8 @@ class LoanController extends Controller
 
     public function disburse(Request $request, Loan $loan)
     {
+        $this->assertCanAccessEmployeeRecord($request, $loan->employee_id, 'loans');
+
         $validated = $request->validate([
             'disbursed_date' => 'required|date',
             'payment_method' => 'required|string',
@@ -227,6 +215,8 @@ class LoanController extends Controller
 
     public function addPayment(Request $request, Loan $loan)
     {
+        $this->assertCanAccessEmployeeRecord($request, $loan->employee_id, 'loans');
+
         $validated = $request->validate([
             'payment_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
@@ -269,8 +259,10 @@ class LoanController extends Controller
         }
     }
 
-    public function destroy(Loan $loan)
+    public function destroy(Request $request, Loan $loan)
     {
+        $this->assertCanAccessEmployeeRecord($request, $loan->employee_id, 'loans');
+
         if (in_array($loan->status, ['active', 'disbursed'])) {
             return response()->json(['message' => 'Cannot delete active loan'], 400);
         }

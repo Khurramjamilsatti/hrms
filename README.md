@@ -194,7 +194,10 @@ Pull requests are **not** deployed — review and merge them with normal Git SOP
 | `DEPLOY_USER` | SSH user |
 | `DEPLOY_SSH_KEY` | Private key for that user (not the `.pub` file) |
 | `DEPLOY_SSH_PASSPHRASE` | Passphrase for the private key (if the key is encrypted) |
+| `DEPLOY_GIT_TOKEN` | GitHub PAT with **Contents: Read** on this repo (used for `git pull` on the VPS) |
 | `DEPLOY_PATH` | Absolute path to the app on the VPS (git clone root) |
+
+Create `DEPLOY_GIT_TOKEN`: GitHub → **Settings** → **Developer settings** → **Personal access tokens** → fine-grained token for `Khurramjamilsatti/hrms` with **Contents: Read-only** (or classic token with `repo` scope for private repos).
 
 #### VPS one-time setup
 

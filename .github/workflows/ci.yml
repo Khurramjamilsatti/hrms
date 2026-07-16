@@ -24,10 +24,11 @@ jobs:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DEPLOY_SSH_PASSPHRASE: ${{ secrets.DEPLOY_SSH_PASSPHRASE }}
+          DEPLOY_GIT_TOKEN: ${{ secrets.DEPLOY_GIT_TOKEN }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           missing=0
-          for key in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY DEPLOY_PATH; do
+          for key in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY DEPLOY_GIT_TOKEN DEPLOY_PATH; do
             if [ -z "${!key}" ]; then
               echo "::error::Missing GitHub secret: $key"
               missing=1
@@ -47,6 +48,7 @@ jobs:
             echo "  DEPLOY_USER  – SSH username"
             echo "  DEPLOY_SSH_KEY – private key (full PEM, including BEGIN/END lines)"
             echo "  DEPLOY_SSH_PASSPHRASE – required if the private key is encrypted"
+            echo "  DEPLOY_GIT_TOKEN – GitHub PAT with repo read access (for git pull on the VPS)"
             echo "  DEPLOY_PATH  – absolute path to the app on the server (e.g. /var/www/hrms)"
             exit 1
           fi
@@ -65,10 +67,16 @@ jobs:
             set -euo pipefail
             cd "${{ secrets.DEPLOY_PATH }}"
 
+            REPO="${{ github.repository }}"
+            CLEAN_ORIGIN="https://github.com/${REPO}.git"
+            AUTH_ORIGIN="https://x-access-token:${{ secrets.DEPLOY_GIT_TOKEN }}@github.com/${REPO}.git"
+
             echo "==> Pulling latest code"
+            git remote set-url origin "$AUTH_ORIGIN"
             git fetch --all --prune
             git checkout "${{ github.ref_name }}"
             git pull --ff-only origin "${{ github.ref_name }}"
+            git remote set-url origin "$CLEAN_ORIGIN"
 
             echo "==> Running migrations"
             php artisan migrate --force --no-interaction

@@ -129,6 +129,16 @@
               <option v-for="d in departments.filter(d => d.id !== editingDept?.id)" :key="d.id" :value="d.id">{{ d.name }}</option>
             </select>
           </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Section Head</label>
+            <select v-model="form.manager_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <option :value="null">None</option>
+              <option v-for="head in sectionHeads" :key="head.id" :value="head.id">
+                {{ head.name }}{{ head.employee_code ? ` (${head.employee_code})` : '' }}{{ head.department ? ` — ${head.department}` : '' }}
+              </option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">Default reporting manager for employees in this department.</p>
+          </div>
           <div class="flex items-center space-x-3">
             <label class="relative inline-flex items-center cursor-pointer">
               <input v-model="form.is_active" type="checkbox" class="sr-only peer" />
@@ -172,6 +182,7 @@ const { can } = usePermissions();
 const { alert } = useDialog();
 
 const departments = ref([]);
+const sectionHeads = ref([]);
 const loading = ref(false);
 const error = ref(null);
 const showModal = ref(false);
@@ -182,7 +193,7 @@ const saving = ref(false);
 const deleting = ref(false);
 const formError = ref(null);
 
-const form = ref({ name: '', description: '', parent_id: null, is_active: true });
+const form = ref({ name: '', description: '', parent_id: null, manager_id: null, is_active: true });
 
 const stats = computed(() => {
   const list = departments.value || [];
@@ -193,6 +204,15 @@ const stats = computed(() => {
     totalEmployees: list.reduce((sum, d) => sum + (d.employees_count || 0), 0)
   };
 });
+
+const loadSectionHeads = async () => {
+  try {
+    const response = await axios.get('/employees/section-heads');
+    sectionHeads.value = response.data || [];
+  } catch (err) {
+    sectionHeads.value = [];
+  }
+};
 
 const loadDepartments = async () => {
   loading.value = true;
@@ -209,14 +229,20 @@ const loadDepartments = async () => {
 
 const openCreateModal = () => {
   editingDept.value = null;
-  form.value = { name: '', description: '', parent_id: null, is_active: true };
+  form.value = { name: '', description: '', parent_id: null, manager_id: null, is_active: true };
   formError.value = null;
   showModal.value = true;
 };
 
 const openEditModal = (dept) => {
   editingDept.value = dept;
-  form.value = { name: dept.name, description: dept.description || '', parent_id: dept.parent_id, is_active: !!dept.is_active };
+  form.value = {
+    name: dept.name,
+    description: dept.description || '',
+    parent_id: dept.parent_id,
+    manager_id: dept.manager_id || null,
+    is_active: !!dept.is_active,
+  };
   formError.value = null;
   showModal.value = true;
 };
@@ -260,5 +286,8 @@ const deleteDepartment = async () => {
 const getManagerName = (mgr) => mgr?.name || `${mgr?.first_name || ''} ${mgr?.last_name || ''}`.trim() || 'N/A';
 const getManagerInitials = (mgr) => getManagerName(mgr).split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
-onMounted(() => { loadDepartments(); });
+onMounted(() => {
+  loadSectionHeads();
+  loadDepartments();
+});
 </script>

@@ -150,6 +150,7 @@
 
           <div class="relative">
             <label class="block text-sm font-medium text-gray-700 mb-1">Reporting Manager (Section Head)</label>
+            <p v-if="!form.department_id" class="text-xs text-gray-500 mb-1">Select a department first to list section heads.</p>
             <div class="relative">
               <input
                 v-model="managerSearch"
@@ -267,7 +268,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -285,6 +286,7 @@ const filteredManagers = ref([]);
 const managerSearch = ref('');
 const showManagerDropdown = ref(false);
 const selectedManager = ref(null);
+const isSettingInitialData = ref(false);
 
 const form = ref({
   first_name: '',
@@ -310,21 +312,60 @@ const form = ref({
   country: 'Pakistan',
 });
 
+const loadSectionHeads = async (departmentId = null) => {
+  try {
+    const params = departmentId ? { department_id: departmentId } : {};
+    const mgrRes = await axios.get('/employees/section-heads', { params });
+    managers.value = mgrRes.data || [];
+    filteredManagers.value = managers.value;
+  } catch (err) {
+    console.error('Failed to load section heads:', err);
+    managers.value = [];
+    filteredManagers.value = [];
+  }
+};
+
+const applyDepartmentManagerDefault = (departmentId) => {
+  if (!departmentId) return;
+  const dept = departments.value.find(d => d.id == departmentId);
+  if (!dept?.manager_id) return;
+  const mgr = managers.value.find(m => m.id === dept.manager_id);
+  if (mgr) selectManager(mgr);
+};
+
 const loadDropdownData = async () => {
   try {
-    const [deptRes, desigRes, mgrRes] = await Promise.all([
+    const [deptRes, desigRes] = await Promise.all([
       axios.get('/departments'),
       axios.get('/designations'),
-      axios.get('/employees/section-heads'),
     ]);
     departments.value = deptRes.data.data || deptRes.data;
     designations.value = desigRes.data;
-    managers.value = mgrRes.data || [];
-    filteredManagers.value = managers.value;
   } catch (err) {
     console.error('Failed to load dropdown data:', err);
   }
 };
+
+watch(() => form.value.department_id, async (newDeptId, oldDeptId) => {
+  if (!newDeptId) {
+    managers.value = [];
+    filteredManagers.value = [];
+    if (oldDeptId) clearManager();
+    return;
+  }
+
+  await loadSectionHeads(newDeptId);
+
+  if (!oldDeptId && !isSettingInitialData.value) {
+    applyDepartmentManagerDefault(newDeptId);
+    return;
+  }
+
+  if (oldDeptId !== newDeptId) {
+    clearManager();
+    applyDepartmentManagerDefault(newDeptId);
+  }
+});
 
 const filterManagers = () => {
   const search = managerSearch.value.toLowerCase().trim();
@@ -400,6 +441,7 @@ onMounted(async () => {
 
   if (isEdit.value) {
     try {
+      isSettingInitialData.value = true;
       const res = await axios.get(`/employees/${route.params.id}`);
       const employee = res.data;
       form.value.first_name = employee.first_name || '';
@@ -415,6 +457,11 @@ onMounted(async () => {
       form.value.national_id = employee.national_id || '';
       form.value.department_id = employee.department_id || '';
       form.value.designation_id = employee.designation_id || '';
+
+      if (employee.department_id) {
+        await loadSectionHeads(employee.department_id);
+      }
+
       form.value.manager_id = employee.manager_id || '';
       
       // Set selected manager if exists
@@ -433,6 +480,8 @@ onMounted(async () => {
       form.value.postal_code = employee.postal_code || '';
     } catch (err) {
       error.value = 'Failed to load employee data';
+    } finally {
+      isSettingInitialData.value = false;
     }
   }
 });

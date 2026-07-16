@@ -87,7 +87,12 @@
       <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         <div v-for="stat in statCards" :key="stat.label" class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
           <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ stat.label }}</p>
-          <p class="text-2xl font-bold text-gray-900 mt-1">{{ stat.value }}</p>
+          <p
+            class="font-bold text-gray-900 mt-1"
+            :class="stat.compact ? 'text-base leading-snug' : 'text-2xl'"
+          >
+            {{ stat.value }}
+          </p>
         </div>
       </div>
 
@@ -289,12 +294,24 @@ const passwordForm = reactive({
 
 const statistics = reactive({
   days_employed: 0,
+  hours_employed: 0,
+  minutes_employed: 0,
   leave_balance: 0,
   attendance_count: 0,
   pending_requests: 0,
   completed_tasks: 0,
   total_documents: 0,
 });
+
+const formatTenure = (days, hours, minutes) => {
+  const d = Number(days) || 0;
+  const h = Number(hours) || 0;
+  const m = Number(minutes) || 0;
+  const dayLabel = d === 1 ? '1 day' : `${d} days`;
+  const hourLabel = h === 1 ? '1 hr' : `${h} hrs`;
+  const minLabel = m === 1 ? '1 min' : `${m} mins`;
+  return `${dayLabel}, ${hourLabel}, ${minLabel}`;
+};
 
 const hasEmployeeProfile = computed(() => !!profileData.value.employee?.id);
 
@@ -318,7 +335,11 @@ const statusClass = computed(() => {
 });
 
 const statCards = computed(() => [
-  { label: 'Days employed', value: statistics.days_employed },
+  {
+    label: 'Time employed',
+    value: formatTenure(statistics.days_employed, statistics.hours_employed, statistics.minutes_employed),
+    compact: true,
+  },
   { label: 'Leave balance', value: statistics.leave_balance },
   { label: 'Attendance', value: statistics.attendance_count },
   { label: 'Pending', value: statistics.pending_requests },
@@ -360,6 +381,8 @@ const fetchStatistics = async () => {
     const data = response.data.data || response.data;
     Object.assign(statistics, {
       days_employed: data.days_employed ?? 0,
+      hours_employed: data.hours_employed ?? 0,
+      minutes_employed: data.minutes_employed ?? 0,
       leave_balance: data.leave_balance ?? 0,
       attendance_count: data.attendance_count ?? 0,
       pending_requests: data.pending_requests ?? 0,

@@ -128,6 +128,10 @@ class EmployeeController extends Controller
             ->orderBy('first_name')
             ->orderBy('last_name');
 
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -142,6 +146,7 @@ class EmployeeController extends Controller
                 'id' => $employee->user_id,
                 'name' => $employee->full_name ?? "{$employee->first_name} {$employee->last_name}",
                 'employee_code' => $employee->employee_code,
+                'department_id' => $employee->department_id,
                 'department' => $employee->department->name ?? null,
             ];
         });

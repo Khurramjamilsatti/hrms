@@ -172,6 +172,7 @@
                   >
                     Cancel
                   </button>
+                  <span v-else-if="!canApproveFirstLevel(leave) && !canApproveFinal(leave) && leave.approval_level === 'pending' && getLeaveSectionHeadApproverId(leave)" class="text-xs text-gray-500 italic">Pending section head approval</span>
                   <span v-else-if="!canApproveFirstLevel(leave) && !canApproveFinal(leave) && leave.approval_level === 'first_approved'" class="text-xs text-gray-500 italic">Pending admin approval</span>
                   <span v-else-if="!canApproveFirstLevel(leave) && !canApproveFinal(leave) && !canCancelLeave(leave) && leave.status !== 'pending'" class="text-xs text-gray-400">Processed</span>
                 </div>
@@ -502,33 +503,27 @@ const resetFilters = () => { filters.value = { status: '' }; loadLeaves(); };
 const isOwnLeave = (leave) =>
   !!user.value?.employee?.id && leave.employee_id === user.value.employee.id;
 
-// Manager / Section Head: first-level approval for team (not own leave)
-const canApproveFirstLevel = (leave) => {
-  if (!can('leaves.approve')) return false;
-  if (!['section_head', 'manager'].includes(role.value)) return false;
-  if (leave.status !== 'pending' || leave.approval_level !== 'pending') return false;
-  if (isOwnLeave(leave)) return false;
-
-  if (role.value === 'manager') {
-    return leave.employee?.manager_id === user.value.id;
-  }
-
-  // section_head: same department (backend also enforces)
-  if (role.value === 'section_head') {
-    const sameDept = user.value?.employee?.department_id
-      && leave.employee?.department_id === user.value.employee.department_id;
-    const reportsToMe = leave.employee?.manager_id === user.value.id;
-    return sameDept || reportsToMe;
-  }
-
-  return false;
+// Assigned section head: first-level approval (not own leave)
+const getLeaveSectionHeadApproverId = (leave) => {
+  if (leave.employee?.manager_id) return leave.employee.manager_id;
+  return leave.employee?.department?.manager_id || null;
 };
 
-// Admin / HR / Super Admin: final (or direct) approval
+const canApproveFirstLevel = (leave) => {
+  if (!can('leaves.approve')) return false;
+  if (leave.status !== 'pending' || leave.approval_level !== 'pending') return false;
+  if (isOwnLeave(leave)) return false;
+  return getLeaveSectionHeadApproverId(leave) === user.value?.id;
+};
+
+// Admin / HR / Super Admin: final approval after section head, or direct if none assigned
 const canApproveFinal = (leave) => {
   if (!can('leaves.approve')) return false;
   if (!['admin', 'hr_admin', 'super_admin'].includes(role.value)) return false;
-  return leave.status === 'pending';
+  if (leave.status !== 'pending') return false;
+  if (leave.approval_level === 'first_approved') return true;
+  const approverId = getLeaveSectionHeadApproverId(leave);
+  return leave.approval_level === 'pending' && !approverId;
 };
 
 // Cancel: own pending/approved leave, or privileged cancel

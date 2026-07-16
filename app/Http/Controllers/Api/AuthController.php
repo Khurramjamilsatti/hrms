@@ -201,6 +201,8 @@ class AuthController extends Controller
         if (!$employee) {
             return response()->json([
                 'days_employed' => 0,
+                'hours_employed' => 0,
+                'minutes_employed' => 0,
                 'leave_balance' => 0,
                 'attendance_count' => 0,
                 'pending_requests' => 0,
@@ -210,8 +212,13 @@ class AuthController extends Controller
         }
 
         $daysEmployed = 0;
+        $hoursEmployed = 0;
+        $minutesEmployed = 0;
         if ($employee->joining_date) {
-            $daysEmployed = $employee->joining_date->diffInDays(now());
+            $totalMinutes = (int) abs($employee->joining_date->diffInMinutes(now()));
+            $daysEmployed = intdiv($totalMinutes, 24 * 60);
+            $hoursEmployed = intdiv($totalMinutes % (24 * 60), 60);
+            $minutesEmployed = $totalMinutes % 60;
         }
 
         $leaveBalance = EmployeeLeaveBalance::where('employee_id', $employee->id)
@@ -238,6 +245,8 @@ class AuthController extends Controller
 
         return response()->json([
             'days_employed' => $daysEmployed,
+            'hours_employed' => $hoursEmployed,
+            'minutes_employed' => $minutesEmployed,
             'leave_balance' => (float) $leaveBalance,
             'attendance_count' => $attendanceCount,
             'pending_requests' => $pendingRequests,

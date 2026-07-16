@@ -62,22 +62,18 @@ jobs:
           script_stop: true
           command_timeout: 10m
           script: |
-            script: |
-              set -euo pipefail
+            set -euo pipefail
+            cd "${{ secrets.DEPLOY_PATH }}"
 
-              export GIT_SSH_COMMAND="ssh -i /root/.ssh/hrms_key -o IdentitiesOnly=yes"
+            echo "==> Pulling latest code"
+            git fetch --all --prune
+            git checkout "${{ github.ref_name }}"
+            git pull --ff-only origin "${{ github.ref_name }}"
 
-              cd "${{ secrets.DEPLOY_PATH }}"
+            echo "==> Running migrations"
+            php artisan migrate --force --no-interaction
 
-              echo "==> Pulling latest code"
-              git fetch --all --prune
-              git checkout "${{ github.ref_name }}"
-              git pull --ff-only origin "${{ github.ref_name }}"
+            echo "==> Clearing caches"
+            php artisan optimize:clear
 
-              echo "==> Running migrations"
-              php artisan migrate --force --no-interaction
-
-              echo "==> Clearing caches"
-              php artisan optimize:clear
-
-              echo "==> Deploy complete"
+            echo "==> Deploy complete"

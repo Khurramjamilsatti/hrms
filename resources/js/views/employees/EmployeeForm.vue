@@ -329,7 +329,20 @@ const applyDepartmentManagerDefault = (departmentId) => {
   if (!departmentId) return;
   const dept = departments.value.find(d => d.id == departmentId);
   if (!dept?.manager_id) return;
-  const mgr = managers.value.find(m => m.id === dept.manager_id);
+
+  let mgr = managers.value.find(m => m.id === dept.manager_id || m.id == dept.manager_id);
+  if (!mgr && dept.manager) {
+    mgr = {
+      id: dept.manager_id,
+      name: dept.manager.name
+        || `${dept.manager.first_name || ''} ${dept.manager.last_name || ''}`.trim()
+        || 'Department Head',
+      employee_code: dept.manager.employee_code || null,
+      department: dept.name,
+    };
+    managers.value = [mgr, ...managers.value.filter(m => m.id !== mgr.id)];
+    filteredManagers.value = managers.value;
+  }
   if (mgr) selectManager(mgr);
 };
 
@@ -350,13 +363,16 @@ watch(() => form.value.department_id, async (newDeptId, oldDeptId) => {
   if (!newDeptId) {
     managers.value = [];
     filteredManagers.value = [];
-    if (oldDeptId) clearManager();
+    if (oldDeptId && !isSettingInitialData.value) clearManager();
     return;
   }
 
   await loadSectionHeads(newDeptId);
 
-  if (!oldDeptId && !isSettingInitialData.value) {
+  // While hydrating the edit form, only refresh the list — don't overwrite manager
+  if (isSettingInitialData.value) return;
+
+  if (!oldDeptId) {
     applyDepartmentManagerDefault(newDeptId);
     return;
   }
@@ -463,14 +479,28 @@ onMounted(async () => {
       }
 
       form.value.manager_id = employee.manager_id || '';
-      
-      // Set selected manager if exists
+
+      // Prefer saved reporting manager; otherwise default to department head
       if (employee.manager_id) {
-        const manager = managers.value.find(m => m.id === employee.manager_id);
+        const manager = managers.value.find(m => m.id === employee.manager_id || m.id == employee.manager_id);
         if (manager) {
           selectedManager.value = manager;
           managerSearch.value = manager.name;
+        } else if (employee.manager) {
+          const mgr = {
+            id: employee.manager_id,
+            name: employee.manager.name
+              || `${employee.manager.first_name || ''} ${employee.manager.last_name || ''}`.trim()
+              || 'Reporting Manager',
+            employee_code: null,
+            department: employee.department?.name || null,
+          };
+          managers.value = [mgr, ...managers.value];
+          filteredManagers.value = managers.value;
+          selectManager(mgr);
         }
+      } else if (employee.department_id) {
+        applyDepartmentManagerDefault(employee.department_id);
       }
       
       form.value.emergency_contact = employee.emergency_contact || '';

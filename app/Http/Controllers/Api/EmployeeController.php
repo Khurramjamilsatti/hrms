@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
@@ -116,20 +117,33 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Get all section heads for dropdown/selection
+     * Get section heads / managers for department & reporting-manager dropdowns.
+     * Optional department_id includes that department's assigned head even if
+     * they are not currently in the same department.
      */
     public function getSectionHeads(Request $request)
     {
+        $eligibleRoles = ['section_head', 'manager', 'hr_admin', 'admin'];
+
         $query = Employee::with(['user', 'department', 'designation'])
-            ->whereHas('user', function ($q) {
-                $q->where('role', 'section_head');
+            ->whereHas('user', function ($q) use ($eligibleRoles) {
+                $q->whereIn('role', $eligibleRoles)->where('is_active', true);
             })
             ->where('employment_status', 'active')
             ->orderBy('first_name')
             ->orderBy('last_name');
 
+        $departmentManagerId = null;
         if ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
+            $departmentId = $request->department_id;
+            $departmentManagerId = Department::where('id', $departmentId)->value('manager_id');
+
+            $query->where(function ($q) use ($departmentId, $departmentManagerId) {
+                $q->where('department_id', $departmentId);
+                if ($departmentManagerId) {
+                    $q->orWhere('user_id', $departmentManagerId);
+                }
+            });
         }
 
         if ($request->has('search')) {
@@ -151,7 +165,21 @@ class EmployeeController extends Controller
             ];
         });
 
-        return response()->json($sectionHeads);
+        // Ensure department head is present even without an employee profile
+        if ($departmentManagerId && ! $sectionHeads->contains('id', $departmentManagerId)) {
+            $managerUser = User::find($departmentManagerId);
+            if ($managerUser) {
+                $sectionHeads->push([
+                    'id' => $managerUser->id,
+                    'name' => $managerUser->name,
+                    'employee_code' => null,
+                    'department_id' => (int) $request->department_id,
+                    'department' => null,
+                ]);
+            }
+        }
+
+        return response()->json($sectionHeads->values());
     }
 
     public function store(Request $request)

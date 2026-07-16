@@ -457,6 +457,7 @@ const rejectionReason = ref('');
 const approvalRemarks = ref('');
 
 const advances = ref([]);
+const form = ref({
     employee_id: '',
     advance_type: 'salary',
     amount: '',

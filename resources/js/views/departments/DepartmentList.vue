@@ -130,14 +130,14 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Section Head</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Department Head (Section Head)</label>
             <select v-model="form.manager_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
               <option :value="null">None</option>
               <option v-for="head in sectionHeads" :key="head.id" :value="head.id">
                 {{ head.name }}{{ head.employee_code ? ` (${head.employee_code})` : '' }}{{ head.department ? ` — ${head.department}` : '' }}
               </option>
             </select>
-            <p class="mt-1 text-xs text-gray-500">Default reporting manager for employees in this department.</p>
+            <p class="mt-1 text-xs text-gray-500">This person becomes the default Reporting Manager for employees in this department.</p>
           </div>
           <div class="flex items-center space-x-3">
             <label class="relative inline-flex items-center cursor-pointer">

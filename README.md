@@ -192,7 +192,8 @@ Pull requests are **not** deployed — review and merge them with normal Git SOP
 |--------|---------|
 | `DEPLOY_HOST` | VPS hostname or IP |
 | `DEPLOY_USER` | SSH user |
-| `DEPLOY_SSH_KEY` | Private key for that user |
+| `DEPLOY_SSH_KEY` | Private key for that user (not the `.pub` file) |
+| `DEPLOY_SSH_PASSPHRASE` | Passphrase for the private key (if the key is encrypted) |
 | `DEPLOY_PATH` | Absolute path to the app on the VPS (git clone root) |
 
 #### VPS one-time setup

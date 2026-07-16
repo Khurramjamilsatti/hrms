@@ -297,7 +297,7 @@ const { can } = usePermissions();
 const { success, error: showError } = useNotification();
 const { confirm } = useDialog();
 const authStore = useAuthStore();
-const { showEmployeePicker, validateEmployeeForSubmit } = useEmployeeRecordPicker('leaves');
+const { showEmployeePicker, canCreateForOthers, validateEmployeeForSubmit } = useEmployeeRecordPicker('leaves');
 
 const leaves = ref([]);
 const leaveTypes = ref([]);
@@ -530,7 +530,7 @@ const canApproveFinal = (leave) => {
 const canCancelLeave = (leave) => {
   if (!can('leaves.cancel')) return false;
   if (!['pending', 'approved'].includes(leave.status)) return false;
-  if (canApplyForOthers.value) return true;
+  if (canCreateForOthers.value) return true;
   return isOwnLeave(leave);
 };
 

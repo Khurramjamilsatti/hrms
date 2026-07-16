@@ -531,9 +531,11 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoleStore } from '../../../stores/role'
 import { usePermissionStore } from '../../../stores/permission'
+import { useDialog } from '@/composables/useDialog'
 
 const roleStore = useRoleStore()
 const permissionStore = usePermissionStore()
+const { confirm } = useDialog()
 const isSuperAdmin = computed(() => permissionStore.isSuperAdmin)
 
 const roles = ref([])
@@ -753,7 +755,13 @@ const editRole = (role) => {
 }
 
 const deleteRole = async (role) => {
-  if (!confirm(`Are you sure you want to delete the role "${role.name}"?`)) {
+  if (!(await confirm({
+    title: 'Delete role?',
+    message: `Are you sure you want to delete the role "${role.name}"?`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  }))) {
     return
   }
 

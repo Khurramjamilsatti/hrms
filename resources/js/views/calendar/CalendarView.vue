@@ -1,582 +1,878 @@
 <template>
-    <div class="p-6 space-y-6">
-        <!-- Page Header -->
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">Company Calendar</h1>
-                <p class="text-gray-600 mt-1">Manage events, meetings, and schedules</p>
-            </div>
-            <button v-if="isManager" @click="openCreateModal"
-                class="flex items-center space-x-2 px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Create Event</span>
-            </button>
-        </div>
-
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-4 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-blue-100 text-xs font-medium">Total Events</p>
-                        <h3 class="text-2xl font-bold mt-1">{{ statistics.total_events || 0 }}</h3>
-                    </div>
-                    <div class="bg-white bg-opacity-20 rounded-lg p-2">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-4 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-green-100 text-xs font-medium">Meetings</p>
-                        <h3 class="text-2xl font-bold mt-1">{{ statistics.meetings || 0 }}</h3>
-                    </div>
-                    <div class="bg-white bg-opacity-20 rounded-lg p-2">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/>
-                            <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-lg p-4 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-yellow-100 text-xs font-medium">Upcoming</p>
-                        <h3 class="text-2xl font-bold mt-1">{{ statistics.upcoming_events || 0 }}</h3>
-                    </div>
-                    <div class="bg-white bg-opacity-20 rounded-lg p-2">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-4 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-purple-100 text-xs font-medium">Training</p>
-                        <h3 class="text-2xl font-bold mt-1">{{ statistics.trainings || 0 }}</h3>
-                    </div>
-                    <div class="bg-white bg-opacity-20 rounded-lg p-2">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-4 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-orange-100 text-xs font-medium">Interviews</p>
-                        <h3 class="text-2xl font-bold mt-1">{{ statistics.interviews || 0 }}</h3>
-                    </div>
-                    <div class="bg-white bg-opacity-20 rounded-lg p-2">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-4 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-red-100 text-xs font-medium">Holidays</p>
-                        <h3 class="text-2xl font-bold mt-1">{{ statistics.holidays || 0 }}</h3>
-                    </div>
-                    <div class="bg-white bg-opacity-20 rounded-lg p-2">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Calendar Navigation -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-            <div class="flex justify-between items-center">
-                <button @click="previousMonth" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    ← Previous
-                </button>
-                <h4 class="text-xl font-semibold">{{ currentMonthName }} {{ currentYear }}</h4>
-                <button @click="nextMonth" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    Next →
-                </button>
-            </div>
-        </div>
-
-        <!-- Calendar Grid -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div class="grid grid-cols-7 gap-2">
-                <div v-for="day in ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']" :key="day" 
-                    class="text-center text-sm font-semibold text-gray-700 py-2">
-                    {{ day }}
-                </div>
-                
-                <div v-for="date in calendarDates" :key="date.toString()" 
-                    class="border rounded-lg p-2 min-h-32 transition-colors" 
-                    :class="[
-                        date.getMonth() !== currentMonth ? 'bg-gray-50' : 'bg-white',
-                        isToday(date) ? 'bg-blue-50 border-blue-500 border-2' : 'hover:bg-gray-50'
-                    ]">
-                    <div class="text-sm font-medium mb-2" :class="isToday(date) ? 'text-blue-600' : ''">
-                        {{ date.getDate() }}
-                    </div>
-                    <div class="space-y-1">
-                        <div v-for="event in getEventsForDate(date)" :key="event.id" 
-                            @click="viewEvent(event)" 
-                            class="text-xs rounded px-2 py-1 cursor-pointer truncate transition-all hover:shadow-md" 
-                            :class="getEventTypeClass(event.event_type)">
-                            {{ event.start_datetime.substr(11, 5) }} {{ event.title }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Upcoming Events -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h4 class="font-semibold text-lg mb-4">Upcoming Events</h4>
-            <div class="space-y-3">
-                <div v-for="event in upcomingEvents" :key="event.id" 
-                    class="border-l-4 pl-4 py-3 cursor-pointer hover:bg-gray-50 rounded-r-lg transition-colors" 
-                    :class="getEventTypeBorder(event.event_type)" 
-                    @click="viewEvent(event)">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <p class="font-medium text-gray-900">{{ event.title }}</p>
-                            <p class="text-sm text-gray-600 mt-1">{{ formatDateTime(event.start_datetime) }}</p>
-                            <p v-if="event.location" class="text-xs text-gray-500 mt-1">
-                                📍 {{ event.location }}
-                            </p>
-                        </div>
-                        <span class="px-3 py-1 text-xs rounded-full font-semibold" :class="getEventTypeClass(event.event_type)">
-                            {{ event.event_type.replace('_', ' ') }}
-                        </span>
-                    </div>
-                </div>
-                <div v-if="upcomingEvents.length === 0" class="text-center py-8 text-gray-500">
-                    No upcoming events scheduled
-                </div>
-            </div>
-        </div>
-
-        <!-- Create Event Modal -->
-        <div v-if="showEventForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <h3 class="text-2xl font-bold mb-4">Create Event</h3>
-                
-                <form @submit.prevent="createEvent">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Event Title *</label>
-                            <input type="text" v-model="eventForm.title" required 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Event Type *</label>
-                            <select v-model="eventForm.event_type" required 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="meeting">Meeting</option>
-                                <option value="training">Training</option>
-                                <option value="interview">Interview</option>
-                                <option value="holiday">Holiday</option>
-                                <option value="company_event">Company Event</option>
-                            </select>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date & Time *</label>
-                                <input type="datetime-local" v-model="eventForm.start_datetime" required 
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">End Date & Time *</label>
-                                <input type="datetime-local" v-model="eventForm.end_datetime" required 
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Location (Optional)</label>
-                            <input type="text" v-model="eventForm.location" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Meeting Link (Optional)</label>
-                            <input type="url" v-model="eventForm.meeting_link" placeholder="https://meet.google.com/..." 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                            <textarea v-model="eventForm.description" rows="3" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Attendees (Select multiple)</label>
-                            <select v-model="eventForm.attendees" multiple 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-32">
-                                <option v-for="employee in employees" :key="employee.id" :value="employee.id">
-                                    {{ employee.name }}
-                                </option>
-                            </select>
-                            <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3 mt-6">
-                        <button type="button" @click="closeEventForm" 
-                            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                            Cancel
-                        </button>
-                        <button type="submit" 
-                            class="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
-                            Create Event
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- View Event Modal -->
-        <div v-if="selectedEvent" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-2xl font-bold">{{ selectedEvent.title }}</h3>
-                    <button @click="closeEventView" class="text-gray-500 hover:text-gray-700">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="space-y-3 text-sm mb-6">
-                    <div class="flex items-start">
-                        <span class="font-medium w-32">Type:</span> 
-                        <span class="px-3 py-1 text-xs rounded-full font-semibold" :class="getEventTypeClass(selectedEvent.event_type)">
-                            {{ selectedEvent.event_type.replace('_', ' ') }}
-                        </span>
-                    </div>
-                    <div class="flex items-start">
-                        <span class="font-medium w-32">Start:</span> 
-                        <span>{{ formatDateTime(selectedEvent.start_datetime) }}</span>
-                    </div>
-                    <div class="flex items-start">
-                        <span class="font-medium w-32">End:</span> 
-                        <span>{{ formatDateTime(selectedEvent.end_datetime) }}</span>
-                    </div>
-                    <div v-if="selectedEvent.location" class="flex items-start">
-                        <span class="font-medium w-32">Location:</span> 
-                        <span>{{ selectedEvent.location }}</span>
-                    </div>
-                    <div v-if="selectedEvent.meeting_link" class="flex items-start">
-                        <span class="font-medium w-32">Meeting Link:</span> 
-                        <a :href="selectedEvent.meeting_link" target="_blank" class="text-blue-600 hover:underline">
-                            Join Meeting
-                        </a>
-                    </div>
-                    <div v-if="selectedEvent.description" class="flex items-start">
-                        <span class="font-medium w-32">Description:</span> 
-                        <span>{{ selectedEvent.description }}</span>
-                    </div>
-                    <div class="flex items-start">
-                        <span class="font-medium w-32">Attendees:</span> 
-                        <span>{{ selectedEvent.attendees?.length || 0 }} people</span>
-                    </div>
-                </div>
-
-                <div class="border-t pt-4 flex space-x-3">
-                    <button @click="respondToEvent('accepted')" 
-                        class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                        Accept
-                    </button>
-                    <button @click="respondToEvent('declined')" 
-                        class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                        Decline
-                    </button>
-                    <button @click="respondToEvent('maybe')" 
-                        class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
-                        Maybe
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notification Toast -->
-        <div v-if="notification.show" 
-            :class="notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'"
-            class="fixed bottom-4 right-4 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
-            {{ notification.message }}
-        </div>
+  <div class="p-6 space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Company Calendar</h1>
+        <p class="text-sm text-gray-500 mt-1">Meetings, trainings, interviews, holidays, birthdays, and company events</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          @click="goToToday"
+          class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+        >
+          Today
+        </button>
+        <button
+          v-if="canManage"
+          @click="openCreateModal()"
+          class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Create Event
+        </button>
+      </div>
     </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div v-for="stat in statCards" :key="stat.key" class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div class="flex items-center gap-3">
+          <span class="w-2.5 h-2.5 rounded-full shrink-0" :class="stat.dot"></span>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ stat.label }}</p>
+            <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ statistics[stat.key] || 0 }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+      <!-- Main calendar -->
+      <div class="xl:col-span-3 space-y-4">
+        <!-- Toolbar -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-2">
+              <button @click="previousMonth" class="p-2 rounded-lg border border-gray-200 hover:bg-gray-50" title="Previous month">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <h2 class="min-w-[180px] text-center text-xl font-bold text-gray-900">{{ currentMonthName }} {{ currentYear }}</h2>
+              <button @click="nextMonth" class="p-2 rounded-lg border border-gray-200 hover:bg-gray-50" title="Next month">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="type in eventTypes"
+                :key="type.value"
+                type="button"
+                @click="toggleTypeFilter(type.value)"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                :class="isTypeActive(type.value) ? type.activeClass : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'"
+              >
+                <span class="w-2 h-2 rounded-full" :class="type.dot"></span>
+                {{ type.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div class="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
+            <div
+              v-for="day in weekDays"
+              :key="day"
+              class="px-2 py-3 text-center text-xs font-bold uppercase tracking-wider text-gray-500"
+            >
+              {{ day }}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-7">
+            <div
+              v-for="(cell, index) in calendarCells"
+              :key="index"
+              @click="onDayClick(cell)"
+              class="min-h-[110px] md:min-h-[130px] border-b border-r border-gray-100 p-1.5 md:p-2 cursor-pointer transition-all relative group"
+              :class="dayCellClass(cell)"
+            >
+              <div class="flex items-center justify-between mb-1">
+                <span
+                  class="inline-flex items-center justify-center w-7 h-7 text-sm font-semibold rounded-full"
+                  :class="dayNumberClass(cell)"
+                >
+                  {{ cell.date.getDate() }}
+                </span>
+                <button
+                  v-if="canManage && cell.inMonth"
+                  type="button"
+                  @click.stop="openCreateModal(cell.date)"
+                  class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-900 transition-opacity"
+                  title="Add event"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                </button>
+              </div>
+
+              <div class="space-y-1">
+                <button
+                  v-for="event in cell.visibleEvents"
+                  :key="event.id"
+                  type="button"
+                  @click.stop="viewEvent(event)"
+                  class="w-full text-left text-[11px] md:text-xs font-medium rounded-md px-1.5 py-1 truncate shadow-sm hover:shadow transition-shadow border"
+                  :class="eventChipClass(event.event_type)"
+                  :title="event.title"
+                >
+                  <span v-if="!event.is_all_day" class="opacity-90">{{ formatTime(event.start_datetime) }}</span>
+                  {{ event.title }}
+                </button>
+                <button
+                  v-if="cell.moreCount > 0"
+                  type="button"
+                  @click.stop="selectDay(cell.date)"
+                  class="w-full text-[11px] font-semibold text-gray-600 hover:text-gray-900 px-1"
+                >
+                  +{{ cell.moreCount }} more
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Event Colors</p>
+          <div class="flex flex-wrap gap-3">
+            <div v-for="type in eventTypes" :key="`legend-${type.value}`" class="inline-flex items-center gap-2 text-sm text-gray-700">
+              <span class="w-3 h-3 rounded" :class="type.swatch"></span>
+              {{ type.label }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="space-y-4">
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-gray-900">
+              {{ selectedDayLabel }}
+            </h3>
+            <button
+              v-if="canManage"
+              type="button"
+              @click="openCreateModal(selectedDay)"
+              class="text-sm font-medium text-gray-900 hover:underline"
+            >
+              Add
+            </button>
+          </div>
+
+          <div v-if="selectedDayEvents.length" class="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+            <button
+              v-for="event in selectedDayEvents"
+              :key="`side-${event.id}`"
+              type="button"
+              @click="viewEvent(event)"
+              class="w-full text-left rounded-lg border border-gray-100 p-3 hover:border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              <div class="flex items-start gap-3">
+                <span class="mt-1 w-2.5 h-2.5 rounded-full shrink-0" :class="typeMeta(event.event_type).dot"></span>
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-gray-900 truncate">{{ event.title }}</p>
+                  <p class="text-xs text-gray-500 mt-0.5">
+                    {{ event.is_all_day ? 'All day' : `${formatTime(event.start_datetime)} – ${formatTime(event.end_datetime)}` }}
+                  </p>
+                  <p v-if="event.location" class="text-xs text-gray-500 mt-1 truncate">{{ event.location }}</p>
+                </div>
+              </div>
+            </button>
+          </div>
+          <p v-else class="text-sm text-gray-500 py-6 text-center">No events on this day</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <h3 class="text-base font-bold text-gray-900 mb-4">Upcoming</h3>
+          <div v-if="upcomingEvents.length" class="space-y-3">
+            <button
+              v-for="event in upcomingEvents"
+              :key="`up-${event.id}`"
+              type="button"
+              @click="viewEvent(event)"
+              class="w-full text-left border-l-4 pl-3 py-2 hover:bg-gray-50 rounded-r-lg transition-colors"
+              :class="typeMeta(event.event_type).border"
+            >
+              <p class="text-sm font-semibold text-gray-900 truncate">{{ event.title }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ formatDateTime(event.start_datetime) }}</p>
+            </button>
+          </div>
+          <p v-else class="text-sm text-gray-500 py-6 text-center">No upcoming events</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create / Edit Modal -->
+    <div v-if="showEventForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
+          <h3 class="text-lg font-bold text-gray-900">{{ editingEventId ? 'Edit Event' : 'Create Event' }}</h3>
+          <button type="button" @click="closeEventForm" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          </button>
+        </div>
+
+        <form @submit.prevent="saveEvent" class="px-6 py-5 space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Title *</label>
+            <input v-model="eventForm.title" required type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Event Type *</label>
+              <select v-model="eventForm.event_type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <option v-for="type in creatableEventTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
+              </select>
+              <div class="mt-2 inline-flex items-center gap-2 text-xs text-gray-600">
+                <span class="w-3 h-3 rounded" :class="typeMeta(eventForm.event_type).swatch"></span>
+                Will appear as {{ typeMeta(eventForm.event_type).label }}
+              </div>
+            </div>
+            <div class="flex items-end">
+              <label class="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input v-model="eventForm.is_all_day" type="checkbox" class="rounded border-gray-300 text-gray-900 focus:ring-gray-900" />
+                All-day event
+              </label>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Start *</label>
+              <input
+                v-model="eventForm.start_datetime"
+                :type="eventForm.is_all_day ? 'date' : 'datetime-local'"
+                required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">End *</label>
+              <input
+                v-model="eventForm.end_datetime"
+                :type="eventForm.is_all_day ? 'date' : 'datetime-local'"
+                required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+              <input v-model="eventForm.location" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Meeting link</label>
+              <input v-model="eventForm.meeting_link" type="url" placeholder="https://" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+            <textarea v-model="eventForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Attendees</label>
+            <div ref="attendeePickerRef" class="relative">
+              <input
+                v-model="attendeeSearch"
+                @input="filterAttendees"
+                @focus="openAttendeeDropdown"
+                type="text"
+                placeholder="Search employees to add..."
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                autocomplete="off"
+              />
+              <div
+                v-if="showAttendeeDropdown && filteredAttendees.length"
+                class="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+              >
+                <button
+                  v-for="emp in filteredAttendees"
+                  :key="emp.id"
+                  type="button"
+                  @mousedown.prevent="addAttendee(emp)"
+                  class="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                >
+                  {{ emp.first_name }} {{ emp.last_name }}
+                  <span class="text-xs text-gray-500"> · {{ emp.employee_code }}</span>
+                </button>
+              </div>
+            </div>
+            <div v-if="selectedAttendees.length" class="flex flex-wrap gap-2 mt-2">
+              <span
+                v-for="emp in selectedAttendees"
+                :key="`att-${emp.id}`"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 text-xs font-medium text-gray-800"
+              >
+                {{ emp.first_name }} {{ emp.last_name }}
+                <button type="button" @click="removeAttendee(emp.id)" class="text-gray-500 hover:text-red-600">×</button>
+              </span>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button type="button" @click="closeEventForm" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
+            <button type="submit" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+              {{ saving ? 'Saving...' : (editingEventId ? 'Update Event' : 'Create Event') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- View Event Modal -->
+    <div v-if="selectedEvent" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-start">
+          <div class="pr-4">
+            <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full border mb-2" :class="eventChipClass(selectedEvent.event_type)">
+              {{ typeMeta(selectedEvent.event_type).label }}
+            </span>
+            <h3 class="text-xl font-bold text-gray-900">{{ selectedEvent.title }}</h3>
+          </div>
+          <button type="button" @click="closeEventView" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          </button>
+        </div>
+
+        <div class="px-6 py-5 space-y-3 text-sm">
+          <p><span class="font-semibold text-gray-700">When:</span> {{ formatDateTime(selectedEvent.start_datetime) }} – {{ formatDateTime(selectedEvent.end_datetime) }}</p>
+          <p v-if="selectedEvent.location"><span class="font-semibold text-gray-700">Location:</span> {{ selectedEvent.location }}</p>
+          <p v-if="selectedEvent.meeting_link">
+            <span class="font-semibold text-gray-700">Link:</span>
+            <a :href="selectedEvent.meeting_link" target="_blank" class="text-blue-600 hover:underline ml-1">Join meeting</a>
+          </p>
+          <p v-if="selectedEvent.description"><span class="font-semibold text-gray-700">Details:</span> {{ selectedEvent.description }}</p>
+          <div v-if="!isReadonlyEvent(selectedEvent)">
+            <p class="font-semibold text-gray-700 mb-2">Attendees ({{ selectedEvent.attendees?.length || 0 }})</p>
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="att in selectedEvent.attendees || []"
+                :key="att.id"
+                class="px-2.5 py-1 rounded-full bg-gray-100 text-xs text-gray-800"
+              >
+                {{ att.employee?.first_name }} {{ att.employee?.last_name }}
+                <span class="text-gray-500">({{ att.status }})</span>
+              </span>
+              <span v-if="!(selectedEvent.attendees || []).length" class="text-gray-500 text-xs">No attendees</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="!isReadonlyEvent(selectedEvent)" class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-wrap gap-2 justify-between">
+          <div class="flex flex-wrap gap-2">
+            <button type="button" @click="respondToEvent('accepted')" class="px-3 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700">Accept</button>
+            <button type="button" @click="respondToEvent('declined')" class="px-3 py-2 text-sm font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700">Decline</button>
+            <button type="button" @click="respondToEvent('maybe')" class="px-3 py-2 text-sm font-medium text-gray-800 bg-white border border-gray-300 rounded-lg hover:bg-gray-100">Maybe</button>
+          </div>
+          <div v-if="canManage" class="flex gap-2">
+            <button type="button" @click="editEvent(selectedEvent)" class="px-3 py-2 text-sm font-medium text-gray-800 bg-white border border-gray-300 rounded-lg hover:bg-gray-100">Edit</button>
+            <button type="button" @click="deleteEvent(selectedEvent)" class="px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100">Delete</button>
+          </div>
+        </div>
+        <div v-else class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <p class="text-sm text-gray-500">Birthdays are generated from employee profiles and cannot be edited here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, reactive } from 'vue';
+import { ref, computed, reactive, onMounted, onBeforeUnmount, watch } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
+import { useNotification } from '@/composables/useNotification';
+import { useDialog } from '@/composables/useDialog';
 
 const authStore = useAuthStore();
+const { success, error: showError } = useNotification();
+const { confirm } = useDialog();
+
 const events = ref([]);
 const employees = ref([]);
+const filteredAttendees = ref([]);
+const selectedAttendees = ref([]);
+const attendeeSearch = ref('');
+const showAttendeeDropdown = ref(false);
+const attendeePickerRef = ref(null);
 const currentMonth = ref(new Date().getMonth());
 const currentYear = ref(new Date().getFullYear());
+const selectedDay = ref(new Date());
 const showEventForm = ref(false);
 const selectedEvent = ref(null);
+const editingEventId = ref(null);
+const saving = ref(false);
+const activeTypeFilters = ref([]);
 
-const isManager = computed(() => authStore.isAdmin || authStore.isManager);
+const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+const eventTypes = [
+  { value: 'meeting', label: 'Meeting', dot: 'bg-sky-500', swatch: 'bg-sky-500', border: 'border-sky-500', activeClass: 'bg-sky-50 text-sky-800 border-sky-300', chip: 'bg-sky-500 text-white border-sky-600', dayTint: 'bg-sky-50/80' },
+  { value: 'training', label: 'Training', dot: 'bg-violet-500', swatch: 'bg-violet-500', border: 'border-violet-500', activeClass: 'bg-violet-50 text-violet-800 border-violet-300', chip: 'bg-violet-500 text-white border-violet-600', dayTint: 'bg-violet-50/80' },
+  { value: 'interview', label: 'Interview', dot: 'bg-emerald-500', swatch: 'bg-emerald-500', border: 'border-emerald-500', activeClass: 'bg-emerald-50 text-emerald-800 border-emerald-300', chip: 'bg-emerald-500 text-white border-emerald-600', dayTint: 'bg-emerald-50/80' },
+  { value: 'holiday', label: 'Holiday', dot: 'bg-rose-500', swatch: 'bg-rose-500', border: 'border-rose-500', activeClass: 'bg-rose-50 text-rose-800 border-rose-300', chip: 'bg-rose-500 text-white border-rose-600', dayTint: 'bg-rose-50/70' },
+  { value: 'birthday', label: 'Birthday', dot: 'bg-pink-500', swatch: 'bg-pink-500', border: 'border-pink-500', activeClass: 'bg-pink-50 text-pink-800 border-pink-300', chip: 'bg-pink-500 text-white border-pink-600', dayTint: 'bg-pink-50/80' },
+  { value: 'company_event', label: 'Company', dot: 'bg-amber-500', swatch: 'bg-amber-500', border: 'border-amber-500', activeClass: 'bg-amber-50 text-amber-900 border-amber-300', chip: 'bg-amber-500 text-white border-amber-600', dayTint: 'bg-amber-50/80' },
+  { value: 'other', label: 'Other', dot: 'bg-slate-500', swatch: 'bg-slate-500', border: 'border-slate-500', activeClass: 'bg-slate-50 text-slate-800 border-slate-300', chip: 'bg-slate-500 text-white border-slate-600', dayTint: 'bg-slate-50/80' },
+];
+
+const creatableEventTypes = computed(() => eventTypes.filter((t) => t.value !== 'birthday'));
 
 const statistics = reactive({
-    total_events: 0,
-    meetings: 0,
-    upcoming_events: 0,
-    trainings: 0,
-    interviews: 0,
-    holidays: 0
-});
-
-const notification = reactive({
-    show: false,
-    message: '',
-    type: 'success'
-});
-
-const currentMonthName = computed(() => {
-    return new Date(currentYear.value, currentMonth.value).toLocaleString('en-US', { month: 'long' });
-});
-
-const calendarDates = computed(() => {
-    const firstDay = new Date(currentYear.value, currentMonth.value, 1);
-    const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0);
-    const dates = [];
-    
-    const startDay = firstDay.getDay();
-    for (let i = startDay - 1; i >= 0; i--) {
-        dates.push(new Date(currentYear.value, currentMonth.value, -i));
-    }
-    
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-        dates.push(new Date(currentYear.value, currentMonth.value, i));
-    }
-    
-    const remainingDays = 42 - dates.length;
-    for (let i = 1; i <= remainingDays; i++) {
-        dates.push(new Date(currentYear.value, currentMonth.value + 1, i));
-    }
-    
-    return dates;
-});
-
-const upcomingEvents = computed(() => {
-    const now = new Date();
-    return events.value
-        .filter(e => new Date(e.start_datetime) >= now)
-        .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
-        .slice(0, 10);
+  total_events: 0,
+  meetings: 0,
+  upcoming_events: 0,
+  trainings: 0,
+  interviews: 0,
+  birthdays: 0,
 });
 
 const eventForm = reactive({
-    title: '',
-    event_type: 'meeting',
-    start_datetime: '',
-    end_datetime: '',
-    location: '',
-    meeting_link: '',
-    description: '',
-    attendees: []
+  title: '',
+  event_type: 'meeting',
+  start_datetime: '',
+  end_datetime: '',
+  location: '',
+  meeting_link: '',
+  description: '',
+  is_all_day: false,
+  attendees: [],
 });
 
-const fetchEvents = async () => {
-    try {
-        const startDate = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}-01`;
-        const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
-        const endDate = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}-${lastDay}`;
-        
-        const response = await axios.get(`calendar/events?start_date=${startDate}&end_date=${endDate}`);
-        events.value = response.data.data || response.data;
-        calculateStatistics();
-    } catch (error) {
-        console.error('Failed to fetch events:', error);
-        showNotification('Failed to fetch events', 'error');
-    }
+const canManage = computed(() =>
+  ['admin', 'super_admin', 'hr_admin', 'manager', 'section_head'].includes(authStore.user?.role)
+);
+
+const statCards = computed(() => [
+  { key: 'total_events', label: 'Total', dot: 'bg-gray-800' },
+  { key: 'meetings', label: 'Meetings', dot: 'bg-sky-500' },
+  { key: 'upcoming_events', label: 'Upcoming', dot: 'bg-amber-500' },
+  { key: 'trainings', label: 'Training', dot: 'bg-violet-500' },
+  { key: 'interviews', label: 'Interviews', dot: 'bg-emerald-500' },
+  { key: 'birthdays', label: 'Birthdays', dot: 'bg-pink-500' },
+]);
+
+const currentMonthName = computed(() =>
+  new Date(currentYear.value, currentMonth.value).toLocaleString('en-US', { month: 'long' })
+);
+
+const selectedDayLabel = computed(() =>
+  selectedDay.value.toLocaleDateString('en-PK', { weekday: 'long', month: 'short', day: 'numeric' })
+);
+
+const filteredEvents = computed(() => {
+  if (!activeTypeFilters.value.length) return events.value;
+  return events.value.filter((e) => activeTypeFilters.value.includes(e.event_type));
+});
+
+const upcomingEvents = computed(() => {
+  const now = new Date();
+  return filteredEvents.value
+    .filter((e) => new Date(e.start_datetime) >= now)
+    .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
+    .slice(0, 8);
+});
+
+const selectedDayEvents = computed(() => getEventsForDate(selectedDay.value));
+
+const calendarCells = computed(() => {
+  const firstDay = new Date(currentYear.value, currentMonth.value, 1);
+  const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0);
+  const cells = [];
+
+  for (let i = firstDay.getDay() - 1; i >= 0; i--) {
+    cells.push(buildCell(new Date(currentYear.value, currentMonth.value, -i), false));
+  }
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    cells.push(buildCell(new Date(currentYear.value, currentMonth.value, d), true));
+  }
+  const remaining = 42 - cells.length;
+  for (let i = 1; i <= remaining; i++) {
+    cells.push(buildCell(new Date(currentYear.value, currentMonth.value + 1, i), false));
+  }
+  return cells;
+});
+
+const typeMeta = (type) => eventTypes.find((t) => t.value === type) || eventTypes[eventTypes.length - 1];
+
+const eventChipClass = (type) => typeMeta(type).chip;
+
+const isTypeActive = (type) => !activeTypeFilters.value.length || activeTypeFilters.value.includes(type);
+
+const toggleTypeFilter = (type) => {
+  if (!activeTypeFilters.value.length) {
+    activeTypeFilters.value = [type];
+    return;
+  }
+  if (activeTypeFilters.value.includes(type)) {
+    activeTypeFilters.value = activeTypeFilters.value.filter((t) => t !== type);
+  } else {
+    activeTypeFilters.value = [...activeTypeFilters.value, type];
+  }
 };
 
-const calculateStatistics = () => {
-    statistics.total_events = events.value.length;
-    statistics.meetings = events.value.filter(e => e.event_type === 'meeting').length;
-    statistics.trainings = events.value.filter(e => e.event_type === 'training').length;
-    statistics.interviews = events.value.filter(e => e.event_type === 'interview').length;
-    statistics.holidays = events.value.filter(e => e.event_type === 'holiday').length;
-    
-    const now = new Date();
-    statistics.upcoming_events = events.value.filter(e => new Date(e.start_datetime) >= now).length;
+const toLocalDateKey = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 };
 
-const fetchEmployees = async () => {
-    try {
-        const response = await axios.get('employees');
-        employees.value = response.data.data || response.data;
-    } catch (error) {
-        console.error('Failed to fetch employees:', error);
-    }
-};
-
-const openCreateModal = () => {
-    showEventForm.value = true;
-};
-
-const closeEventForm = () => {
-    showEventForm.value = false;
-    Object.assign(eventForm, {
-        title: '',
-        event_type: 'meeting',
-        start_datetime: '',
-        end_datetime: '',
-        location: '',
-        meeting_link: '',
-        description: '',
-        attendees: []
-    });
-};
-
-const createEvent = async () => {
-    try {
-        await axios.post('calendar/events', eventForm);
-        closeEventForm();
-        fetchEvents();
-        showNotification('Event created successfully', 'success');
-    } catch (error) {
-        console.error('Failed to create event:', error);
-        showNotification('Failed to create event', 'error');
-    }
-};
-
-const viewEvent = async (event) => {
-    try {
-        const response = await axios.get(`calendar/events/${event.id}`);
-        selectedEvent.value = response.data;
-    } catch (error) {
-        console.error('Failed to fetch event details:', error);
-        showNotification('Failed to load event details', 'error');
-    }
-};
-
-const closeEventView = () => {
-    selectedEvent.value = null;
-};
-
-const respondToEvent = async (status) => {
-    try {
-        await axios.post(`calendar/events/${selectedEvent.value.id}/respond`, { status });
-        closeEventView();
-        fetchEvents();
-        showNotification(`Event response updated to: ${status}`, 'success');
-    } catch (error) {
-        console.error('Failed to respond to event:', error);
-        showNotification('Failed to update response', 'error');
-    }
-};
-
-const previousMonth = () => {
-    if (currentMonth.value === 0) {
-        currentMonth.value = 11;
-        currentYear.value--;
-    } else {
-        currentMonth.value--;
-    }
-    fetchEvents();
-};
-
-const nextMonth = () => {
-    if (currentMonth.value === 11) {
-        currentMonth.value = 0;
-        currentYear.value++;
-    } else {
-        currentMonth.value++;
-    }
-    fetchEvents();
+const eventDateKey = (datetime) => {
+  const date = new Date(datetime);
+  if (Number.isNaN(date.getTime())) return String(datetime).slice(0, 10);
+  return toLocalDateKey(date);
 };
 
 const getEventsForDate = (date) => {
-    const dateStr = date.toISOString().substr(0, 10);
-    return events.value.filter(event => event.start_datetime.substr(0, 10) === dateStr);
+  const key = toLocalDateKey(date);
+  return filteredEvents.value
+    .filter((event) => {
+      const startKey = eventDateKey(event.start_datetime);
+      const endKey = eventDateKey(event.end_datetime || event.start_datetime);
+      return key >= startKey && key <= endKey;
+    })
+    .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime));
 };
 
-const isToday = (date) => {
-    const today = new Date();
-    return date.toDateString() === today.toDateString();
+const buildCell = (date, inMonth) => {
+  const dayEvents = getEventsForDate(date);
+  return {
+    date,
+    inMonth,
+    events: dayEvents,
+    visibleEvents: dayEvents.slice(0, 3),
+    moreCount: Math.max(0, dayEvents.length - 3),
+    primaryType: dayEvents[0]?.event_type || null,
+  };
 };
 
-const formatDateTime = (datetime) => {
-    return new Date(datetime).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' });
+const isToday = (date) => date.toDateString() === new Date().toDateString();
+const isSelectedDay = (date) => date.toDateString() === selectedDay.value.toDateString();
+
+const dayCellClass = (cell) => {
+  const classes = [];
+  if (!cell.inMonth) classes.push('bg-gray-50/70 text-gray-400');
+  if (cell.inMonth && cell.events.length && cell.primaryType) {
+    classes.push(typeMeta(cell.primaryType).dayTint);
+  }
+  if (isToday(cell.date)) classes.push('ring-2 ring-inset ring-gray-900');
+  if (isSelectedDay(cell.date)) classes.push('bg-gray-100');
+  if (cell.inMonth) classes.push('hover:bg-gray-50');
+  return classes;
 };
 
-const getEventTypeClass = (type) => {
-    const classes = {
-        meeting: 'bg-blue-100 text-blue-800',
-        training: 'bg-purple-100 text-purple-800',
-        interview: 'bg-green-100 text-green-800',
-        holiday: 'bg-red-100 text-red-800',
-        company_event: 'bg-yellow-100 text-yellow-800'
-    };
-    return classes[type] || 'bg-gray-100 text-gray-800';
+const dayNumberClass = (cell) => {
+  if (isToday(cell.date)) return 'bg-gray-900 text-white';
+  if (!cell.inMonth) return 'text-gray-400';
+  if (cell.events.length) return 'text-gray-900';
+  return 'text-gray-700';
 };
 
-const getEventTypeBorder = (type) => {
-    const borders = {
-        meeting: 'border-blue-500',
-        training: 'border-purple-500',
-        interview: 'border-green-500',
-        holiday: 'border-red-500',
-        company_event: 'border-yellow-500'
-    };
-    return borders[type] || 'border-gray-500';
+const formatTime = (datetime) =>
+  new Date(datetime).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+
+const formatDateTime = (datetime) =>
+  new Date(datetime).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' });
+
+const toInputValue = (datetime, allDay = false) => {
+  const d = new Date(datetime);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  if (allDay) return date;
+  return `${date}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-const showNotification = (message, type = 'success') => {
-    notification.message = message;
-    notification.type = type;
-    notification.show = true;
-    setTimeout(() => {
-        notification.show = false;
-    }, 3000);
+const normalizePayloadDates = () => {
+  const payload = {
+    title: eventForm.title,
+    event_type: eventForm.event_type,
+    location: eventForm.location || null,
+    meeting_link: eventForm.meeting_link || null,
+    description: eventForm.description || null,
+    is_all_day: !!eventForm.is_all_day,
+    attendees: eventForm.attendees,
+  };
+
+  if (eventForm.is_all_day) {
+    payload.start_datetime = `${eventForm.start_datetime}T00:00:00`;
+    payload.end_datetime = `${eventForm.end_datetime}T23:59:00`;
+  } else {
+    payload.start_datetime = eventForm.start_datetime;
+    payload.end_datetime = eventForm.end_datetime;
+  }
+  return payload;
 };
 
-onMounted(() => {
-    fetchEvents();
-    fetchEmployees();
+const fetchEvents = async () => {
+  try {
+    const startDate = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}-01`;
+    const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+    const endDate = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+    const response = await axios.get('/calendar/events', {
+      params: { start_date: startDate, end_date: endDate, calendar: 1 },
+    });
+    events.value = response.data.data || response.data || [];
+    calculateStatistics();
+  } catch (err) {
+    console.error(err);
+    showError('Failed to load calendar events');
+  }
+};
+
+const calculateStatistics = () => {
+  statistics.total_events = events.value.length;
+  statistics.meetings = events.value.filter((e) => e.event_type === 'meeting').length;
+  statistics.trainings = events.value.filter((e) => e.event_type === 'training').length;
+  statistics.interviews = events.value.filter((e) => e.event_type === 'interview').length;
+  statistics.birthdays = events.value.filter((e) => e.event_type === 'birthday').length;
+  const now = new Date();
+  statistics.upcoming_events = events.value.filter((e) => new Date(e.start_datetime) >= now).length;
+};
+
+const isReadonlyEvent = (event) =>
+  !!event?.readonly || event?.event_type === 'birthday' || !!event?.is_system || String(event?.id || '').startsWith('birthday-');
+
+const fetchEmployees = async () => {
+  try {
+    const response = await axios.get('/employees', { params: { per_page: 200, employment_status: 'active' } });
+    employees.value = response.data.data || response.data || [];
+    filteredAttendees.value = employees.value.slice(0, 40);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const filterAttendees = (keepOpen = true) => {
+  const q = attendeeSearch.value.toLowerCase().trim();
+  const selectedIds = new Set(selectedAttendees.value.map((e) => e.id));
+  filteredAttendees.value = employees.value
+    .filter((emp) => !selectedIds.has(emp.id))
+    .filter((emp) => {
+      if (!q) return true;
+      const name = `${emp.first_name || ''} ${emp.last_name || ''}`.toLowerCase();
+      return name.includes(q) || String(emp.employee_code || '').toLowerCase().includes(q);
+    })
+    .slice(0, 40);
+  if (keepOpen) {
+    showAttendeeDropdown.value = true;
+  }
+};
+
+const openAttendeeDropdown = () => {
+  filterAttendees(true);
+};
+
+const closeAttendeeDropdown = () => {
+  showAttendeeDropdown.value = false;
+};
+
+const handleOutsideClick = (event) => {
+  if (!showAttendeeDropdown.value) return;
+  const root = attendeePickerRef.value;
+  if (root && !root.contains(event.target)) {
+    closeAttendeeDropdown();
+  }
+};
+
+const addAttendee = (emp) => {
+  if (!selectedAttendees.value.find((e) => e.id === emp.id)) {
+    selectedAttendees.value.push(emp);
+    eventForm.attendees = selectedAttendees.value.map((e) => e.id);
+  }
+  attendeeSearch.value = '';
+  filterAttendees(false);
+  closeAttendeeDropdown();
+};
+
+const removeAttendee = (id) => {
+  selectedAttendees.value = selectedAttendees.value.filter((e) => e.id !== id);
+  eventForm.attendees = selectedAttendees.value.map((e) => e.id);
+  filterAttendees(showAttendeeDropdown.value);
+};
+
+const openCreateModal = (date = null) => {
+  editingEventId.value = null;
+  const base = date ? new Date(date) : new Date(selectedDay.value);
+  const pad = (n) => String(n).padStart(2, '0');
+  const dateStr = `${base.getFullYear()}-${pad(base.getMonth() + 1)}-${pad(base.getDate())}`;
+  Object.assign(eventForm, {
+    title: '',
+    event_type: 'meeting',
+    start_datetime: `${dateStr}T10:00`,
+    end_datetime: `${dateStr}T11:00`,
+    location: '',
+    meeting_link: '',
+    description: '',
+    is_all_day: false,
+    attendees: [],
+  });
+  selectedAttendees.value = [];
+  attendeeSearch.value = '';
+  showEventForm.value = true;
+};
+
+const editEvent = (event) => {
+  editingEventId.value = event.id;
+  Object.assign(eventForm, {
+    title: event.title,
+    event_type: event.event_type,
+    start_datetime: toInputValue(event.start_datetime, event.is_all_day),
+    end_datetime: toInputValue(event.end_datetime, event.is_all_day),
+    location: event.location || '',
+    meeting_link: event.meeting_link || '',
+    description: event.description || '',
+    is_all_day: !!event.is_all_day,
+    attendees: (event.attendees || []).map((a) => a.employee_id || a.employee?.id).filter(Boolean),
+  });
+  selectedAttendees.value = (event.attendees || [])
+    .map((a) => a.employee)
+    .filter(Boolean);
+  selectedEvent.value = null;
+  showEventForm.value = true;
+};
+
+const closeEventForm = () => {
+  showEventForm.value = false;
+  editingEventId.value = null;
+  closeAttendeeDropdown();
+};
+
+const saveEvent = async () => {
+  saving.value = true;
+  try {
+    const payload = normalizePayloadDates();
+    if (editingEventId.value) {
+      await axios.put(`/calendar/events/${editingEventId.value}`, payload);
+      success('Event updated');
+    } else {
+      await axios.post('/calendar/events', payload);
+      success('Event created');
+    }
+    closeEventForm();
+    await fetchEvents();
+  } catch (err) {
+    showError(err.response?.data?.message || 'Failed to save event');
+  } finally {
+    saving.value = false;
+  }
+};
+
+const viewEvent = async (event) => {
+  if (isReadonlyEvent(event)) {
+    selectedEvent.value = event;
+    return;
+  }
+  try {
+    const response = await axios.get(`/calendar/events/${event.id}`);
+    selectedEvent.value = response.data;
+  } catch (err) {
+    showError('Failed to load event details');
+  }
+};
+
+const closeEventView = () => {
+  selectedEvent.value = null;
+};
+
+const respondToEvent = async (status) => {
+  try {
+    await axios.post(`/calendar/events/${selectedEvent.value.id}/respond`, { status });
+    success(`Response saved: ${status}`);
+    closeEventView();
+    await fetchEvents();
+  } catch (err) {
+    showError(err.response?.data?.message || 'Failed to update response');
+  }
+};
+
+const deleteEvent = async (event) => {
+  if (!(await confirm({
+    title: 'Delete event?',
+    message: `Delete "${event.title}" permanently?`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  }))) return;
+
+  try {
+    await axios.delete(`/calendar/events/${event.id}`);
+    success('Event deleted');
+    closeEventView();
+    await fetchEvents();
+  } catch (err) {
+    showError(err.response?.data?.message || 'Failed to delete event');
+  }
+};
+
+const onDayClick = (cell) => {
+  selectDay(cell.date);
+};
+
+const selectDay = (date) => {
+  selectedDay.value = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+};
+
+const previousMonth = () => {
+  if (currentMonth.value === 0) {
+    currentMonth.value = 11;
+    currentYear.value -= 1;
+  } else {
+    currentMonth.value -= 1;
+  }
+};
+
+const nextMonth = () => {
+  if (currentMonth.value === 11) {
+    currentMonth.value = 0;
+    currentYear.value += 1;
+  } else {
+    currentMonth.value += 1;
+  }
+};
+
+const goToToday = () => {
+  const today = new Date();
+  currentMonth.value = today.getMonth();
+  currentYear.value = today.getFullYear();
+  selectedDay.value = today;
+};
+
+watch([currentMonth, currentYear], () => {
+  fetchEvents();
+});
+
+watch(
+  () => eventForm.is_all_day,
+  (allDay) => {
+    if (!eventForm.start_datetime) return;
+    if (allDay) {
+      eventForm.start_datetime = String(eventForm.start_datetime).slice(0, 10);
+      eventForm.end_datetime = String(eventForm.end_datetime || eventForm.start_datetime).slice(0, 10);
+    } else if (eventForm.start_datetime.length === 10) {
+      eventForm.start_datetime = `${eventForm.start_datetime}T09:00`;
+      eventForm.end_datetime = `${eventForm.end_datetime || eventForm.start_datetime.slice(0, 10)}T10:00`;
+    }
+  }
+);
+
+onMounted(async () => {
+  selectedDay.value = new Date();
+  document.addEventListener('mousedown', handleOutsideClick);
+  await Promise.all([fetchEvents(), fetchEmployees()]);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleOutsideClick);
 });
 </script>
-
-<style scoped>
-@keyframes fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fade-in {
-    animation: fade-in 0.3s ease-out;
-}
-</style>

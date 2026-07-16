@@ -1,0 +1,55 @@
+services:
+  app:
+    image: ${HRMS_IMAGE:-ghcr.io/khurramjamilsatti/hrms:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hrms-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+    env_file:
+      - .env
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      RUN_MIGRATIONS: "${RUN_MIGRATIONS:-false}"
+      CACHE_CONFIG: "${CACHE_CONFIG:-true}"
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+    volumes:
+      - app_storage:/var/www/html/storage/app
+      - app_logs:/var/www/html/storage/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hrms
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: hrms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-hrms_db}
+      POSTGRES_USER: ${DB_USERNAME:-hrms_db}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-hrms_db} -d ${DB_DATABASE:-hrms_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hrms
+
+volumes:
+  postgres_data:
+  app_storage:
+  app_logs:
+
+networks:
+  hrms:
+    driver: bridge

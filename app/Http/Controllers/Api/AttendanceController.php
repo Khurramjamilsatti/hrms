@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Employee;
@@ -10,26 +11,24 @@ use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     public function index(Request $request)
     {
-        $user = $request->user();
-        $query = Attendance::with(['employee.user', 'approver']);
+        $user = $request->user()->loadMissing('employee');
+        $query = Attendance::query();
 
-        // Permission middleware already validated access
         // Apply data scope filters based on user context
         if ($user->hasRole('employee')) {
-            // Employees can only see their own attendance
             if ($user->employee) {
                 $query->where('employee_id', $user->employee->id);
             } else {
-                $query->whereRaw('1 = 0'); // No results
+                $query->whereRaw('1 = 0');
             }
         } elseif ($user->hasRole('manager')) {
-            // Managers see their team's attendance
             $teamEmployeeIds = Employee::where('manager_id', $user->id)->pluck('id');
             $query->whereIn('employee_id', $teamEmployeeIds);
         } elseif ($user->hasRole('section_head')) {
-            // Section heads see their department's attendance
             $sectionHeadEmployee = $user->employee;
             if ($sectionHeadEmployee && $sectionHeadEmployee->department_id) {
                 $deptEmployeeIds = Employee::where('department_id', $sectionHeadEmployee->department_id)->pluck('id');
@@ -38,14 +37,13 @@ class AttendanceController extends Controller
                 $query->whereRaw('1 = 0');
             }
         }
-        // hr_admin, super_admin, admin, and users with attendance.view permission see all attendance
 
         if ($request->filled('employee_id')) {
             $query->where('employee_id', $request->employee_id);
         }
 
         if ($request->filled('date')) {
-            $query->where('date', $request->date);
+            $query->whereDate('date', $request->date);
         }
 
         if ($request->filled('month') && $request->filled('year')) {
@@ -69,24 +67,59 @@ class AttendanceController extends Controller
             });
         }
 
-        // Get all attendance records first (ordered by date desc, then check_in asc with nulls last)
-        $allAttendances = $query->orderBy('date', 'desc')
-            ->orderByRaw('check_in ASC NULLS LAST')
-            ->get();
+        $perPage = max(1, min((int) ($request->per_page ?? 15), 100));
 
-        // Group by employee_id and date
-        $grouped = $allAttendances->groupBy(function ($attendance) {
-            return $attendance->employee_id . '_' . $attendance->date;
-        })->map(function ($sessions, $key) {
-            // Get first session for the main record
+        // Paginate unique employee+date rows in the database (avoids loading all sessions into memory)
+        $dayPage = (clone $query)
+            ->select('employee_id', 'date')
+            ->groupBy('employee_id', 'date')
+            ->orderByDesc('date')
+            ->orderBy('employee_id')
+            ->paginate($perPage);
+
+        $dayItems = collect($dayPage->items());
+
+        if ($dayItems->isEmpty()) {
+            return response()->json([
+                'data' => [],
+                'current_page' => $dayPage->currentPage(),
+                'last_page' => $dayPage->lastPage(),
+                'per_page' => $dayPage->perPage(),
+                'total' => $dayPage->total(),
+                'from' => 0,
+                'to' => 0,
+            ]);
+        }
+
+        $employeeIds = $dayItems->pluck('employee_id')->unique()->values();
+        $dates = $dayItems->map(function ($row) {
+            return Carbon::parse($row->date)->toDateString();
+        })->unique()->values();
+
+        $sessionsByDay = Attendance::with(['employee.user', 'approver'])
+            ->whereIn('employee_id', $employeeIds)
+            ->whereIn('date', $dates)
+            ->orderByRaw('check_in ASC NULLS LAST')
+            ->get()
+            ->groupBy(function ($attendance) {
+                return $attendance->employee_id.'_'.Carbon::parse($attendance->date)->toDateString();
+            });
+
+        $paginatedData = $dayItems->map(function ($row) use ($sessionsByDay) {
+            $dateStr = Carbon::parse($row->date)->toDateString();
+            $key = $row->employee_id.'_'.$dateStr;
+            $sessions = $sessionsByDay->get($key, collect());
+
+            if ($sessions->isEmpty()) {
+                return null;
+            }
+
             $firstSession = $sessions->first();
-            
-            // Calculate total working hours for the day
             $totalWorkingHours = $sessions->sum('working_hours');
             $totalOvertimeHours = $sessions->sum('overtime_hours');
-            
+
             return [
-                'id' => $firstSession->id, // Use first session ID
+                'id' => $firstSession->id,
                 'employee_id' => $firstSession->employee_id,
                 'employee' => $firstSession->employee ? [
                     'id' => $firstSession->employee->id,
@@ -95,7 +128,7 @@ class AttendanceController extends Controller
                     'first_name' => $firstSession->employee->first_name,
                     'last_name' => $firstSession->employee->last_name,
                 ] : null,
-                'date' => $firstSession->date,
+                'date' => $dateStr,
                 'status' => $firstSession->status,
                 'remarks' => $firstSession->remarks,
                 'approved_by' => $firstSession->approved_by,
@@ -103,8 +136,8 @@ class AttendanceController extends Controller
                     'id' => $firstSession->approver->id,
                     'name' => $firstSession->approver->name,
                 ] : null,
-                'total_working_hours' => round($totalWorkingHours, 2),
-                'total_overtime_hours' => round($totalOvertimeHours, 2),
+                'total_working_hours' => round((float) $totalWorkingHours, 2),
+                'total_overtime_hours' => round((float) $totalOvertimeHours, 2),
                 'sessions_count' => $sessions->count(),
                 'sessions' => $sessions->map(function ($session) {
                     return [
@@ -118,25 +151,16 @@ class AttendanceController extends Controller
                 'created_at' => $firstSession->created_at,
                 'updated_at' => $firstSession->updated_at,
             ];
-        })->values();
-
-        // Manual pagination
-        $perPage = (int) ($request->per_page ?? 15);
-        $page = (int) ($request->page ?? 1);
-        $total = $grouped->count();
-        $lastPage = $total > 0 ? (int) ceil($total / $perPage) : 1;
-        
-        $offset = ($page - 1) * $perPage;
-        $paginatedData = $grouped->slice($offset, $perPage)->values()->toArray();
+        })->filter()->values();
 
         return response()->json([
             'data' => $paginatedData,
-            'current_page' => $page,
-            'last_page' => $lastPage,
-            'per_page' => $perPage,
-            'total' => $total,
-            'from' => $total > 0 ? $offset + 1 : 0,
-            'to' => min($offset + $perPage, $total),
+            'current_page' => $dayPage->currentPage(),
+            'last_page' => $dayPage->lastPage(),
+            'per_page' => $dayPage->perPage(),
+            'total' => $dayPage->total(),
+            'from' => $dayPage->firstItem() ?? 0,
+            'to' => $dayPage->lastItem() ?? 0,
         ]);
     }
 
@@ -164,29 +188,30 @@ class AttendanceController extends Controller
 
     public function checkIn(Request $request)
     {
-        $user = $request->user();
-        
+        $user = $request->user()->loadMissing('employee');
+
         $validated = $request->validate([
             'employee_id' => 'nullable|exists:employees,id',
         ]);
 
-        // If no employee_id provided, use authenticated user's employee ID
-        $employeeId = $validated['employee_id'] ?? $user->employee->id ?? null;
-        
+        $employeeId = $validated['employee_id'] ?? $user->employee?->id;
+
         if (!$employeeId) {
-            return response()->json(['message' => 'Employee record not found for this user'], 400);
+            return response()->json([
+                'message' => 'No employee profile is linked to your account. Ask HR to link an employee record before checking in.',
+            ], 400);
         }
 
         // Regular employees can only check in for themselves
-        if ($user->hasRole('employee') && $employeeId != $user->employee->id) {
+        if ($user->hasRole('employee') && (int) $employeeId !== (int) $user->employee->id) {
             return response()->json(['message' => 'You can only check in for yourself'], 403);
         }
 
         $today = Carbon::today();
-        
+
         // Check if there's an incomplete check-in (no check-out yet)
         $incompleteAttendance = Attendance::where('employee_id', $employeeId)
-            ->where('date', $today)
+            ->whereDate('date', $today)
             ->whereNotNull('check_in')
             ->whereNull('check_out')
             ->first();
@@ -194,58 +219,64 @@ class AttendanceController extends Controller
         if ($incompleteAttendance) {
             return response()->json([
                 'message' => 'Please check out first before checking in again',
-                'attendance' => $incompleteAttendance
+                'attendance' => $incompleteAttendance,
             ], 400);
         }
 
-        // Create new attendance record (allows multiple check-ins per day)
+        $now = Carbon::now();
+        $status = 'present';
+
+        // Optional late detection using default shift start 09:00
+        if ($now->format('H:i') > '09:15') {
+            $status = 'late';
+        }
+
         $attendance = Attendance::create([
             'employee_id' => $employeeId,
-            'date' => $today,
-            'check_in' => Carbon::now()->format('H:i'),
-            'status' => 'present',
+            'date' => $today->toDateString(),
+            'check_in' => $now->format('H:i'),
+            'status' => $status,
         ]);
 
-        return response()->json($attendance->load(['employee.user']));
+        return response()->json($attendance->load(['employee.user']), 201);
     }
 
     public function checkOut(Request $request)
     {
-        $user = $request->user();
-        
+        $user = $request->user()->loadMissing('employee');
+
         $validated = $request->validate([
             'employee_id' => 'nullable|exists:employees,id',
         ]);
 
-        // If no employee_id provided, use authenticated user's employee ID
-        $employeeId = $validated['employee_id'] ?? $user->employee->id ?? null;
-        
+        $employeeId = $validated['employee_id'] ?? $user->employee?->id;
+
         if (!$employeeId) {
-            return response()->json(['message' => 'Employee record not found for this user'], 400);
+            return response()->json([
+                'message' => 'No employee profile is linked to your account. Ask HR to link an employee record before checking out.',
+            ], 400);
         }
 
-        // Regular employees can only check out for themselves
-        if ($user->hasRole('employee') && $employeeId != $user->employee->id) {
+        if ($user->hasRole('employee') && (int) $employeeId !== (int) $user->employee->id) {
             return response()->json(['message' => 'You can only check out for yourself'], 403);
         }
 
         $today = Carbon::today();
-        
-        // Find the latest incomplete attendance (has check-in but no check-out)
+
         $attendance = Attendance::where('employee_id', $employeeId)
-            ->where('date', $today)
+            ->whereDate('date', $today)
             ->whereNotNull('check_in')
             ->whereNull('check_out')
-            ->orderBy('id', 'desc')
+            ->orderByDesc('id')
             ->first();
 
         if (!$attendance) {
             return response()->json(['message' => 'No active check-in found for today. Please check in first.'], 400);
         }
 
-        $checkIn = Carbon::parse($attendance->check_in);
+        $checkIn = Carbon::parse($attendance->date->format('Y-m-d').' '.$attendance->check_in);
         $checkOut = Carbon::now();
-        $workingHours = $checkOut->diffInHours($checkIn, true);
+        $workingHours = round($checkIn->diffInMinutes($checkOut) / 60, 2);
 
         $attendance->update([
             'check_out' => $checkOut->format('H:i'),
@@ -253,11 +284,13 @@ class AttendanceController extends Controller
             'overtime_hours' => max(0, $workingHours - 8),
         ]);
 
-        return response()->json($attendance);
+        return response()->json($attendance->fresh()->load(['employee.user']));
     }
 
-    public function show(Attendance $attendance)
+    public function show(Request $request, Attendance $attendance)
     {
+        $this->assertCanAccessEmployeeRecord($request, $attendance->employee_id);
+
         return response()->json($attendance->load(['employee.user', 'approver']));
     }
 

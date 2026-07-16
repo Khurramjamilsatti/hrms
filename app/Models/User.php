@@ -72,7 +72,9 @@ class User extends Authenticatable
     // Permission Methods
     /**
      * Check if user has a specific permission
-     * Checks both role permissions and direct user permissions
+     * Checks both role permissions and direct user permissions.
+     * Also resolves common route/seeder slug aliases (hyphen vs underscore,
+     * .create vs .apply/.request, and .manage covering mutating actions).
      */
     public function hasPermission(string $permissionSlug): bool
     {
@@ -81,21 +83,113 @@ class User extends Authenticatable
             return true;
         }
 
-        // Check if user has direct permission override (revoked = false)
+        foreach ($this->permissionCandidates($permissionSlug) as $candidate) {
+            if ($this->hasExactPermission($candidate)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Exact slug match against direct overrides and role permissions.
+     */
+    protected function hasExactPermission(string $permissionSlug): bool
+    {
         $directPermission = $this->directPermissions()
             ->where('slug', $permissionSlug)
             ->first();
 
         if ($directPermission) {
-            return $directPermission->pivot->is_granted;
+            return (bool) $directPermission->pivot->is_granted;
         }
 
-        // Check role permissions if user has a role assigned
         if ($this->role_id && $this->assignedRole) {
             return $this->assignedRole->hasPermission($permissionSlug);
         }
 
         return false;
+    }
+
+    /**
+     * Expand a route/UI permission slug into seeded equivalents.
+     */
+    protected function permissionCandidates(string $permissionSlug): array
+    {
+        $candidates = [$permissionSlug];
+        $normalized = str_replace('-', '_', $permissionSlug);
+        $hyphenated = str_replace('_', '-', $permissionSlug);
+
+        if ($normalized !== $permissionSlug) {
+            $candidates[] = $normalized;
+        }
+        if ($hyphenated !== $permissionSlug) {
+            $candidates[] = $hyphenated;
+        }
+
+        // Module renames used inconsistently across routes vs seeder
+        $moduleAliases = [
+            'salary_advance' => 'salary_advances',
+            'salary-advance' => 'salary_advances',
+            'cv-bank' => 'cv_bank',
+            'cv_bank' => 'cv_bank',
+        ];
+
+        foreach ([$permissionSlug, $normalized, $hyphenated] as $slug) {
+            if (!str_contains($slug, '.')) {
+                continue;
+            }
+
+            [$module, $action] = explode('.', $slug, 2);
+            $canonicalModule = $moduleAliases[$module] ?? str_replace('-', '_', $module);
+            $candidates[] = "{$canonicalModule}.{$action}";
+
+            // Action synonyms
+            $actionAliases = match ($action) {
+                'create' => ['apply', 'request', 'manage'],
+                'update', 'edit', 'delete' => ['manage'],
+                'approve', 'assign', 'process', 'generate' => ['manage'],
+                'apply', 'request' => ['manage'],
+                default => ['manage'],
+            };
+
+            foreach ($actionAliases as $aliasAction) {
+                $candidates[] = "{$canonicalModule}.{$aliasAction}";
+            }
+        }
+
+        // Explicit high-traffic mismatches
+        $explicit = [
+            'loans.create' => ['loans.apply', 'loans.manage'],
+            'loans.update' => ['loans.manage'],
+            'loans.delete' => ['loans.manage'],
+            'salary-advance.view' => ['salary_advances.view'],
+            'salary-advance.create' => ['salary_advances.request', 'salary_advances.approve'],
+            'salary-advance.update' => ['salary_advances.request', 'salary_advances.approve'],
+            'salary-advance.delete' => ['salary_advances.request', 'salary_advances.approve'],
+            'salary-advance.approve' => ['salary_advances.approve'],
+            'salary_components.create' => ['salary_components.manage'],
+            'salary_components.update' => ['salary_components.manage'],
+            'salary_components.delete' => ['salary_components.manage'],
+            'cv-bank.view' => ['cv_bank.view'],
+            'cv-bank.create' => ['cv_bank.manage'],
+            'cv-bank.update' => ['cv_bank.manage'],
+            'cv-bank.delete' => ['cv_bank.manage'],
+            'deployments.create' => ['deployments.manage'],
+            'deployments.update' => ['deployments.manage'],
+            'deployments.delete' => ['deployments.manage'],
+            'deployments.approve' => ['deployments.manage'],
+        ];
+
+        if (isset($explicit[$permissionSlug])) {
+            array_push($candidates, ...$explicit[$permissionSlug]);
+        }
+        if (isset($explicit[$normalized])) {
+            array_push($candidates, ...$explicit[$normalized]);
+        }
+
+        return array_values(array_unique($candidates));
     }
 
     /**

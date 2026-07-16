@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\FileCategory;
 use App\Models\EmployeeFile;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 
 class FileManagementController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     // Categories
     public function getCategories()
     {
@@ -121,18 +124,19 @@ class FileManagementController extends Controller
         return response()->json($employeeFile->load(['employee', 'category', 'uploadedBy']), 201);
     }
 
-    public function getFile($id)
+    public function getFile(Request $request, $id)
     {
         $file = EmployeeFile::with([
-            'employee', 
-            'category', 
-            'uploadedBy', 
+            'employee',
+            'category',
+            'uploadedBy',
             'parentFile',
             'versions',
-            'accessLogs.user'
+            'accessLogs.user',
         ])->findOrFail($id);
 
-        // Log access
+        $this->assertCanAccessEmployeeRecord($request, $file->employee_id);
+
         FileAccessLog::create([
             'file_id' => $id,
             'user_id' => auth()->id(),
@@ -143,11 +147,11 @@ class FileManagementController extends Controller
         return response()->json($file);
     }
 
-    public function downloadFile($id)
+    public function downloadFile(Request $request, $id)
     {
         $file = EmployeeFile::findOrFail($id);
+        $this->assertCanAccessEmployeeRecord($request, $file->employee_id);
 
-        // Log download
         FileAccessLog::create([
             'file_id' => $id,
             'user_id' => auth()->id(),
@@ -161,7 +165,8 @@ class FileManagementController extends Controller
     public function updateFile(Request $request, $id)
     {
         $file = EmployeeFile::findOrFail($id);
-        
+        $this->assertCanAccessEmployeeRecord($request, $file->employee_id);
+
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
@@ -171,7 +176,6 @@ class FileManagementController extends Controller
 
         $file->update($validated);
 
-        // Log edit
         FileAccessLog::create([
             'file_id' => $id,
             'user_id' => auth()->id(),
@@ -182,11 +186,11 @@ class FileManagementController extends Controller
         return response()->json($file->load(['employee', 'category', 'uploadedBy']));
     }
 
-    public function deleteFile($id)
+    public function deleteFile(Request $request, $id)
     {
         $file = EmployeeFile::findOrFail($id);
+        $this->assertCanAccessEmployeeRecord($request, $file->employee_id);
 
-        // Log deletion
         FileAccessLog::create([
             'file_id' => $id,
             'user_id' => auth()->id(),
@@ -194,9 +198,8 @@ class FileManagementController extends Controller
             'accessed_at' => now(),
         ]);
 
-        // Delete physical file
         Storage::disk('public')->delete($file->file_path);
-        
+
         $file->delete();
 
         return response()->json(['message' => 'File deleted successfully']);
@@ -205,6 +208,7 @@ class FileManagementController extends Controller
     public function uploadNewVersion(Request $request, $id)
     {
         $parentFile = EmployeeFile::findOrFail($id);
+        $this->assertCanAccessEmployeeRecord($request, $parentFile->employee_id);
         
         $validated = $request->validate([
             'file' => 'required|file|max:10240',

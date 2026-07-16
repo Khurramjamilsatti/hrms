@@ -189,9 +189,11 @@
 import { ref, computed, onMounted } from 'vue';
 import { useEmployeeStore } from '@/stores/employee';
 import { usePermissions } from '@/composables/usePermissions';
+import { useDialog } from '@/composables/useDialog';
 import axios from 'axios';
 
 const { can } = usePermissions();
+const { confirm, alert } = useDialog();
 
 const employeeStore = useEmployeeStore();
 
@@ -288,20 +290,31 @@ const loadPage = (page) => {
 };
 
 const handleDelete = async (id) => {
-  if (confirm('Are you sure you want to delete this employee?')) {
-    try {
-      await employeeStore.deleteEmployee(id);
-      const params = { search: searchQuery.value };
-      if (departmentFilter.value) {
-        params.department_id = departmentFilter.value;
-      }
-      if (statusFilter.value) {
-        params.employment_status = statusFilter.value;
-      }
-      loadEmployees(params);
-    } catch (err) {
-      alert('Failed to delete employee');
+  if (!(await confirm({
+    title: 'Delete employee?',
+    message: 'Are you sure you want to delete this employee?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  }))) return;
+  try {
+    await employeeStore.deleteEmployee(id);
+    const params = { search: searchQuery.value };
+    if (departmentFilter.value) {
+      params.department_id = departmentFilter.value;
     }
+    if (statusFilter.value) {
+      params.employment_status = statusFilter.value;
+    }
+    loadEmployees(params);
+  } catch (err) {
+    await alert({
+      title: 'Error',
+      message: 'Failed to delete employee',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 

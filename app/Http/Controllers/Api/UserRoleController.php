@@ -12,6 +12,92 @@ use Illuminate\Support\Facades\Validator;
 class UserRoleController extends Controller
 {
     /**
+     * List users for role assignment (Super Admin only)
+     */
+    public function index(Request $request)
+    {
+        $query = User::with(['assignedRole.permissions', 'employee.department', 'directPermissions'])
+            ->orderBy('name');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                    ->orWhere('email', 'ilike', "%{$search}%")
+                    ->orWhereHas('employee', function ($eq) use ($search) {
+                        $eq->where('employee_code', 'ilike', "%{$search}%")
+                            ->orWhere('first_name', 'ilike', "%{$search}%")
+                            ->orWhere('last_name', 'ilike', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('role_id')) {
+            $query->where('role_id', $request->role_id);
+        }
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        if ($request->has('is_active') && $request->is_active !== '') {
+            $query->where('is_active', $request->boolean('is_active'));
+        }
+
+        if ($request->boolean('unassigned_only')) {
+            $query->whereNull('role_id');
+        }
+
+        $users = $query->paginate($request->integer('per_page', 15));
+
+        $users->getCollection()->transform(function (User $user) {
+            if ($user->role === 'super_admin') {
+                $user->setAttribute('permissions_count', Permission::count());
+            } else {
+                $user->setAttribute('permissions_count', $user->getAllPermissions()->count());
+            }
+            return $user;
+        });
+
+        $payload = $users->toArray();
+        $payload['stats'] = [
+            'total' => User::count(),
+            'with_role' => User::whereNotNull('role_id')->count(),
+            'active' => User::where('is_active', true)->count(),
+            'inactive' => User::where('is_active', false)->count(),
+        ];
+
+        return response()->json($payload);
+    }
+
+    /**
+     * Toggle user active status (Super Admin only)
+     */
+    public function toggleActive(User $user)
+    {
+        if ($user->role === 'super_admin' && $user->is_active) {
+            $otherActiveSuperAdmins = User::where('role', 'super_admin')
+                ->where('is_active', true)
+                ->where('id', '!=', $user->id)
+                ->count();
+
+            if ($otherActiveSuperAdmins === 0) {
+                return response()->json([
+                    'message' => 'Cannot deactivate the only active super admin account',
+                ], 422);
+            }
+        }
+
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        return response()->json([
+            'message' => $user->is_active ? 'User activated successfully' : 'User deactivated successfully',
+            'data' => $user->load(['assignedRole', 'employee']),
+        ]);
+    }
+
+    /**
      * Assign a role to a user (Super Admin only)
      */
     public function assignRole(Request $request, User $user)
@@ -36,8 +122,22 @@ class UserRoleController extends Controller
             ], 422);
         }
 
+        // Prevent demoting the last super admin
+        if ($user->role === 'super_admin' && $role->slug !== 'super_admin') {
+            $otherActiveSuperAdmins = User::where('role', 'super_admin')
+                ->where('is_active', true)
+                ->where('id', '!=', $user->id)
+                ->count();
+
+            if ($otherActiveSuperAdmins === 0) {
+                return response()->json([
+                    'message' => 'Cannot change role of the only active super admin',
+                ], 422);
+            }
+        }
+
         $user->assignRole($role);
-        $user->load('assignedRole.permissions');
+        $user->load('assignedRole.permissions', 'employee');
 
         return response()->json([
             'message' => 'Role assigned successfully',
@@ -50,12 +150,28 @@ class UserRoleController extends Controller
      */
     public function removeRole(User $user)
     {
-        $user->role_id = null;
-        $user->role = 'employee'; // Default fallback
+        if ($user->role === 'super_admin') {
+            $otherActiveSuperAdmins = User::where('role', 'super_admin')
+                ->where('is_active', true)
+                ->where('id', '!=', $user->id)
+                ->count();
+
+            if ($otherActiveSuperAdmins === 0) {
+                return response()->json([
+                    'message' => 'Cannot remove role from the only active super admin',
+                ], 422);
+            }
+        }
+
+        $employeeRole = Role::where('slug', 'employee')->first();
+
+        $user->role_id = $employeeRole?->id;
+        $user->role = 'employee';
         $user->save();
+        $user->load('assignedRole', 'employee');
 
         return response()->json([
-            'message' => 'Role removed successfully',
+            'message' => 'Role reset to Employee successfully',
             'data' => $user
         ]);
     }

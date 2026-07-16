@@ -82,19 +82,28 @@ class ShiftSchedulingController extends Controller
     {
         $query = ShiftAssignment::with(['roster', 'employee', 'shift']);
 
-        if ($request->has('roster_id')) {
+        if ($request->filled('roster_id')) {
             $query->where('roster_id', $request->roster_id);
         }
 
-        if ($request->has('employee_id')) {
+        if ($request->filled('employee_id')) {
             $query->where('employee_id', $request->employee_id);
         }
 
-        if ($request->has('date')) {
+        if ($request->filled('date')) {
             $query->whereDate('date', $request->date);
         }
 
-        $assignments = $query->latest('date')->paginate(50);
+        if ($request->filled('month') && $request->filled('year')) {
+            $query->whereMonth('date', (int) $request->month)
+                ->whereYear('date', (int) $request->year);
+        } elseif ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('date', [$request->start_date, $request->end_date]);
+        }
+
+        $perPage = min((int) $request->get('per_page', 100), 500);
+        $assignments = $query->orderBy('date')->paginate($perPage);
+
         return response()->json($assignments);
     }
 
@@ -172,10 +181,13 @@ class ShiftSchedulingController extends Controller
         ]);
 
         if ($request->user()->role === 'employee') {
+            if (!$request->user()->employee) {
+                return response()->json(['data' => []]);
+            }
             $employeeId = $request->user()->employee->id;
-            $query->where(function($q) use ($employeeId) {
+            $query->where(function ($q) use ($employeeId) {
                 $q->where('requester_id', $employeeId)
-                  ->orWhere('swapper_id', $employeeId);
+                    ->orWhere('swapper_id', $employeeId);
             });
         }
 
@@ -211,11 +223,11 @@ class ShiftSchedulingController extends Controller
     public function respondToSwapRequest(Request $request, $id)
     {
         $validated = $request->validate([
-            'response' => 'required|in:accept,reject',
+            'response' => 'required|in:accept,reject,decline',
         ]);
 
         $swapRequest = ShiftSwapRequest::findOrFail($id);
-        
+
         $status = $validated['response'] === 'accept' ? 'accepted' : 'rejected';
         $swapRequest->update(['status' => $status]);
 

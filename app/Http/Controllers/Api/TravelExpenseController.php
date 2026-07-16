@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\TravelRequest;
 use App\Models\ExpenseCategory;
@@ -13,12 +14,17 @@ use Illuminate\Http\Request;
 
 class TravelExpenseController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     // Travel Requests
     public function getTravelRequests(Request $request)
     {
         $query = TravelRequest::with(['employee', 'approver']);
 
         if ($request->user()->role === 'employee') {
+            if (!$request->user()->employee) {
+                return response()->json(['data' => []]);
+            }
             $query->where('employee_id', $request->user()->employee->id);
         }
 
@@ -44,6 +50,8 @@ class TravelExpenseController extends Controller
             'estimated_cost' => 'required|numeric|min:0',
         ]);
 
+        $this->assertCanAccessEmployeeRecord($request, (int) $validated['employee_id']);
+
         $validated['request_number'] = 'TR-' . strtoupper(uniqid());
         $validated['status'] = 'draft';
 
@@ -54,7 +62,8 @@ class TravelExpenseController extends Controller
     public function updateTravelRequest(Request $request, $id)
     {
         $travelRequest = TravelRequest::findOrFail($id);
-        
+        $this->assertCanAccessEmployeeRecord($request, $travelRequest->employee_id);
+
         $validated = $request->validate([
             'purpose' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
@@ -71,9 +80,10 @@ class TravelExpenseController extends Controller
         return response()->json($travelRequest->load('employee'));
     }
 
-    public function submitTravelRequest($id)
+    public function submitTravelRequest(Request $request, $id)
     {
         $travelRequest = TravelRequest::findOrFail($id);
+        $this->assertCanAccessEmployeeRecord($request, $travelRequest->employee_id);
         $travelRequest->update(['status' => 'submitted']);
         return response()->json($travelRequest);
     }
@@ -237,9 +247,16 @@ class TravelExpenseController extends Controller
     // Advance Requests
     public function getAdvanceRequests(Request $request)
     {
-        $query = AdvanceRequest::with(['employee', 'travelRequest', 'approver']);
+        $query = AdvanceRequest::with(['employee', 'travelRequest', 'approver'])
+            ->where(function ($q) {
+                $q->where('advance_type', 'travel')
+                    ->orWhereNull('advance_type');
+            });
 
         if ($request->user()->role === 'employee') {
+            if (!$request->user()->employee) {
+                return response()->json(['data' => []]);
+            }
             $query->where('employee_id', $request->user()->employee->id);
         }
 
@@ -263,6 +280,7 @@ class TravelExpenseController extends Controller
 
         $validated['request_number'] = 'ADV-' . strtoupper(uniqid());
         $validated['status'] = 'pending';
+        $validated['advance_type'] = 'travel';
 
         $advance = AdvanceRequest::create($validated);
         return response()->json($advance->load('employee'), 201);

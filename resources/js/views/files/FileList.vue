@@ -714,7 +714,13 @@ const uploadFile = async () => {
     formData.append('title', uploadForm.title);
     formData.append('description', uploadForm.description || '');
     formData.append('category_id', uploadForm.category_id);
-    formData.append('employee_id', authStore.user.employee?.id || authStore.user.id);
+    const employeeId = authStore.user.employee?.id || authStore.user.employee_id;
+    if (!employeeId) {
+        showNotification('Employee profile required to upload files', 'error');
+        uploading.value = false;
+        return;
+    }
+    formData.append('employee_id', employeeId);
     formData.append('is_confidential', uploadForm.is_confidential ? '1' : '0');
     if (uploadForm.expiry_date) formData.append('expiry_date', uploadForm.expiry_date);
     

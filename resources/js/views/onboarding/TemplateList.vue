@@ -272,9 +272,11 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useNotification } from '@/composables/useNotification';
+import { useDialog } from '@/composables/useDialog';
 
 const router = useRouter();
 const { success, error: showError } = useNotification();
+const { confirm } = useDialog();
 const templates = ref([]);
 const departments = ref([]);
 const loading = ref(false);
@@ -472,7 +474,13 @@ const cancelAddTask = () => {
 };
 
 const deleteTask = async (taskId) => {
-  if (!confirm('Delete this task?')) return;
+  if (!(await confirm({
+    title: 'Delete task?',
+    message: 'Delete this task?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  }))) return;
   try {
     await axios.delete(`/onboarding/template-tasks/${taskId}`);
     const res = await axios.get(`/onboarding/templates/${selectedTemplate.value.id}`);

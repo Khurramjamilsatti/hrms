@@ -10,10 +10,11 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.token,
-    isAdmin: (state) => state.user?.role === 'admin',
-    isManager: (state) => state.user?.role === 'manager',
+    isAdmin: (state) => ['admin', 'super_admin', 'hr_admin'].includes(state.user?.role),
+    isManager: (state) => ['manager', 'section_head'].includes(state.user?.role),
     isEmployee: (state) => state.user?.role === 'employee',
     isSuperAdmin: (state) => state.user?.role === 'super_admin',
+    hasEmployeeProfile: (state) => !!state.user?.employee,
   },
 
   actions: {

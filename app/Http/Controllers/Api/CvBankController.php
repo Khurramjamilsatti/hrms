@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\EmployeeCv;
 use Illuminate\Http\Request;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\Storage;
 
 class CvBankController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     public function index(Request $request)
     {
         $query = EmployeeCv::with(['employee.user', 'employee.department', 'uploader']);
@@ -85,8 +88,10 @@ class CvBankController extends Controller
         ], 201);
     }
 
-    public function show(EmployeeCv $cv)
+    public function show(Request $request, EmployeeCv $cv)
     {
+        $this->assertCanAccessEmployeeRecord($request, $cv->employee_id);
+
         return response()->json($cv->load([
             'employee.user',
             'employee.department',

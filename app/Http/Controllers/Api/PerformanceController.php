@@ -15,8 +15,13 @@ class PerformanceController extends Controller
     {
         $query = PerformanceReview::with(['employee.user', 'reviewer', 'cycle']);
 
-        if (!auth()->user()->role === 'admin') {
-            $query->where('employee_id', auth()->user()->employee->id);
+        $user = $request->user();
+        if (!($user->isAdmin() || $user->isHRAdmin() || $user->isSuperAdmin())) {
+            if ($user->employee) {
+                $query->where('employee_id', $user->employee->id);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
 
         if ($request->filled('cycle_id')) {
@@ -68,8 +73,13 @@ class PerformanceController extends Controller
     {
         $query = Goal::with(['employee.user']);
 
-        if (!auth()->user()->role === 'admin') {
-            $query->where('employee_id', auth()->user()->employee->id);
+        $user = $request->user();
+        if (!($user->isAdmin() || $user->isHRAdmin() || $user->isSuperAdmin())) {
+            if ($user->employee) {
+                $query->where('employee_id', $user->employee->id);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
 
         if ($request->filled('status')) {

@@ -15,9 +15,13 @@ class OvertimeRequest extends Model
         'hours',
         'reason',
         'status',
-        'approved_by',
-        'approval_remarks',
-        'approved_at',
+        'approval_level',
+        'first_approved_by',
+        'first_approval_remarks',
+        'first_approved_at',
+        'final_approved_by',
+        'final_approval_remarks',
+        'final_approved_at',
     ];
 
     protected function casts(): array
@@ -25,7 +29,8 @@ class OvertimeRequest extends Model
         return [
             'date' => 'date',
             'hours' => 'decimal:2',
-            'approved_at' => 'datetime',
+            'first_approved_at' => 'datetime',
+            'final_approved_at' => 'datetime',
         ];
     }
 
@@ -34,8 +39,19 @@ class OvertimeRequest extends Model
         return $this->belongsTo(Employee::class);
     }
 
+    public function firstApprover()
+    {
+        return $this->belongsTo(User::class, 'first_approved_by');
+    }
+
+    public function finalApprover()
+    {
+        return $this->belongsTo(User::class, 'final_approved_by');
+    }
+
+    // Legacy relationship for backwards compatibility
     public function approver()
     {
-        return $this->belongsTo(User::class, 'approved_by');
+        return $this->belongsTo(User::class, 'final_approved_by');
     }
 }

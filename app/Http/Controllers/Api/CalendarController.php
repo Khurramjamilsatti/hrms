@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CalendarEvent;
+use App\Models\Employee;
 use App\Models\EventAttendee;
 use App\Models\Reminder;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class CalendarController extends Controller
 {
@@ -54,28 +57,129 @@ class CalendarController extends Controller
         }
         // hr_admin, super_admin, and admin can see all events
 
-        // Filter by date range
-        if ($request->has('start_date') && $request->has('end_date')) {
-            $query->whereBetween('start_datetime', [$request->start_date, $request->end_date]);
+        // Filter by date range (inclusive full days)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $start = Carbon::parse($request->start_date)->startOfDay();
+            $end = Carbon::parse($request->end_date)->endOfDay();
+
+            $query->where(function ($q) use ($start, $end) {
+                $q->whereBetween('start_datetime', [$start, $end])
+                    ->orWhereBetween('end_datetime', [$start, $end])
+                    ->orWhere(function ($inner) use ($start, $end) {
+                        $inner->where('start_datetime', '<=', $start)
+                            ->where('end_datetime', '>=', $end);
+                    });
+            });
         }
 
         // Filter by event type
-        if ($request->has('event_type')) {
+        if ($request->filled('event_type')) {
             $query->where('event_type', $request->event_type);
         }
 
         // Filter by current user's events
-        if ($request->has('my_events') && $request->boolean('my_events')) {
-            if ($user->employee) {
-                $employeeId = $user->employee->id;
-                $query->whereHas('attendees', function($q) use ($employeeId) {
-                    $q->where('employee_id', $employeeId);
-                });
+        if ($request->boolean('my_events') && $user->employee) {
+            $employeeId = $user->employee->id;
+            $query->whereHas('attendees', function ($q) use ($employeeId) {
+                $q->where('employee_id', $employeeId);
+            });
+        }
+
+        $query->orderBy('start_datetime');
+
+        // Calendar month fetch should return the full range, not a short page
+        if ($request->boolean('calendar') || ($request->filled('start_date') && $request->filled('end_date'))) {
+            $events = $query->get();
+
+            $includeBirthdays = !$request->filled('event_type') || $request->event_type === 'birthday';
+            if ($includeBirthdays && !$request->boolean('my_events')) {
+                $rangeStart = $request->filled('start_date')
+                    ? Carbon::parse($request->start_date)->startOfDay()
+                    : now()->startOfMonth();
+                $rangeEnd = $request->filled('end_date')
+                    ? Carbon::parse($request->end_date)->endOfDay()
+                    : now()->endOfMonth();
+
+                $events = $events
+                    ->concat($this->birthdayEventsForRange($rangeStart, $rangeEnd))
+                    ->sortBy('start_datetime')
+                    ->values();
+            }
+
+            return response()->json([
+                'data' => $events,
+            ]);
+        }
+
+        $events = $query->paginate($request->integer('per_page', 50));
+        return response()->json($events);
+    }
+
+    /**
+     * Build read-only birthday events for active employees within a date range.
+     * Matches month/day across years (Feb 29 -> Feb 28 on non-leap years).
+     */
+    protected function birthdayEventsForRange(Carbon $rangeStart, Carbon $rangeEnd): Collection
+    {
+        $employees = Employee::query()
+            ->whereNotNull('date_of_birth')
+            ->where('employment_status', 'active')
+            ->select(['id', 'first_name', 'last_name', 'employee_code', 'date_of_birth', 'department_id'])
+            ->with('department:id,name')
+            ->get();
+
+        $events = collect();
+        $periodYears = range($rangeStart->year, $rangeEnd->year);
+
+        foreach ($employees as $employee) {
+            $dob = Carbon::parse($employee->date_of_birth);
+
+            foreach ($periodYears as $year) {
+                $month = $dob->month;
+                $day = $dob->day;
+
+                if ($month === 2 && $day === 29 && !Carbon::create($year, 1, 1)->isLeapYear()) {
+                    $day = 28;
+                }
+
+                try {
+                    $birthday = Carbon::create($year, $month, $day)->startOfDay();
+                } catch (\Throwable $e) {
+                    continue;
+                }
+
+                if ($birthday->lt($rangeStart->copy()->startOfDay()) || $birthday->gt($rangeEnd->copy()->endOfDay())) {
+                    continue;
+                }
+
+                $name = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''));
+                $age = (int) $dob->diffInYears($birthday);
+
+                $events->push([
+                    'id' => 'birthday-' . $employee->id . '-' . $birthday->format('Y-m-d'),
+                    'title' => $name . "'s Birthday",
+                    'description' => $age > 0
+                        ? "{$name} turns {$age}" . ($employee->department?->name ? " · {$employee->department->name}" : '')
+                        : ($employee->department?->name ?: 'Employee birthday'),
+                    'event_type' => 'birthday',
+                    'start_datetime' => $birthday->toIso8601String(),
+                    'end_datetime' => $birthday->copy()->endOfDay()->toIso8601String(),
+                    'location' => null,
+                    'meeting_link' => null,
+                    'is_all_day' => true,
+                    'is_recurring' => true,
+                    'recurrence_rule' => 'YEARLY',
+                    'created_by' => null,
+                    'is_system' => true,
+                    'readonly' => true,
+                    'employee_id' => $employee->id,
+                    'attendees' => [],
+                    'creator' => null,
+                ]);
             }
         }
 
-        $events = $query->latest('start_datetime')->paginate(50);
-        return response()->json($events);
+        return $events->sortBy('start_datetime')->values();
     }
 
     public function storeEvent(Request $request)
@@ -85,7 +189,7 @@ class CalendarController extends Controller
             'description' => 'nullable|string',
             'event_type' => 'required|in:meeting,training,interview,holiday,company_event,other',
             'start_datetime' => 'required|date',
-            'end_datetime' => 'required|date|after:start_datetime',
+            'end_datetime' => 'required|date|after_or_equal:start_datetime',
             'location' => 'nullable|string|max:255',
             'meeting_link' => 'nullable|url',
             'is_all_day' => 'nullable|boolean',
@@ -171,16 +275,22 @@ class CalendarController extends Controller
     public function respondToEvent(Request $request, $eventId)
     {
         $validated = $request->validate([
-            'status' => 'required|in:accepted,declined,tentative',
+            'status' => 'required|in:accepted,declined,tentative,maybe',
             'response_note' => 'nullable|string',
         ]);
+
+        $status = $validated['status'] === 'maybe' ? 'tentative' : $validated['status'];
+
+        if (!$request->user()->employee) {
+            return response()->json(['message' => 'Employee profile required to respond'], 422);
+        }
 
         $attendee = EventAttendee::where('event_id', $eventId)
             ->where('employee_id', $request->user()->employee->id)
             ->firstOrFail();
 
         $attendee->update([
-            'status' => $validated['status'],
+            'status' => $status,
             'response_note' => $validated['response_note'] ?? null,
             'responded_at' => now(),
         ]);
@@ -230,11 +340,15 @@ class CalendarController extends Controller
     // Reminders
     public function addReminder(Request $request, $eventId)
     {
+        if (!$request->user()->employee) {
+            return response()->json(['message' => 'Employee profile required to set reminders'], 422);
+        }
+
         $validated = $request->validate([
             'remind_before_minutes' => 'required|integer|min:5',
         ]);
 
-        $event = CalendarEvent::findOrFail($eventId);
+        CalendarEvent::findOrFail($eventId);
 
         $reminder = Reminder::create([
             'event_id' => $eventId,
@@ -248,17 +362,21 @@ class CalendarController extends Controller
 
     public function getMyEvents(Request $request)
     {
+        if (!$request->user()->employee) {
+            return response()->json([]);
+        }
+
         $employeeId = $request->user()->employee->id;
 
-        $events = CalendarEvent::whereHas('attendees', function($q) use ($employeeId) {
+        $events = CalendarEvent::whereHas('attendees', function ($q) use ($employeeId) {
             $q->where('employee_id', $employeeId);
         })
-        ->with(['creator', 'attendees' => function($q) use ($employeeId) {
+        ->with(['creator', 'attendees' => function ($q) use ($employeeId) {
             $q->where('employee_id', $employeeId);
         }])
         ->whereBetween('start_datetime', [
             $request->get('start_date', now()->startOfMonth()),
-            $request->get('end_date', now()->endOfMonth())
+            $request->get('end_date', now()->endOfMonth()),
         ])
         ->orderBy('start_datetime')
         ->get();

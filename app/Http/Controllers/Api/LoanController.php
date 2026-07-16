@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\Loan;
 use App\Models\LoanPayment;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class LoanController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -119,8 +122,10 @@ class LoanController extends Controller
         ], 201);
     }
 
-    public function show(Loan $loan)
+    public function show(Request $request, Loan $loan)
     {
+        $this->assertCanAccessEmployeeRecord($request, $loan->employee_id);
+
         return response()->json($loan->load([
             'employee.user',
             'employee.department',

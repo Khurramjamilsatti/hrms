@@ -359,9 +359,11 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useNotification } from '@/composables/useNotification';
+import { useDialog } from '@/composables/useDialog';
 import SearchableSelect from '@/components/SearchableSelect.vue';
 
 const { success, error: showError } = useNotification();
+const { confirm } = useDialog();
 
 const onboardings = ref([]);
 const employees = ref([]);
@@ -515,8 +517,14 @@ const editOnboarding = (onboarding) => {
   fetchBuddyEmployees();
 };
 
-const deleteOnboardingConfirm = (onboarding) => {
-  if (confirm(`Are you sure you want to delete the onboarding for ${getEmployeeName(onboarding.employee)}? This action cannot be undone.`)) {
+const deleteOnboardingConfirm = async (onboarding) => {
+  if (await confirm({
+    title: 'Delete onboarding?',
+    message: `Are you sure you want to delete the onboarding for ${getEmployeeName(onboarding.employee)}? This action cannot be undone.`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  })) {
     deleteOnboardingRecord(onboarding.id);
   }
 };

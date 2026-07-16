@@ -211,8 +211,10 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Pagination from '@/components/Pagination.vue';
+import { useDialog } from '@/composables/useDialog';
 
 const router = useRouter();
+const { confirm, alert } = useDialog();
 const cvs = ref([]);
 const pagination = ref({ current_page: 1, last_page: 1, total: 0, from: 0, to: 0 });
 const employees = ref([]);
@@ -238,7 +240,7 @@ const fetchCvs = async (page = 1) => {
     params.append('page', page);
     if (searchQuery.value) params.append('employee_name', searchQuery.value);
     
-    const response = await axios.get(`/api/cvs?${params}`);
+    const response = await axios.get(`/cvs?${params}`);
     cvs.value = response.data.data || response.data;
     
     // Update pagination data
@@ -266,7 +268,7 @@ const viewDetails = (cvId) => {
 
 const fetchEmployees = async () => {
   try {
-    const response = await axios.get('/api/employees/dropdown');
+    const response = await axios.get('/employees/dropdown');
     employees.value = response.data.data || response.data;
   } catch (error) {
     console.error('Failed to fetch employees:', error);
@@ -297,17 +299,29 @@ const submitCvUpload = async () => {
       certs.forEach(cert => formData.append('certifications[]', cert));
     }
     
-    await axios.post('/api/cvs', formData, {
+    await axios.post('/cvs', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     
     showUploadModal.value = false;
     cvForm.value = { employee_id: '', cv_file: null, summary: '', experience_years: '', education_level: '', skillsText: '', certificationsText: '' };
     fetchCvs();
-    alert('CV uploaded successfully!');
+    await alert({
+      title: 'Success',
+      message: 'CV uploaded successfully!',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'success',
+    });
   } catch (error) {
     console.error('Failed to upload CV:', error);
-    alert('Failed to upload CV');
+    await alert({
+      title: 'Error',
+      message: 'Failed to upload CV',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   } finally {
     uploading.value = false;
   }
@@ -315,7 +329,7 @@ const submitCvUpload = async () => {
 
 const downloadCv = async (cv) => {
   try {
-    const response = await axios.get(`/api/cvs/${cv.id}/download`, {
+    const response = await axios.get(`/cvs/${cv.id}/download`, {
       responseType: 'blob'
     });
     
@@ -328,30 +342,60 @@ const downloadCv = async (cv) => {
     link.remove();
   } catch (error) {
     console.error('Failed to download CV:', error);
-    alert('Failed to download CV');
+    await alert({
+      title: 'Error',
+      message: 'Failed to download CV',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 
 const viewHistory = async (cv) => {
   try {
-    const response = await axios.get(`/api/cvs/employees/${cv.employee_id}/history`);
+    const response = await axios.get(`/cvs/employees/${cv.employee_id}/history`);
     cvHistory.value = response.data.data || response.data;
     showHistoryModal.value = true;
   } catch (error) {
     console.error('Failed to fetch CV history:', error);
-    alert('Failed to fetch CV history');
+    await alert({
+      title: 'Error',
+      message: 'Failed to fetch CV history',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 
 const deleteCv = async (cv) => {
-  if (!confirm(`Delete CV: ${cv.file_name}?`)) return;
+  if (!(await confirm({
+    title: 'Delete CV?',
+    message: `Delete CV: ${cv.file_name}?`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  }))) return;
   try {
-    await axios.delete(`/api/cvs/${cv.id}`);
+    await axios.delete(`/cvs/${cv.id}`);
     fetchCvs();
-    alert('CV deleted successfully');
+    await alert({
+      title: 'Success',
+      message: 'CV deleted successfully',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'success',
+    });
   } catch (error) {
     console.error('Failed to delete CV:', error);
-    alert('Failed to delete CV');
+    await alert({
+      title: 'Error',
+      message: 'Failed to delete CV',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 

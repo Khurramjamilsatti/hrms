@@ -223,10 +223,22 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span :class="getStatusClass(ticket.status)" 
-                                    class="px-2 py-1 text-xs font-medium rounded-full">
-                                    {{ ticket.status.replace('_', ' ') }}
-                                </span>
+                                <select
+                                    :value="ticket.status"
+                                    @change="changeTicketStatus(ticket, $event.target.value)"
+                                    :disabled="updatingStatusId === ticket.id"
+                                    :class="[
+                                        getStatusClass(ticket.status),
+                                        'px-2 py-1 text-xs font-medium rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-gray-900 cursor-pointer disabled:opacity-50'
+                                    ]"
+                                    title="Change status"
+                                >
+                                    <option value="open">Open</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="closed">Closed</option>
+                                    <option value="reopened">Reopened</option>
+                                </select>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ formatDate(ticket.created_at) }}
@@ -295,71 +307,121 @@
         </div>
 
         <!-- Create Modal -->
-        <div v-if="showCreateModal" class="fixed inset-0 z-50 overflow-y-auto">
-            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-                    @click="showCreateModal = false"></div>
-
-                <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Create New Ticket</h3>
-
-                        <form @submit.prevent="createTicket" class="space-y-4">
-                            <!-- Debug info -->
-                            <div class="text-xs text-gray-500 mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                                <strong>Debug:</strong> Categories ref: {{ categories.length }}, Computed: {{ availableCategories.length }}
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-                                <select v-model="formData.category_id" required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">Select Category ({{ availableCategories.length }} available)</option>
-                                    <option v-for="category in availableCategories" :key="category.id" :value="category.id">
-                                        {{ category.name }}
-                                    </option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Priority *</label>
-                                <select v-model="formData.priority" required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
-                                    <option value="urgent">Urgent</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
-                                <input type="text" v-model="formData.subject" required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Brief description of the issue" />
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-                                <textarea v-model="formData.description" rows="5" required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Detailed description of the issue"></textarea>
-                            </div>
-
-                            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                                <button type="submit" :disabled="submitting"
-                                    class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50">
-                                    {{ submitting ? 'Creating...' : 'Create Ticket' }}
-                                </button>
-                                <button type="button" @click="showCreateModal = false"
-                                    class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+        <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                    <h3 class="text-lg font-bold text-gray-900">Create New Ticket</h3>
+                    <button type="button" @click="closeCreateModal" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    </button>
                 </div>
+
+                <form @submit.prevent="createTicket" class="px-6 py-5 space-y-4">
+                    <div v-if="showEmployeePicker">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Employee *</label>
+                        <div class="relative">
+                            <input
+                                v-model="employeeSearch"
+                                @input="filterEmployees"
+                                @focus="showEmployeeDropdown = true"
+                                type="text"
+                                placeholder="Search employee by name or code..."
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                autocomplete="off"
+                            />
+                            <div
+                                v-if="showEmployeeDropdown && filteredEmployees.length > 0"
+                                class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                            >
+                                <button
+                                    v-for="emp in filteredEmployees"
+                                    :key="emp.id"
+                                    type="button"
+                                    @click="selectEmployee(emp)"
+                                    class="w-full text-left px-4 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                                >
+                                    <div class="text-sm font-medium text-gray-900">{{ emp.first_name }} {{ emp.last_name }}</div>
+                                    <div class="text-xs text-gray-500">{{ emp.employee_code }} · {{ emp.department?.name || 'No department' }}</div>
+                                </button>
+                            </div>
+                        </div>
+                        <div v-if="formData.employee_id && selectedEmployee" class="mt-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">{{ selectedEmployee.first_name }} {{ selectedEmployee.last_name }}</div>
+                                <div class="text-xs text-gray-500">{{ selectedEmployee.employee_code }}</div>
+                            </div>
+                            <button type="button" @click="clearEmployee" class="text-sm text-red-600 hover:text-red-700">Clear</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
+                        <select
+                            v-model="formData.category_id"
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        >
+                            <option value="">Select Category</option>
+                            <option v-for="category in categories" :key="category.id" :value="category.id">
+                                {{ category.name }}
+                            </option>
+                        </select>
+                        <p v-if="!categories.length" class="mt-1 text-sm text-amber-700">Loading categories...</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Priority *</label>
+                        <select
+                            v-model="formData.priority"
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        >
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Subject *</label>
+                        <input
+                            type="text"
+                            v-model="formData.subject"
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                            placeholder="Brief description of the issue"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
+                        <textarea
+                            v-model="formData.description"
+                            rows="5"
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                            placeholder="Detailed description of the issue"
+                        ></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button
+                            type="button"
+                            @click="closeCreateModal"
+                            class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            :disabled="submitting || !canSubmitTicket"
+                            class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg disabled:opacity-50"
+                        >
+                            {{ submitting ? 'Creating...' : 'Create Ticket' }}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -588,27 +650,21 @@ const { success, error: showError } = useNotification();
 
 const tickets = ref([]);
 const categories = ref([]);
+const employees = ref([]);
+const filteredEmployees = ref([]);
 const statistics = ref({});
 const loading = ref(false);
 const submitting = ref(false);
-
-// Default categories as fallback
-const defaultCategories = [
-    { id: 1, name: 'Payroll Issues' },
-    { id: 2, name: 'Leave & Attendance' },
-    { id: 3, name: 'IT Support' },
-    { id: 4, name: 'HR Policies' },
-    { id: 5, name: 'Benefits' },
-    { id: 6, name: 'Training' },
-    { id: 7, name: 'Equipment' },
-    { id: 8, name: 'Other' }
-];
+const updatingStatusId = ref(null);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showDeleteModal = ref(false);
 const selectedTicket = ref(null);
 const ticketToDelete = ref(null);
 const replyMessage = ref('');
+const employeeSearch = ref('');
+const showEmployeeDropdown = ref(false);
+const selectedEmployee = ref(null);
 
 const filters = ref({
     search: '',
@@ -628,6 +684,7 @@ const pagination = ref({
 });
 
 const formData = ref({
+    employee_id: '',
     category_id: '',
     priority: 'medium',
     subject: '',
@@ -643,10 +700,23 @@ const editFormData = ref({
     description: ''
 });
 
-const availableCategories = computed(() => {
-    console.log('Computed: availableCategories called, categories.value:', categories.value);
-    return categories.value || [];
+const privilegedRoles = ['admin', 'hr_admin', 'super_admin', 'manager', 'section_head'];
+const showEmployeePicker = computed(() => {
+    const role = authStore.user?.role;
+    return privilegedRoles.includes(role) || !authStore.user?.employee;
 });
+
+const canSubmitTicket = computed(() => {
+    if (!formData.value.category_id || !formData.value.subject || !formData.value.description) {
+        return false;
+    }
+    if (showEmployeePicker.value && !formData.value.employee_id) {
+        return false;
+    }
+    return true;
+});
+
+const availableCategories = computed(() => categories.value || []);
 
 const visiblePages = computed(() => {
     const current = pagination.value.current_page;
@@ -716,71 +786,116 @@ const fetchStatistics = async () => {
 const fetchCategories = async () => {
     try {
         const response = await axios.get('/helpdesk/categories');
-        console.log('Categories API response:', response.data);
-        
-        // API returns array directly, not wrapped in data
-        if (Array.isArray(response.data) && response.data.length > 0) {
+        if (Array.isArray(response.data)) {
             categories.value = response.data;
-            console.log('✅ Categories loaded from API:', categories.value.length, 'items');
-        } else if (response.data.data && Array.isArray(response.data.data)) {
+        } else if (Array.isArray(response.data?.data)) {
             categories.value = response.data.data;
-            console.log('✅ Categories loaded from API (nested):', categories.value.length, 'items');
         } else {
-            categories.value = defaultCategories;
-            console.log('⚠️ Using default categories as fallback');
+            categories.value = [];
         }
     } catch (err) {
-        console.error('❌ Error fetching categories, using defaults:', err);
-        categories.value = defaultCategories;
+        console.error('Error fetching categories:', err);
+        categories.value = [];
+        showError('Failed to load ticket categories');
     }
 };
 
-const openCreateModal = async () => {
-    console.log('Opening create modal, categories available:', categories.value.length);
-    
-    // Ensure categories are loaded
-    if (categories.value.length === 0) {
-        console.log('Categories empty, fetching now...');
-        await fetchCategories();
+const fetchEmployees = async () => {
+    try {
+        const response = await axios.get('/employees', { params: { per_page: 200, employment_status: 'active' } });
+        employees.value = response.data.data || response.data || [];
+        filteredEmployees.value = employees.value.slice(0, 50);
+    } catch (err) {
+        console.error('Error fetching employees:', err);
+        employees.value = [];
+        filteredEmployees.value = [];
     }
-    
-    console.log('Final categories count:', categories.value.length);
-    console.log('Categories data:', categories.value);
+};
+
+const filterEmployees = () => {
+    const search = employeeSearch.value.toLowerCase().trim();
+    showEmployeeDropdown.value = true;
+    if (!search) {
+        filteredEmployees.value = employees.value.slice(0, 50);
+        return;
+    }
+    filteredEmployees.value = employees.value.filter((emp) => {
+        const name = `${emp.first_name || ''} ${emp.last_name || ''}`.toLowerCase();
+        const code = String(emp.employee_code || '').toLowerCase();
+        return name.includes(search) || code.includes(search);
+    }).slice(0, 50);
+};
+
+const selectEmployee = (emp) => {
+    formData.value.employee_id = emp.id;
+    selectedEmployee.value = emp;
+    employeeSearch.value = `${emp.first_name} ${emp.last_name}`;
+    showEmployeeDropdown.value = false;
+};
+
+const clearEmployee = () => {
+    formData.value.employee_id = '';
+    selectedEmployee.value = null;
+    employeeSearch.value = '';
+    filteredEmployees.value = employees.value.slice(0, 50);
+};
+
+const closeCreateModal = () => {
+    showCreateModal.value = false;
+    showEmployeeDropdown.value = false;
+    employeeSearch.value = '';
+    selectedEmployee.value = null;
+    formData.value = {
+        employee_id: '',
+        category_id: '',
+        priority: 'medium',
+        subject: '',
+        description: ''
+    };
+};
+
+const openCreateModal = async () => {
+    await fetchCategories();
+    if (showEmployeePicker.value) {
+        await fetchEmployees();
+    } else if (authStore.user?.employee) {
+        formData.value.employee_id = authStore.user.employee.id;
+        selectedEmployee.value = authStore.user.employee;
+    }
     showCreateModal.value = true;
 };
 
 const createTicket = async () => {
+    if (!canSubmitTicket.value) {
+        showError(showEmployeePicker.value && !formData.value.employee_id
+            ? 'Please select an employee'
+            : 'Please fill in all required fields');
+        return;
+    }
+
     submitting.value = true;
     try {
-        // Get employee_id properly
-        let employeeId = null;
-        if (authStore.user && authStore.user.employee) {
-            employeeId = authStore.user.employee.id;
-        } else if (authStore.user && authStore.user.id) {
-            // Try to get employee by user_id
-            employeeId = authStore.user.id;
+        const payload = {
+            category_id: formData.value.category_id,
+            priority: formData.value.priority,
+            subject: formData.value.subject,
+            description: formData.value.description,
+        };
+
+        if (formData.value.employee_id) {
+            payload.employee_id = formData.value.employee_id;
         }
-        
-        console.log('Creating ticket with employee_id:', employeeId);
-        
-        const data = {
-            ...formData.value,
-            employee_id: employeeId
-        };
-        
-        await axios.post('/helpdesk/tickets', data);
+
+        await axios.post('/helpdesk/tickets', payload);
         success('Ticket created successfully!');
-        showCreateModal.value = false;
-        formData.value = {
-            category_id: '',
-            priority: 'medium',
-            subject: '',
-            description: ''
-        };
+        closeCreateModal();
         fetchTickets();
         fetchStatistics();
     } catch (err) {
-        showError(err.response?.data?.message || 'Failed to create ticket');
+        const message = err.response?.data?.message
+            || (err.response?.data?.errors && Object.values(err.response.data.errors).flat()[0])
+            || 'Failed to create ticket';
+        showError(message);
         console.error('Error creating ticket:', err, err.response?.data);
     } finally {
         submitting.value = false;
@@ -843,6 +958,30 @@ const updateTicket = async () => {
         console.error('Error updating ticket:', err);
     } finally {
         submitting.value = false;
+    }
+};
+
+const changeTicketStatus = async (ticket, newStatus) => {
+    if (!newStatus || newStatus === ticket.status) {
+        return;
+    }
+
+    const previousStatus = ticket.status;
+    ticket.status = newStatus;
+    updatingStatusId.value = ticket.id;
+
+    try {
+        const response = await axios.put(`/helpdesk/tickets/${ticket.id}`, {
+            status: newStatus,
+        });
+        Object.assign(ticket, response.data);
+        success(`Status updated to ${newStatus.replace('_', ' ')}`);
+        fetchStatistics();
+    } catch (err) {
+        ticket.status = previousStatus;
+        showError(err.response?.data?.message || 'Failed to update status');
+    } finally {
+        updatingStatusId.value = null;
     }
 };
 
@@ -958,11 +1097,6 @@ const formatDateTime = (date) => {
 };
 
 onMounted(() => {
-    // Initialize categories with defaults immediately
-    categories.value = defaultCategories;
-    console.log('🚀 Initialized with default categories:', categories.value.length);
-    
-    // Then fetch from API
     fetchTickets();
     fetchStatistics();
     fetchCategories();

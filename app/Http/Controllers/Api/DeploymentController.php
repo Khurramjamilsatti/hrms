@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\EmployeeDeployment;
 use App\Models\DeploymentExtension;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class DeploymentController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     public function index(Request $request)
     {
         $query = EmployeeDeployment::with(['employee.user', 'employee.department', 'approver']);
@@ -77,8 +80,10 @@ class DeploymentController extends Controller
         ], 201);
     }
 
-    public function show(EmployeeDeployment $deployment)
+    public function show(Request $request, EmployeeDeployment $deployment)
     {
+        $this->assertCanAccessEmployeeRecord($request, $deployment->employee_id);
+
         return response()->json($deployment->load([
             'employee.user',
             'employee.department',

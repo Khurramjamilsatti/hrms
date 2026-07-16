@@ -15,14 +15,22 @@ class TrainingController extends Controller
     public function getCourses(Request $request)
     {
         $query = TrainingCourse::with(['instructor', 'sessions', 'department']);
-        
-        // Filter by department if provided
+
+        // Department filter: include department-specific + company-wide (null) courses
         if ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
+            $departmentId = $request->department_id;
+            $query->where(function ($q) use ($departmentId) {
+                $q->where('department_id', $departmentId)
+                    ->orWhereNull('department_id');
+            });
         }
-        
-        $courses = $query->latest()->paginate(50);
-        
+
+        if ($request->boolean('active_only')) {
+            $query->where('is_active', true);
+        }
+
+        $courses = $query->latest()->paginate($request->integer('per_page', 50));
+
         return response()->json($courses);
     }
 
@@ -70,17 +78,36 @@ class TrainingController extends Controller
     // Sessions
     public function getSessions(Request $request)
     {
-        $query = TrainingSession::with(['course', 'enrollments']);
+        $query = TrainingSession::with(['course.department', 'enrollments']);
 
-        if ($request->has('course_id')) {
+        if ($request->filled('course_id')) {
             $query->where('course_id', $request->course_id);
         }
 
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $sessions = $query->latest('start_date')->paginate(50);
+        // Open enrollable sessions only
+        if ($request->boolean('open_only')) {
+            $query->whereIn('status', ['scheduled', 'ongoing']);
+        }
+
+        // Sessions available to a department (department courses + company-wide)
+        if ($request->filled('department_id')) {
+            $departmentId = $request->department_id;
+            $query->whereHas('course', function ($q) use ($departmentId) {
+                $q->where(function ($inner) use ($departmentId) {
+                    $inner->where('department_id', $departmentId)
+                        ->orWhereNull('department_id');
+                })->where(function ($active) {
+                    $active->where('is_active', true)->orWhereNull('is_active');
+                });
+            });
+        }
+
+        $sessions = $query->latest('start_date')->paginate($request->integer('per_page', 50));
+
         return response()->json($sessions);
     }
 

@@ -165,9 +165,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { usePermissions } from '@/composables/usePermissions';
+import { useDialog } from '@/composables/useDialog';
 import axios from 'axios';
 
 const { can } = usePermissions();
+const { alert } = useDialog();
 
 const departments = ref([]);
 const loading = ref(false);
@@ -245,7 +247,13 @@ const deleteDepartment = async () => {
     showDeleteModal.value = false;
     loadDepartments();
   } catch (err) {
-    alert(err.response?.data?.message || 'Failed to delete department');
+    await alert({
+      title: 'Error',
+      message: err.response?.data?.message || 'Failed to delete department',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   } finally { deleting.value = false; }
 };
 

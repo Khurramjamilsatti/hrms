@@ -179,23 +179,31 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import { useDialog } from '@/composables/useDialog';
 
 const route = useRoute();
+const { alert } = useDialog();
 const cv = ref({});
 
 const fetchCvDetails = async () => {
   try {
-    const response = await axios.get(`/api/cvs/${route.params.id}`);
+    const response = await axios.get(`/cvs/${route.params.id}`);
     cv.value = response.data;
   } catch (error) {
     console.error('Error fetching CV details:', error);
-    alert('Failed to load CV details');
+    await alert({
+      title: 'Error',
+      message: 'Failed to load CV details',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 
 const downloadCv = async () => {
   try {
-    const response = await axios.get(`/api/cvs/${route.params.id}/download`, {
+    const response = await axios.get(`/cvs/${route.params.id}/download`, {
       responseType: 'blob',
     });
     const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -207,7 +215,13 @@ const downloadCv = async () => {
     document.body.removeChild(link);
   } catch (error) {
     console.error('Error downloading CV:', error);
-    alert('Failed to download CV');
+    await alert({
+      title: 'Error',
+      message: 'Failed to download CV',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 

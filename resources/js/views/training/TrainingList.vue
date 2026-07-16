@@ -6,12 +6,21 @@
         <h1 class="text-3xl font-bold text-gray-900">Training Management</h1>
         <p class="text-sm text-gray-500 mt-1">Manage your training courses and enrollments</p>
       </div>
-      <button @click="openEnrollModal" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        New Enrollment
-      </button>
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          v-if="authStore.user?.role !== 'employee'"
+          @click="$router.push('/training/courses')"
+          class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-medium rounded-lg transition-colors"
+        >
+          Manage Courses
+        </button>
+        <button @click="openEnrollModal" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          New Enrollment
+        </button>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -237,7 +246,7 @@
                   class="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center justify-between"
                 >
                   <span>{{ emp.first_name }} {{ emp.last_name }}</span>
-                  <span class="text-sm text-gray-500">{{ emp.employee_id }} - {{ emp.department?.name }}</span>
+                  <span class="text-sm text-gray-500">{{ emp.employee_code || emp.employee_id }} - {{ emp.department?.name || 'No department' }}</span>
                 </button>
               </div>
             </div>
@@ -251,11 +260,11 @@
             <select v-model="enrollmentForm.session_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
               <option value="">Select Session</option>
               <option v-for="session in filteredSessions" :key="session.id" :value="session.id">
-                {{ session.session_name }} ({{ session.course?.name }}) - {{ session.course?.department?.name }}
+                {{ session.session_name }} ({{ session.course?.name }}){{ session.course?.department?.name ? ` — ${session.course.department.name}` : ' — Company-wide' }}
               </option>
             </select>
             <p v-if="filteredSessions.length === 0" class="mt-1 text-sm text-red-600">
-              No training sessions available for this employee's department
+              No open training sessions available. Create a scheduled session under Training Courses first.
             </p>
           </div>
 
@@ -406,8 +415,10 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
+import { useDialog } from '@/composables/useDialog';
 
 const authStore = useAuthStore();
+const { alert } = useDialog();
 const enrollments = ref([]);
 const employees = ref([]);
 const filteredEmployees = ref([]);
@@ -503,7 +514,8 @@ const filterEmployees = () => {
     filteredEmployees.value = employees.value.filter(emp => 
       emp.first_name?.toLowerCase().includes(search) ||
       emp.last_name?.toLowerCase().includes(search) ||
-      emp.employee_id?.toLowerCase().includes(search)
+      emp.employee_code?.toLowerCase().includes(search) ||
+      emp.employee_id?.toString().toLowerCase().includes(search)
     );
   }
   showEmployeeDropdown.value = true;
@@ -511,40 +523,39 @@ const filterEmployees = () => {
 
 const selectEmployee = async (employee) => {
   enrollmentForm.value.employee_id = employee.id;
+  enrollmentForm.value.session_id = '';
   employeeSearch.value = `${employee.first_name} ${employee.last_name}`;
-  selectedEmployeeName.value = `${employee.first_name} ${employee.last_name} (${employee.employee_id})`;
+  selectedEmployeeName.value = `${employee.first_name} ${employee.last_name} (${employee.employee_code || employee.employee_id || ''})`;
   showEmployeeDropdown.value = false;
-  
-  // Fetch sessions for this employee's department
-  if (employee.department_id) {
-    await fetchSessionsByDepartment(employee.department_id);
-  }
+
+  await fetchSessionsForEmployee(employee);
 };
 
 const fetchSessions = async () => {
   try {
-    const response = await axios.get('/training/sessions');
-    sessions.value = response.data.data || response.data;
+    const response = await axios.get('/training/sessions', {
+      params: { open_only: 1, per_page: 200 },
+    });
+    sessions.value = response.data.data || response.data || [];
   } catch (err) {
     console.error('Failed to fetch sessions:', err);
   }
 };
 
-const fetchSessionsByDepartment = async (departmentId) => {
+const fetchSessionsForEmployee = async (employee) => {
   try {
-    // Get courses for this department
-    const coursesResponse = await axios.get('/training/courses', { 
-      params: { department_id: departmentId, per_page: 1000 } 
-    });
-    const departmentCourses = coursesResponse.data.data || coursesResponse.data;
-    const courseIds = departmentCourses.map(c => c.id);
-    
-    // Filter sessions by these courses
-    const sessionsResponse = await axios.get('/training/sessions', { params: { per_page: 1000 } });
-    const allSessions = sessionsResponse.data.data || sessionsResponse.data;
-    filteredSessions.value = allSessions.filter(s => courseIds.includes(s.course_id));
+    const params = {
+      open_only: 1,
+      per_page: 200,
+    };
+    if (employee?.department_id) {
+      params.department_id = employee.department_id;
+    }
+
+    const sessionsResponse = await axios.get('/training/sessions', { params });
+    filteredSessions.value = sessionsResponse.data.data || sessionsResponse.data || [];
   } catch (err) {
-    console.error('Failed to fetch sessions by department:', err);
+    console.error('Failed to fetch sessions for employee:', err);
     filteredSessions.value = [];
   }
 };
@@ -615,7 +626,13 @@ const saveEnrollment = async () => {
     fetchEnrollments();
   } catch (err) {
     console.error('Failed to save enrollment:', err);
-    alert(err.response?.data?.message || 'Failed to save enrollment');
+    await alert({
+      title: 'Error',
+      message: err.response?.data?.message || 'Failed to save enrollment',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   } finally {
     submitting.value = false;
   }
@@ -633,7 +650,13 @@ const deleteEnrollment = async () => {
     fetchEnrollments();
   } catch (err) {
     console.error('Failed to delete enrollment:', err);
-    alert(err.response?.data?.message || 'Failed to delete enrollment');
+    await alert({
+      title: 'Error',
+      message: err.response?.data?.message || 'Failed to delete enrollment',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   } finally {
     submitting.value = false;
   }

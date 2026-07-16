@@ -12,7 +12,8 @@ class AnnouncementController extends Controller
     {
         $query = Announcement::query();
 
-        if (!auth()->user()->role === 'admin') {
+        $user = $request->user();
+        if (!($user->isAdmin() || $user->isHRAdmin() || $user->isSuperAdmin())) {
             $query->where('is_active', true)
                   ->where(function ($q) {
                       $q->whereNull('expiry_date')

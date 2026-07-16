@@ -97,9 +97,10 @@ class DashboardDataSeeder extends Seeder
                 'hours' => rand(2, 6),
                 'reason' => 'Project deadline and urgent deliverables',
                 'status' => $status,
-                'approved_by' => $status !== 'pending' ? 1 : null,
-                'approval_remarks' => $status !== 'pending' ? 'Reviewed and ' . $status : null,
-                'approved_at' => $status !== 'pending' ? Carbon::now()->subDays(rand(0, 3)) : null,
+                'approval_level' => $status === 'pending' ? 'pending' : ($status === 'approved' ? 'final_approved' : 'rejected'),
+                'final_approved_by' => $status !== 'pending' ? 1 : null,
+                'final_approval_remarks' => $status !== 'pending' ? 'Reviewed and ' . $status : null,
+                'final_approved_at' => $status !== 'pending' ? Carbon::now()->subDays(rand(0, 3)) : null,
             ]);
             $overtimeCreated++;
         }

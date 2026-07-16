@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\AdvanceRequest;
 use App\Models\Employee;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class SalaryAdvanceController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -110,8 +113,10 @@ class SalaryAdvanceController extends Controller
         ], 201);
     }
 
-    public function show(AdvanceRequest $salaryAdvance)
+    public function show(Request $request, AdvanceRequest $salaryAdvance)
     {
+        $this->assertCanAccessEmployeeRecord($request, $salaryAdvance->employee_id);
+
         return response()->json($salaryAdvance->load([
             'employee.user',
             'employee.department',

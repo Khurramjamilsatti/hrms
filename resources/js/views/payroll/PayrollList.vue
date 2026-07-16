@@ -155,6 +155,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm">
                 <div class="flex items-center space-x-2">
                   <button @click="viewPayrollDetails(payroll)" class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">Details</button>
+                  <button @click="printPayslip(payroll)" class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-md transition-colors">Print</button>
                   <button v-if="isAdminOrManager && payroll.status === 'draft'" @click="processPayroll(payroll)" class="px-3 py-1 text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-md transition-colors">Process</button>
                   <button v-if="isAdminOrManager && payroll.status === 'processed'" @click="markPaid(payroll)" class="px-3 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors">Mark Paid</button>
                 </div>
@@ -215,6 +216,14 @@
                 <span class="text-gray-600">Overtime ({{ selectedPayroll.overtime_hours }} hrs)</span>
                 <span class="font-medium text-green-600">+{{ formatCurrency(selectedPayroll.overtime_amount) }}</span>
               </div>
+              <div v-if="selectedPayroll.sunday_allowance > 0" class="flex justify-between text-sm">
+                <span class="text-gray-600">Sunday Allowance</span>
+                <span class="font-medium text-green-600">+{{ formatCurrency(selectedPayroll.sunday_allowance) }}</span>
+              </div>
+              <div v-if="selectedPayroll.holiday_allowance > 0" class="flex justify-between text-sm">
+                <span class="text-gray-600">Holiday Allowance</span>
+                <span class="font-medium text-green-600">+{{ formatCurrency(selectedPayroll.holiday_allowance) }}</span>
+              </div>
               <div v-if="selectedPayroll.bonus_amount > 0" class="flex justify-between text-sm">
                 <span class="text-gray-600">Bonus</span>
                 <span class="font-medium text-green-600">+{{ formatCurrency(selectedPayroll.bonus_amount) }}</span>
@@ -235,7 +244,11 @@
             <div class="space-y-2">
               <div v-if="selectedPayroll.absent_days > 0" class="flex justify-between text-sm">
                 <span class="text-gray-600">Absent Days ({{ selectedPayroll.absent_days }})</span>
-                <span class="font-medium text-red-600">-{{ formatCurrency((selectedPayroll.basic_salary / selectedPayroll.working_days) * selectedPayroll.absent_days) }}</span>
+                <span class="font-medium text-red-600">-{{ formatCurrency(selectedPayroll.absent_deduction || (selectedPayroll.basic_salary / selectedPayroll.working_days) * selectedPayroll.absent_days) }}</span>
+              </div>
+              <div v-if="selectedPayroll.unpaid_leave_days > 0" class="flex justify-between text-sm">
+                <span class="text-gray-600">Unpaid Leave ({{ selectedPayroll.unpaid_leave_days }} days)</span>
+                <span class="font-medium text-red-600">-{{ formatCurrency(selectedPayroll.unpaid_leave_deduction) }}</span>
               </div>
               <div v-if="payrollDetails.deductions && payrollDetails.deductions.length > 0">
                 <div v-for="deduction in payrollDetails.deductions" :key="deduction.id" class="flex justify-between text-sm">
@@ -270,16 +283,22 @@
               <span class="text-base font-semibold text-gray-900">Net Salary</span>
               <span class="text-2xl font-bold text-gray-900">{{ formatCurrency(selectedPayroll.net_salary) }}</span>
             </div>
-            <div class="mt-3 flex items-center justify-between text-xs text-gray-600">
+            <div class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-gray-600">
               <span>Working Days: {{ selectedPayroll.working_days }}</span>
               <span>Present: {{ selectedPayroll.present_days }}</span>
               <span>Absent: {{ selectedPayroll.absent_days }}</span>
               <span>Leave: {{ selectedPayroll.leave_days }}</span>
+              <span v-if="selectedPayroll.unpaid_leave_days > 0">Unpaid Leave: {{ selectedPayroll.unpaid_leave_days }}</span>
+              <span v-if="selectedPayroll.half_days > 0">Half Days: {{ selectedPayroll.half_days }}</span>
+              <span v-if="selectedPayroll.timesheet_hours > 0">Timesheet: {{ selectedPayroll.timesheet_hours }}h</span>
+              <span v-if="selectedPayroll.overtime_hours > 0">OT: {{ selectedPayroll.overtime_hours }}h</span>
             </div>
+            <p v-if="selectedPayroll.remarks" class="mt-3 text-xs text-gray-500 border-t border-gray-200 pt-2">{{ selectedPayroll.remarks }}</p>
           </div>
         </div>
         
-        <div class="px-6 py-4 border-t border-gray-200 flex justify-end bg-gray-50">
+        <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
+          <button @click="printPayslip(selectedPayroll)" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800">Print Payslip</button>
           <button @click="showDetailsModal = false" class="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Close</button>
         </div>
       </div>
@@ -293,6 +312,10 @@
           <button @click="showGenerateModal = false" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
         </div>
         <div class="px-6 py-5 space-y-4">
+          <p class="text-sm text-gray-600">
+            Payroll will sync <strong>attendance</strong> (absences, half-days, allowances),
+            <strong>approved leaves</strong> (including unpaid), and <strong>approved timesheets</strong> / overtime into each employee’s payslip.
+          </p>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Month</label>
             <select v-model="generateForm.month" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
@@ -320,7 +343,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
+import { useDialog } from '@/composables/useDialog';
 
+const { alert } = useDialog();
 const payrolls = ref([]);
 const loading = ref(false);
 const error = ref(null);
@@ -395,43 +420,143 @@ const generatePayroll = async () => {
 };
 
 const processPayroll = async (payroll) => {
-  try { await axios.post(`/payroll/${payroll.id}/process`); loadPayrolls(pagination.value?.current_page || 1); } catch (err) { alert(err.response?.data?.message || 'Failed to process'); }
+  try {
+    await axios.post(`/payroll/${payroll.id}/process`);
+    loadPayrolls(pagination.value?.current_page || 1);
+  } catch (err) {
+    await alert({
+      title: 'Error',
+      message: err.response?.data?.message || 'Failed to process',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
+  }
 };
 
 const markPaid = async (payroll) => {
-  try { await axios.post(`/payroll/${payroll.id}/mark-paid`, { payment_date: new Date().toISOString().split('T')[0] }); loadPayrolls(pagination.value?.current_page || 1); } catch (err) { alert(err.response?.data?.message || 'Failed to mark as paid'); }
+  try {
+    await axios.post(`/payroll/${payroll.id}/mark-paid`, { payment_date: new Date().toISOString().split('T')[0] });
+    loadPayrolls(pagination.value?.current_page || 1);
+  } catch (err) {
+    await alert({
+      title: 'Error',
+      message: err.response?.data?.message || 'Failed to mark as paid',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
+  }
+};
+
+const loadPayrollDetailData = async (payroll) => {
+  const response = await axios.get(`/payroll/${payroll.id}`);
+  const data = response.data;
+
+  payrollDetails.value.earnings = data.details?.filter(d => d.salary_component?.type === 'earning') || [];
+  payrollDetails.value.deductions = data.details?.filter(d => d.salary_component?.type === 'deduction') || [];
+
+  try {
+    const loansResponse = await axios.get('/loans', {
+      params: { employee_id: payroll.employee_id, status: 'active' }
+    });
+    payrollDetails.value.loanDeductions = loansResponse.data.data || [];
+  } catch {
+    payrollDetails.value.loanDeductions = [];
+  }
+
+  try {
+    const advancesResponse = await axios.get('/travel-expenses/advance-requests', {
+      params: { employee_id: payroll.employee_id, status: 'paid' }
+    });
+    const advances = advancesResponse.data.data || advancesResponse.data || [];
+    payrollDetails.value.advanceDeductions = (Array.isArray(advances) ? advances : [])
+      .filter(a => a.balance_amount > 0)
+      .map(a => ({
+        ...a,
+        deduction_amount: a.installment_amount || (a.balance_amount / (a.installments || 1))
+      }));
+  } catch {
+    payrollDetails.value.advanceDeductions = [];
+  }
+
+  return data;
 };
 
 const viewPayrollDetails = async (payroll) => {
   selectedPayroll.value = payroll;
   showDetailsModal.value = true;
-  
   try {
-    // Fetch detailed payroll info
-    const response = await axios.get(`/payroll/${payroll.id}`);
-    const data = response.data;
-    
-    // Separate earnings and deductions from payroll details
-    payrollDetails.value.earnings = data.details?.filter(d => d.salary_component?.type === 'earning') || [];
-    payrollDetails.value.deductions = data.details?.filter(d => d.salary_component?.type === 'deduction') || [];
-    
-    // Fetch loan deductions for this employee/period
-    const loansResponse = await axios.get('/loans', {
-      params: { employee_id: payroll.employee_id, status: 'active' }
-    });
-    payrollDetails.value.loanDeductions = loansResponse.data.data || [];
-    
-    // Fetch advance deductions
-    const advancesResponse = await axios.get('/advance-requests', {
-      params: { employee_id: payroll.employee_id, status: 'paid' }
-    });
-    const advances = advancesResponse.data || [];
-    payrollDetails.value.advanceDeductions = advances.filter(a => a.balance_amount > 0).map(a => ({
-      ...a,
-      deduction_amount: a.installment_amount || (a.balance_amount / (a.installments || 1))
-    }));
+    await loadPayrollDetailData(payroll);
   } catch (err) {
     console.error('Failed to fetch payroll details:', err);
+  }
+};
+
+const printPayslip = async (payroll) => {
+  try {
+    selectedPayroll.value = payroll;
+    await loadPayrollDetailData(payroll);
+  } catch (err) {
+    console.error('Failed to load payslip data:', err);
+  }
+
+  const emp = getEmployeeName(payroll.employee);
+  const period = `${months.find(m => m.value == payroll.month)?.label || payroll.month} ${payroll.year}`;
+  const earningsRows = [
+    `<tr><td style="padding:6px 0">Basic Salary</td><td style="text-align:right;padding:6px 0">${formatCurrency(payroll.basic_salary)}</td></tr>`,
+    ...(payrollDetails.value.earnings || []).map(e =>
+      `<tr><td style="padding:6px 0">${e.salary_component?.name || 'Earning'}</td><td style="text-align:right;padding:6px 0;color:#15803d">+${formatCurrency(e.amount)}</td></tr>`
+    ),
+    payroll.overtime_amount > 0
+      ? `<tr><td style="padding:6px 0">Overtime (${payroll.overtime_hours || 0} hrs)</td><td style="text-align:right;padding:6px 0;color:#15803d">+${formatCurrency(payroll.overtime_amount)}</td></tr>`
+      : '',
+    payroll.bonus_amount > 0
+      ? `<tr><td style="padding:6px 0">Bonus</td><td style="text-align:right;padding:6px 0;color:#15803d">+${formatCurrency(payroll.bonus_amount)}</td></tr>`
+      : '',
+  ].join('');
+
+  const deductionRows = [
+    ...(payrollDetails.value.deductions || []).map(d =>
+      `<tr><td style="padding:6px 0">${d.salary_component?.name || 'Deduction'}</td><td style="text-align:right;padding:6px 0;color:#dc2626">-${formatCurrency(d.amount)}</td></tr>`
+    ),
+    ...(payrollDetails.value.loanDeductions || []).map(l =>
+      `<tr><td style="padding:6px 0">${l.loan_type || 'Loan'} (${l.loan_number || ''})</td><td style="text-align:right;padding:6px 0;color:#dc2626">-${formatCurrency(l.installment_amount)}</td></tr>`
+    ),
+  ].join('');
+
+  const html = `<!DOCTYPE html><html><head><title>Payslip - ${emp}</title>
+    <style>
+      body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:32px;max-width:720px;margin:0 auto}
+      h1{font-size:22px;margin:0 0 4px} h2{font-size:14px;color:#555;font-weight:normal;margin:0 0 24px}
+      .meta{display:flex;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #111}
+      .meta div{font-size:13px;line-height:1.6} table{width:100%;border-collapse:collapse;font-size:13px}
+      .section{margin-top:20px} .section h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px;color:#444}
+      .total{margin-top:24px;padding:16px;background:#f5f5f5;border:1px solid #ddd;display:flex;justify-content:space-between;align-items:center}
+      .total strong{font-size:20px} .footer{margin-top:32px;font-size:11px;color:#777;text-align:center}
+      @media print{body{padding:16px} button{display:none}}
+    </style></head><body>
+    <h1>Payslip</h1>
+    <h2>HRMS · Salary Statement</h2>
+    <div class="meta">
+      <div><strong>${emp}</strong><br>Code: ${payroll.employee?.employee_code || '—'}<br>Department: ${payroll.employee?.department?.name || '—'}</div>
+      <div style="text-align:right">Period: <strong>${period}</strong><br>Status: ${capitalise(payroll.status)}<br>Working Days: ${payroll.working_days || 0} · Present: ${payroll.present_days || 0}</div>
+    </div>
+    <div class="section"><h3>Earnings</h3><table>${earningsRows}
+      <tr style="border-top:1px solid #ddd"><td style="padding-top:8px;font-weight:bold">Total Earnings</td><td style="text-align:right;padding-top:8px;font-weight:bold;color:#15803d">${formatCurrency((payroll.total_earnings || 0) + (payroll.overtime_amount || 0) + (payroll.bonus_amount || 0))}</td></tr>
+    </table></div>
+    <div class="section"><h3>Deductions</h3><table>${deductionRows || '<tr><td style="padding:6px 0;color:#777">No itemized deductions</td><td></td></tr>'}
+      <tr style="border-top:1px solid #ddd"><td style="padding-top:8px;font-weight:bold">Total Deductions</td><td style="text-align:right;padding-top:8px;font-weight:bold;color:#dc2626">${formatCurrency(payroll.total_deductions)}</td></tr>
+    </table></div>
+    <div class="total"><span>Net Salary Payable</span><strong>${formatCurrency(payroll.net_salary)}</strong></div>
+    <div class="footer">Generated on ${new Date().toLocaleDateString('en-PK')} · This is a computer-generated payslip</div>
+    <script>window.onload=()=>window.print()<\/script>
+    </body></html>`;
+
+  const win = window.open('', '_blank', 'width=800,height=900');
+  if (win) {
+    win.document.write(html);
+    win.document.close();
   }
 };
 

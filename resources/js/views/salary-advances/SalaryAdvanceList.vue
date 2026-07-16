@@ -422,8 +422,10 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import SearchableSelect from '../../components/SearchableSelect.vue';
 import { useNotification } from '@/composables/useNotification';
+import { useDialog } from '@/composables/useDialog';
 
 const { success, error: showError, info } = useNotification();
+const { confirm, alert } = useDialog();
 
 const advances = ref([]);
 const employees = ref([]);
@@ -521,7 +523,13 @@ const handleSearch = () => {
 
 const submitAdvanceRequest = async () => {
     if (!advanceForm.value.employee_id) {
-        alert('Please select an employee');
+        await alert({
+            title: 'Error',
+            message: 'Please select an employee',
+            confirmText: 'OK',
+            cancelText: 'Close',
+            variant: 'danger',
+        });
         return;
     }
 
@@ -580,7 +588,13 @@ const closeApproveModal = () => {
 };
 
 const approveAdvance = async () => {
-    if (!confirm('Are you sure you want to approve this salary advance request?')) {
+    if (!(await confirm({
+        title: 'Approve advance?',
+        message: 'Are you sure you want to approve this salary advance request?',
+        confirmText: 'Approve',
+        cancelText: 'Cancel',
+        variant: 'primary',
+    }))) {
         return;
     }
 
@@ -614,7 +628,13 @@ const rejectAdvance = async () => {
         return;
     }
 
-    if (!confirm('Are you sure you want to reject this salary advance request?')) {
+    if (!(await confirm({
+        title: 'Reject advance?',
+        message: 'Are you sure you want to reject this salary advance request?',
+        confirmText: 'Reject',
+        cancelText: 'Cancel',
+        variant: 'danger',
+    }))) {
         return;
     }
 
@@ -647,7 +667,13 @@ const closeDisburseModal = () => {
 };
 
 const disburseAdvance = async () => {
-    if (!confirm('Are you sure you want to mark this advance as disbursed?')) {
+    if (!(await confirm({
+        title: 'Confirm',
+        message: 'Are you sure you want to mark this advance as disbursed?',
+        confirmText: 'Disburse',
+        cancelText: 'Cancel',
+        variant: 'primary',
+    }))) {
         return;
     }
 

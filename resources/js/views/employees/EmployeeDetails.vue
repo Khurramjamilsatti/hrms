@@ -223,33 +223,88 @@
 
       <!-- Documents -->
       <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
-        <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Documents
-        </h3>
-        <div v-if="employee.documents && employee.documents.length > 0">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Documents
+          </h3>
+          <button @click="showDocModal = true" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+            Upload
+          </button>
+        </div>
+        <div v-if="documents.length > 0">
           <div class="overflow-hidden rounded-lg border border-gray-200">
             <table class="w-full text-sm">
               <thead class="bg-gray-50">
                 <tr>
                   <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-600 uppercase">Document</th>
                   <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
+                  <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-600 uppercase">Expiry</th>
                   <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-600 uppercase">Uploaded</th>
+                  <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-600 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
-                <tr v-for="doc in employee.documents" :key="doc.id" class="hover:bg-gray-50">
+                <tr v-for="doc in documents" :key="doc.id" class="hover:bg-gray-50">
                   <td class="px-4 py-2.5 font-medium text-gray-900">{{ doc.title || doc.file_name }}</td>
                   <td class="px-4 py-2.5 text-gray-600 capitalize">{{ doc.document_type?.replace('_', ' ') || '—' }}</td>
+                  <td class="px-4 py-2.5 text-gray-600">{{ formatDate(doc.expiry_date) }}</td>
                   <td class="px-4 py-2.5 text-gray-600">{{ formatDate(doc.created_at) }}</td>
+                  <td class="px-4 py-2.5 text-right space-x-2">
+                    <a v-if="doc.file_path" :href="`/storage/${doc.file_path}`" target="_blank" class="text-xs font-medium text-gray-700 hover:text-gray-900">View</a>
+                    <button @click="deleteDocument(doc)" class="text-xs font-medium text-red-600 hover:text-red-800">Delete</button>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
         <div v-else class="text-sm text-gray-400 text-center py-4">No documents uploaded</div>
+      </div>
+
+      <!-- Upload Document Modal -->
+      <div v-if="showDocModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-900">Upload Document</h3>
+            <button @click="showDocModal = false" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+          </div>
+          <div class="px-6 py-5 space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Title</label>
+              <input v-model="docForm.title" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="e.g. CNIC Copy" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Document Type</label>
+              <select v-model="docForm.document_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <option value="cnic">CNIC / National ID</option>
+                <option value="passport">Passport</option>
+                <option value="contract">Contract</option>
+                <option value="degree">Degree / Certificate</option>
+                <option value="experience">Experience Letter</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Expiry Date (optional)</label>
+              <input v-model="docForm.expiry_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">File</label>
+              <input type="file" @change="onDocFileChange" class="w-full text-sm text-gray-600" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+            </div>
+            <div v-if="docError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ docError }}</div>
+          </div>
+          <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
+            <button @click="showDocModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+            <button @click="uploadDocument" :disabled="uploadingDoc" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">{{ uploadingDoc ? 'Uploading...' : 'Upload' }}</button>
+          </div>
+        </div>
       </div>
 
       <!-- Contracts -->
@@ -436,13 +491,25 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import { useDialog } from '@/composables/useDialog';
 
 const route = useRoute();
+const { confirm, alert } = useDialog();
 const employee = ref(null);
 const loading = ref(true);
 const error = ref(null);
 const incrementHistory = ref([]);
 const loadingIncrements = ref(false);
+const documents = ref([]);
+const showDocModal = ref(false);
+const uploadingDoc = ref(false);
+const docError = ref(null);
+const docForm = ref({
+  title: '',
+  document_type: 'cnic',
+  expiry_date: '',
+  file: null,
+});
 
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 const isAdminOrManager = computed(() => user.role === 'admin' || user.role === 'manager');
@@ -492,13 +559,76 @@ const fetchIncrementHistory = async () => {
   }
 };
 
+const loadDocuments = async () => {
+  try {
+    const res = await axios.get(`/employees/${route.params.id}/documents`);
+    documents.value = res.data.data || res.data || [];
+  } catch (err) {
+    documents.value = employee.value?.documents || [];
+  }
+};
+
+const onDocFileChange = (e) => {
+  docForm.value.file = e.target.files?.[0] || null;
+};
+
+const uploadDocument = async () => {
+  docError.value = null;
+  if (!docForm.value.title || !docForm.value.file) {
+    docError.value = 'Title and file are required';
+    return;
+  }
+  uploadingDoc.value = true;
+  try {
+    const formData = new FormData();
+    formData.append('title', docForm.value.title);
+    formData.append('document_type', docForm.value.document_type);
+    formData.append('file', docForm.value.file);
+    if (docForm.value.expiry_date) {
+      formData.append('expiry_date', docForm.value.expiry_date);
+    }
+    await axios.post(`/employees/${route.params.id}/documents`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    showDocModal.value = false;
+    docForm.value = { title: '', document_type: 'cnic', expiry_date: '', file: null };
+    await loadDocuments();
+  } catch (err) {
+    docError.value = err.response?.data?.message || 'Failed to upload document';
+  } finally {
+    uploadingDoc.value = false;
+  }
+};
+
+const deleteDocument = async (doc) => {
+  if (!(await confirm({
+    title: 'Delete document?',
+    message: `Delete "${doc.title}"?`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  }))) return;
+  try {
+    await axios.delete(`/employees/${route.params.id}/documents/${doc.id}`);
+    await loadDocuments();
+  } catch (err) {
+    await alert({
+      title: 'Error',
+      message: err.response?.data?.message || 'Failed to delete document',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
+  }
+};
+
 onMounted(async () => {
   try {
     const res = await axios.get(`/employees/${route.params.id}`);
     employee.value = res.data;
-    
-    // Fetch increment history
+    documents.value = res.data.documents || [];
     fetchIncrementHistory();
+    loadDocuments();
   } catch (err) {
     error.value = err.response?.data?.message || 'Failed to load employee details';
   } finally {

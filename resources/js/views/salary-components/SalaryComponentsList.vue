@@ -174,7 +174,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
+import { useDialog } from '@/composables/useDialog';
 
+const { confirm } = useDialog();
 const components = ref([]);
 const showAddModal = ref(false);
 
@@ -217,7 +219,14 @@ const addComponent = async () => {
 };
 
 const toggleStatus = async (component) => {
-    if (!confirm(`Are you sure you want to ${component.is_active ? 'deactivate' : 'activate'} this component?`)) {
+    const action = component.is_active ? 'deactivate' : 'activate';
+    if (!(await confirm({
+        title: component.is_active ? 'Deactivate component?' : 'Activate component?',
+        message: `Are you sure you want to ${action} this component?`,
+        confirmText: component.is_active ? 'Deactivate' : 'Activate',
+        cancelText: 'Cancel',
+        variant: component.is_active ? 'danger' : 'primary',
+    }))) {
         return;
     }
 

@@ -2,16 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\LeaveApplication;
 use App\Models\Employee;
 use App\Models\EmployeeLeaveBalance;
 use App\Models\Notification;
+use App\Services\PayrollGenerationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class LeaveApplicationController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
+    public function __construct(protected PayrollGenerationService $payrollService)
+    {
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -40,9 +48,16 @@ class LeaveApplicationController extends Controller
                 $query->whereRaw('1 = 0');
             }
         } elseif ($user->hasRole('manager')) {
-            // Managers see their team's leave applications
-            $teamEmployeeIds = Employee::where('manager_id', $user->id)->pluck('id');
-            $query->whereIn('employee_id', $teamEmployeeIds);
+            // Managers see their team's leave applications + their own
+            $teamEmployeeIds = Employee::where('manager_id', $user->id)->pluck('id')->toArray();
+            if ($user->employee) {
+                $teamEmployeeIds[] = $user->employee->id;
+            }
+            if (!empty($teamEmployeeIds)) {
+                $query->whereIn('employee_id', $teamEmployeeIds);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
         // hr_admin, super_admin, and admin see all leave applications
 
@@ -67,13 +82,27 @@ class LeaveApplicationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'employee_id' => 'nullable|exists:employees,id',
             'leave_type_id' => 'required|exists:leave_types,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'required|string',
             'document_path' => 'nullable|string',
         ]);
+
+        $user = $request->user()->loadMissing('employee');
+        $canApplyForOthers = in_array($user->role, ['admin', 'hr_admin', 'super_admin'], true);
+
+        if (empty($validated['employee_id'])) {
+            if (!$user->employee) {
+                return response()->json([
+                    'message' => 'No employee profile is linked to your account. Please select an employee.',
+                ], 422);
+            }
+            $validated['employee_id'] = $user->employee->id;
+        } elseif (!$canApplyForOthers && $user->employee?->id != $validated['employee_id']) {
+            return response()->json(['message' => 'You can only apply leave for yourself'], 403);
+        }
 
         $startDate = Carbon::parse($validated['start_date']);
         $endDate = Carbon::parse($validated['end_date']);
@@ -118,8 +147,10 @@ class LeaveApplicationController extends Controller
         return response()->json($leaveApplication->load(['employee.user', 'employee.department', 'leaveType']), 201);
     }
 
-    public function show(LeaveApplication $leaveApplication)
+    public function show(Request $request, LeaveApplication $leaveApplication)
     {
+        $this->assertCanAccessEmployeeRecord($request, $leaveApplication->employee_id);
+
         return response()->json($leaveApplication->load(['employee.user', 'employee.department', 'leaveType', 'firstApprover', 'finalApprover']));
     }
 
@@ -142,11 +173,12 @@ class LeaveApplicationController extends Controller
         ]);
 
         $employee = $leaveApplication->employee;
-        $isSectionEmployee = $employee && $employee->department_id !== null;
-        
-        // Section Head: First level approval
+        if (!$employee) {
+            return response()->json(['message' => 'Employee record for this leave was not found'], 404);
+        }
+
+        // Section Head: First level approval for same department
         if ($user->hasRole('section_head') && $leaveApplication->approval_level === 'pending') {
-            // Verify section head can approve this leave
             if (!$user->employee || $user->employee->department_id !== $employee->department_id) {
                 return response()->json(['message' => 'You can only approve leaves from your section'], 403);
             }
@@ -164,17 +196,27 @@ class LeaveApplicationController extends Controller
             ]);
         }
 
-        // Admin/HR: Final approval
-        if (($user->hasRole('admin') || $user->hasRole('hr_admin') || $user->hasRole('super_admin'))) {
-            // Check if the employee is a section head
-            $isEmployeeASectionHead = $employee->user && $employee->user->hasRole('section_head');
-            
-            // For regular section employees: Must have first approval from section head
-            // For section heads' own leave: Can be approved directly by admin
-            if ($isSectionEmployee && !$isEmployeeASectionHead && $leaveApplication->approval_level !== 'first_approved') {
-                return response()->json(['message' => 'This leave requires section head approval first'], 400);
+        // Manager: First level approval for direct reports
+        if ($user->hasRole('manager') && $leaveApplication->approval_level === 'pending') {
+            if ($employee->manager_id !== $user->id) {
+                return response()->json(['message' => 'You can only approve leaves for your team'], 403);
             }
 
+            $leaveApplication->update([
+                'approval_level' => 'first_approved',
+                'first_approved_by' => $user->id,
+                'first_approved_at' => now(),
+                'first_approval_remarks' => $validated['approval_remarks'] ?? null,
+            ]);
+
+            return response()->json([
+                'message' => 'Leave approved at first level. Pending admin approval.',
+                'leave' => $leaveApplication->load(['employee.user', 'employee.department', 'leaveType', 'firstApprover'])
+            ]);
+        }
+
+        // Admin/HR/Super Admin: Final approval (can finalize directly)
+        if ($user->hasRole('admin') || $user->hasRole('hr_admin') || $user->hasRole('super_admin')) {
             $leaveApplication->update([
                 'status' => 'approved',
                 'approval_level' => 'final_approved',
@@ -194,6 +236,9 @@ class LeaveApplicationController extends Controller
                 $balance->remaining_days -= $leaveApplication->total_days;
                 $balance->save();
             }
+
+            // Sync approved leave days into attendance for payroll
+            $this->payrollService->syncLeaveToAttendance($leaveApplication);
 
             return response()->json([
                 'message' => 'Leave approved successfully',
@@ -224,11 +269,26 @@ class LeaveApplicationController extends Controller
         $employee = $leaveApplication->employee;
         $remarks = $validated['approval_remarks'];
 
-        // Section Head or Admin can reject
+        if (!$employee) {
+            return response()->json(['message' => 'Employee record for this leave was not found'], 404);
+        }
+
+        // Section Head / Manager / Admin can reject
         if ($user->hasRole('section_head')) {
-            // Verify section head can reject this leave
             if (!$user->employee || $user->employee->department_id !== $employee->department_id) {
                 return response()->json(['message' => 'You can only reject leaves from your section'], 403);
+            }
+
+            $leaveApplication->update([
+                'status' => 'rejected',
+                'approval_level' => 'rejected',
+                'first_approved_by' => $user->id,
+                'first_approved_at' => now(),
+                'first_approval_remarks' => $remarks,
+            ]);
+        } elseif ($user->hasRole('manager')) {
+            if ($employee->manager_id !== $user->id) {
+                return response()->json(['message' => 'You can only reject leaves for your team'], 403);
             }
 
             $leaveApplication->update([
@@ -253,9 +313,24 @@ class LeaveApplicationController extends Controller
         return response()->json($leaveApplication->load(['employee.user', 'employee.department', 'leaveType', 'firstApprover', 'finalApprover']));
     }
 
-    public function cancel(LeaveApplication $leaveApplication)
+    public function cancel(Request $request, LeaveApplication $leaveApplication)
     {
-        if ($leaveApplication->status === 'approved' && $leaveApplication->approval_level === 'final_approved') {
+        $user = $request->user()->loadMissing('employee');
+        $isOwner = $user->employee && $user->employee->id === $leaveApplication->employee_id;
+        $isPrivileged = in_array($user->role, ['admin', 'hr_admin', 'super_admin'], true);
+
+        if (!$isOwner && !$isPrivileged) {
+            return response()->json(['message' => 'You can only cancel your own leave applications'], 403);
+        }
+
+        if (!in_array($leaveApplication->status, ['pending', 'approved'], true)) {
+            return response()->json(['message' => 'Only pending or approved leave can be cancelled'], 400);
+        }
+
+        $wasFinallyApproved = $leaveApplication->status === 'approved'
+            && $leaveApplication->approval_level === 'final_approved';
+
+        if ($wasFinallyApproved) {
             // Restore leave balance only if finally approved
             $balance = EmployeeLeaveBalance::where('employee_id', $leaveApplication->employee_id)
                 ->where('leave_type_id', $leaveApplication->leave_type_id)
@@ -267,6 +342,8 @@ class LeaveApplicationController extends Controller
                 $balance->remaining_days += $leaveApplication->total_days;
                 $balance->save();
             }
+
+            $this->payrollService->unsyncLeaveFromAttendance($leaveApplication);
         }
 
         $leaveApplication->update([

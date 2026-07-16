@@ -25,7 +25,7 @@ class DashboardController extends Controller
 
         // Super Admin & HR Admin - Full dashboard
         if ($user->isSuperAdmin() || $user->isHRAdmin() || $user->isAdmin()) {
-            return $this->getAdminDashboard($today, $currentMonth, $currentYear);
+            return $this->getAdminDashboard($user, $today, $currentMonth, $currentYear);
         }
 
         // Section Head - Department-specific dashboard
@@ -42,7 +42,7 @@ class DashboardController extends Controller
         return $this->getEmployeeDashboard($user, $today, $currentMonth, $currentYear);
     }
 
-    private function getAdminDashboard($today, $currentMonth, $currentYear)
+    private function getAdminDashboard($user, $today, $currentMonth, $currentYear)
     {
             // Department distribution
             $departmentStats = Employee::select(
@@ -198,6 +198,17 @@ class DashboardController extends Controller
                 ? round(($actualAttendance / $totalExpectedAttendance) * 100, 2) 
                 : 0;
 
+            $user->loadMissing('employee');
+            $myAttendanceToday = null;
+            if ($user->employee) {
+                $myAttendanceToday = Attendance::where('employee_id', $user->employee->id)
+                    ->whereDate('date', $today)
+                    ->whereNotNull('check_in')
+                    ->whereNull('check_out')
+                    ->orderByDesc('id')
+                    ->first();
+            }
+
             return response()->json([
                 'total_employees' => Employee::where('employment_status', 'active')->count(),
                 'present_today' => Attendance::where('date', $today->format('Y-m-d'))
@@ -212,6 +223,8 @@ class DashboardController extends Controller
                     ->count(),
                 'recent_hires' => Employee::where('joining_date', '>=', Carbon::now()->subDays(30))
                     ->count(),
+                'has_employee_profile' => (bool) $user->employee,
+                'my_attendance_today' => $myAttendanceToday,
                 'payroll_stats' => [
                     'total_payroll_current_month' => Payroll::where('month', $currentMonth)
                         ->where('year', $currentYear)
@@ -440,6 +453,14 @@ class DashboardController extends Controller
 
     public function stats(Request $request)
     {
+        $user = $request->user();
+
+        if (!$user || !in_array($user->role, ['super_admin', 'hr_admin', 'admin'], true)) {
+            return response()->json([
+                'message' => 'Unauthorized access to company statistics',
+            ], 403);
+        }
+
         $year = $request->get('year', Carbon::now()->year);
 
         $monthlyPayroll = Payroll::select(

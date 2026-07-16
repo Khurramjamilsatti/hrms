@@ -3,9 +3,13 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\DesignationController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\EmployeeDocumentController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\LeaveApplicationController;
+use App\Http\Controllers\Api\LeaveTypeController;
+use App\Http\Controllers\Api\OvertimeRequestController;
 use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\Api\RecruitmentController;
 use App\Http\Controllers\Api\PerformanceController;
@@ -41,6 +45,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
+    Route::post('/password/change', [AuthController::class, 'changePassword']);
+
+    // Profile
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/profile/picture', [AuthController::class, 'uploadProfilePicture']);
+    Route::get('/profile/stats', [AuthController::class, 'profileStats']);
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
@@ -53,10 +63,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/departments/{department}', [DepartmentController::class, 'update'])->middleware('permission:departments.update');
     Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->middleware('permission:departments.delete');
 
-    // Dropdown data for forms
-    Route::get('/designations', function () {
-        return response()->json(\App\Models\Designation::orderBy('level')->get());
-    });
+    // Designations
+    Route::get('/designations', [DesignationController::class, 'index']);
+    Route::post('/designations', [DesignationController::class, 'store'])->middleware('permission:departments.create');
+    Route::get('/designations/{designation}', [DesignationController::class, 'show'])->middleware('permission:departments.view');
+    Route::put('/designations/{designation}', [DesignationController::class, 'update'])->middleware('permission:departments.update');
+    Route::delete('/designations/{designation}', [DesignationController::class, 'destroy'])->middleware('permission:departments.delete');
 
     // Employees - Permission-based access
     Route::get('/employees/all', [EmployeeController::class, 'getAllEmployees'])->middleware('permission:employees.view');
@@ -67,6 +79,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->middleware('permission:employees.view');
     Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->middleware('permission:employees.update');
     Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->middleware('permission:employees.delete');
+
+    // Employee Documents
+    Route::get('/employees/{employee}/documents', [EmployeeDocumentController::class, 'index'])->middleware('permission:employees.view');
+    Route::post('/employees/{employee}/documents', [EmployeeDocumentController::class, 'store'])->middleware('permission:employees.update');
+    Route::delete('/employees/{employee}/documents/{document}', [EmployeeDocumentController::class, 'destroy'])->middleware('permission:employees.update');
 
     // Attendance - Permission-based access
     Route::prefix('attendance')->group(function () {
@@ -81,9 +98,15 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Leave Types
-    Route::get('/leave-types', function () {
-        return response()->json(\App\Models\LeaveType::where('is_active', true)->get());
-    });
+    Route::get('/leave-types', [LeaveTypeController::class, 'index']);
+    Route::post('/leave-types', [LeaveTypeController::class, 'store'])->middleware('permission:leaves.manage');
+    Route::get('/leave-types/{leaveType}', [LeaveTypeController::class, 'show'])->middleware('permission:leaves.view');
+    Route::put('/leave-types/{leaveType}', [LeaveTypeController::class, 'update'])->middleware('permission:leaves.manage');
+    Route::delete('/leave-types/{leaveType}', [LeaveTypeController::class, 'destroy'])->middleware('permission:leaves.manage');
+
+    // Leave Balances
+    Route::get('/leave-balances', [LeaveTypeController::class, 'balances'])->middleware('permission:leaves.view');
+    Route::post('/leave-balances', [LeaveTypeController::class, 'allocateBalance'])->middleware('permission:leaves.manage');
 
     // Leave Applications - Permission-based access
     Route::prefix('leave-applications')->group(function () {
@@ -96,6 +119,19 @@ Route::middleware('auth:sanctum')->group(function () {
             ->middleware('permission:leaves.approve');
         Route::post('/{leaveApplication}/cancel', [LeaveApplicationController::class, 'cancel'])
             ->middleware('permission:leaves.cancel');
+    });
+
+    // Overtime Requests
+    Route::prefix('overtime-requests')->group(function () {
+        Route::get('/', [OvertimeRequestController::class, 'index'])->middleware('permission:overtime.view');
+        Route::post('/', [OvertimeRequestController::class, 'store'])->middleware('permission:overtime.create');
+        Route::get('/{overtimeRequest}', [OvertimeRequestController::class, 'show'])->middleware('permission:overtime.view');
+        Route::put('/{overtimeRequest}', [OvertimeRequestController::class, 'update'])->middleware('permission:overtime.create');
+        Route::delete('/{overtimeRequest}', [OvertimeRequestController::class, 'destroy'])->middleware('permission:overtime.create');
+        Route::post('/{overtimeRequest}/approve', [OvertimeRequestController::class, 'approve'])
+            ->middleware('permission:overtime.approve');
+        Route::post('/{overtimeRequest}/reject', [OvertimeRequestController::class, 'reject'])
+            ->middleware('permission:overtime.approve');
     });
 
     // Payroll - Permission-based access
@@ -122,6 +158,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/applications', [RecruitmentController::class, 'storeApplication'])->middleware('permission:recruitment.create');
         Route::post('/applications/{application}/status', [RecruitmentController::class, 'updateApplicationStatus'])
             ->middleware('permission:recruitment.manage');
+
+        Route::get('/interviews', [RecruitmentController::class, 'getInterviews'])->middleware('permission:recruitment.view');
+        Route::post('/interviews', [RecruitmentController::class, 'storeInterview'])->middleware('permission:recruitment.create');
+        Route::put('/interviews/{interview}', [RecruitmentController::class, 'updateInterview'])->middleware('permission:recruitment.update');
+
+        Route::get('/offers', [RecruitmentController::class, 'getOffers'])->middleware('permission:recruitment.view');
+        Route::post('/offers', [RecruitmentController::class, 'storeOffer'])->middleware('permission:recruitment.create');
+        Route::put('/offers/{offer}', [RecruitmentController::class, 'updateOffer'])->middleware('permission:recruitment.update');
     });
 
     // Performance Reviews - Permission-based access
@@ -141,12 +185,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('assets')->group(function () {
         Route::get('/', [AssetController::class, 'index'])->middleware('permission:assets.view');
         Route::post('/', [AssetController::class, 'store'])->middleware('permission:assets.create');
+        Route::post('/assign', [AssetController::class, 'assignAsset'])->middleware('permission:assets.assign');
+        Route::get('/assignments/list', [AssetController::class, 'getAssignments'])->middleware('permission:assets.view');
+        Route::post('/assignments/{assignment}/return', [AssetController::class, 'returnAsset'])->middleware('permission:assets.assign');
         Route::get('/{asset}', [AssetController::class, 'show'])->middleware('permission:assets.view');
         Route::put('/{asset}', [AssetController::class, 'update'])->middleware('permission:assets.update');
         Route::delete('/{asset}', [AssetController::class, 'destroy'])->middleware('permission:assets.delete');
-        Route::post('/assign', [AssetController::class, 'assignAsset'])->middleware('permission:assets.assign');
-        Route::post('/assignments/{assignment}/return', [AssetController::class, 'returnAsset'])->middleware('permission:assets.assign');
-        Route::get('/assignments/list', [AssetController::class, 'getAssignments'])->middleware('permission:assets.view');
     });
 
     // Announcements - Permission-based access
@@ -169,11 +213,11 @@ Route::middleware('auth:sanctum')->group(function () {
         
         Route::get('/', [TimesheetController::class, 'getTimesheets'])->middleware('permission:timesheets.view');
         Route::post('/', [TimesheetController::class, 'storeTimesheet'])->middleware('permission:timesheets.create');
+        Route::get('/summary', [TimesheetController::class, 'getTimesheetSummary'])->middleware('permission:timesheets.view');
         Route::put('/{timesheet}', [TimesheetController::class, 'updateTimesheet'])->middleware('permission:timesheets.update');
         Route::post('/{timesheet}/submit', [TimesheetController::class, 'submitTimesheet'])->middleware('permission:timesheets.create');
         Route::post('/{timesheet}/approve', [TimesheetController::class, 'approveTimesheet'])->middleware('permission:timesheets.approve');
         Route::post('/{timesheet}/reject', [TimesheetController::class, 'rejectTimesheet'])->middleware('permission:timesheets.approve');
-        Route::get('/summary', [TimesheetController::class, 'getTimesheetSummary'])->middleware('permission:timesheets.view');
     });
 
     // Onboarding - Permission-based access
@@ -275,11 +319,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Loans - Permission-based access
     Route::prefix('loans')->group(function () {
         Route::get('/', [LoanController::class, 'index'])->middleware('permission:loans.view');
-        Route::post('/', [LoanController::class, 'store'])->middleware('permission:loans.create');
+        Route::post('/', [LoanController::class, 'store'])->middleware('permission:loans.apply');
         Route::get('/{loan}', [LoanController::class, 'show'])->middleware('permission:loans.view');
-        Route::put('/{loan}', [LoanController::class, 'update'])->middleware('permission:loans.update');
-        Route::delete('/{loan}', [LoanController::class, 'destroy'])->middleware('permission:loans.delete');
-        
+        Route::put('/{loan}', [LoanController::class, 'update'])->middleware('permission:loans.manage');
+        Route::delete('/{loan}', [LoanController::class, 'destroy'])->middleware('permission:loans.manage');
+
         Route::post('/{loan}/approve', [LoanController::class, 'approve'])->middleware('permission:loans.approve');
         Route::post('/{loan}/reject', [LoanController::class, 'reject'])->middleware('permission:loans.approve');
         Route::post('/{loan}/disburse', [LoanController::class, 'disburse'])->middleware('permission:loans.manage');
@@ -288,70 +332,69 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Salary Advances - Permission-based access
     Route::prefix('salary-advances')->group(function () {
-        Route::get('/', [SalaryAdvanceController::class, 'index'])->middleware('permission:salary-advance.view');
-        Route::post('/', [SalaryAdvanceController::class, 'store'])->middleware('permission:salary-advance.create');
-        Route::get('/{salaryAdvance}', [SalaryAdvanceController::class, 'show'])->middleware('permission:salary-advance.view');
-        Route::put('/{salaryAdvance}', [SalaryAdvanceController::class, 'update'])->middleware('permission:salary-advance.update');
-        Route::delete('/{salaryAdvance}', [SalaryAdvanceController::class, 'destroy'])->middleware('permission:salary-advance.delete');
-        
-        Route::post('/{salaryAdvance}/approve', [SalaryAdvanceController::class, 'approve'])->middleware('permission:salary-advance.approve');
-        Route::post('/{salaryAdvance}/reject', [SalaryAdvanceController::class, 'reject'])->middleware('permission:salary-advance.approve');
-        Route::post('/{salaryAdvance}/disburse', [SalaryAdvanceController::class, 'disburse'])->middleware('permission:salary-advance.approve');
+        Route::get('/', [SalaryAdvanceController::class, 'index'])->middleware('permission:salary_advances.view');
+        Route::post('/', [SalaryAdvanceController::class, 'store'])->middleware('permission:salary_advances.request');
+        Route::get('/{salaryAdvance}', [SalaryAdvanceController::class, 'show'])->middleware('permission:salary_advances.view');
+        Route::put('/{salaryAdvance}', [SalaryAdvanceController::class, 'update'])->middleware('permission:salary_advances.request');
+        Route::delete('/{salaryAdvance}', [SalaryAdvanceController::class, 'destroy'])->middleware('permission:salary_advances.request');
+
+        Route::post('/{salaryAdvance}/approve', [SalaryAdvanceController::class, 'approve'])->middleware('permission:salary_advances.approve');
+        Route::post('/{salaryAdvance}/reject', [SalaryAdvanceController::class, 'reject'])->middleware('permission:salary_advances.approve');
+        Route::post('/{salaryAdvance}/disburse', [SalaryAdvanceController::class, 'disburse'])->middleware('permission:salary_advances.approve');
     });
 
     // Salary Components & Employee Salaries - Permission-based access
     Route::prefix('salary-components')->group(function () {
-        Route::get('/', [SalaryComponentController::class, 'index'])->middleware('permission:salary-components.view');
-        
-        // Master Salary Components CRUD
-        Route::post('/', [SalaryComponentController::class, 'store'])->middleware('permission:salary-components.create');
-        Route::put('/{id}', [SalaryComponentController::class, 'updateMaster'])->middleware('permission:salary-components.update');
-        Route::delete('/{id}', [SalaryComponentController::class, 'destroyMaster'])->middleware('permission:salary-components.delete');
-        
-        // Employee Salary Management
+        Route::get('/', [SalaryComponentController::class, 'index'])->middleware('permission:salary_components.view');
+
+        // Employee Salary Management (static paths before /{id})
         Route::get('/employees/{employeeId}', [SalaryComponentController::class, 'getEmployeeSalary'])
-            ->middleware('permission:salary-components.view');
+            ->middleware('permission:salary_components.view');
         Route::post('/employees/{employeeId}', [SalaryComponentController::class, 'storeEmployeeSalary'])
-            ->middleware('permission:salary-components.manage');
-        Route::put('/components/{componentId}', [SalaryComponentController::class, 'updateComponent'])
-            ->middleware('permission:salary-components.update');
-        Route::delete('/components/{componentId}', [SalaryComponentController::class, 'deleteComponent'])
-            ->middleware('permission:salary-components.delete');
+            ->middleware('permission:salary_components.manage');
         Route::get('/employees/{employeeId}/increment-history', [SalaryComponentController::class, 'getIncrementHistory'])
-            ->middleware('permission:salary-components.view');
+            ->middleware('permission:salary_components.view');
         Route::post('/employees/{employeeId}/apply-increment', [SalaryComponentController::class, 'applyIncrement'])
-            ->middleware('permission:salary-components.manage');
+            ->middleware('permission:salary_components.manage');
+        Route::put('/components/{componentId}', [SalaryComponentController::class, 'updateComponent'])
+            ->middleware('permission:salary_components.manage');
+        Route::delete('/components/{componentId}', [SalaryComponentController::class, 'deleteComponent'])
+            ->middleware('permission:salary_components.manage');
+
+        // Master Salary Components CRUD
+        Route::post('/', [SalaryComponentController::class, 'store'])->middleware('permission:salary_components.manage');
+        Route::put('/{id}', [SalaryComponentController::class, 'updateMaster'])->middleware('permission:salary_components.manage');
+        Route::delete('/{id}', [SalaryComponentController::class, 'destroyMaster'])->middleware('permission:salary_components.manage');
     });
 
     // CV Bank - Permission-based access
     Route::prefix('cvs')->group(function () {
-        Route::get('/', [CvBankController::class, 'index'])->middleware('permission:cv-bank.view');
-        Route::post('/', [CvBankController::class, 'store'])->middleware('permission:cv-bank.create');
-        Route::get('/{cv}', [CvBankController::class, 'show'])->middleware('permission:cv-bank.view');
-        Route::post('/{cv}', [CvBankController::class, 'update'])->middleware('permission:cv-bank.update'); // POST for file upload support
-        Route::delete('/{cv}', [CvBankController::class, 'destroy'])->middleware('permission:cv-bank.delete');
-        Route::get('/{cv}/download', [CvBankController::class, 'download'])->middleware('permission:cv-bank.view');
-        
+        Route::get('/', [CvBankController::class, 'index'])->middleware('permission:cv_bank.view');
+        Route::post('/', [CvBankController::class, 'store'])->middleware('permission:cv_bank.manage');
         Route::get('/employees/{employeeId}/history', [CvBankController::class, 'getEmployeeCvHistory'])
-            ->middleware('permission:cv-bank.view');
+            ->middleware('permission:cv_bank.view');
+        Route::get('/{cv}/download', [CvBankController::class, 'download'])->middleware('permission:cv_bank.view');
+        Route::get('/{cv}', [CvBankController::class, 'show'])->middleware('permission:cv_bank.view');
+        Route::post('/{cv}', [CvBankController::class, 'update'])->middleware('permission:cv_bank.manage'); // POST for file upload support
+        Route::delete('/{cv}', [CvBankController::class, 'destroy'])->middleware('permission:cv_bank.manage');
     });
 
     // Deployments - Permission-based access
     Route::prefix('deployments')->group(function () {
         Route::get('/', [DeploymentController::class, 'index'])->middleware('permission:deployments.view');
-        Route::get('/{deployment}', [DeploymentController::class, 'show'])->middleware('permission:deployments.view');
         Route::get('/employees/{employeeId}/history', [DeploymentController::class, 'getEmployeeDeploymentHistory'])
             ->middleware('permission:deployments.view');
-        
-        Route::post('/', [DeploymentController::class, 'store'])->middleware('permission:deployments.create');
-        Route::put('/{deployment}', [DeploymentController::class, 'update'])->middleware('permission:deployments.update');
-        Route::delete('/{deployment}', [DeploymentController::class, 'destroy'])->middleware('permission:deployments.delete');
-        Route::post('/{deployment}/approve', [DeploymentController::class, 'approve'])->middleware('permission:deployments.approve');
-        Route::post('/{deployment}/activate', [DeploymentController::class, 'activate'])->middleware('permission:deployments.approve');
-        Route::post('/{deployment}/complete', [DeploymentController::class, 'complete'])->middleware('permission:deployments.manage');
-        Route::post('/{deployment}/extend', [DeploymentController::class, 'extend'])->middleware('permission:deployments.update');
         Route::post('/extensions/{extension}/approve', [DeploymentController::class, 'approveExtension'])
-            ->middleware('permission:deployments.approve');
+            ->middleware('permission:deployments.manage');
+
+        Route::post('/', [DeploymentController::class, 'store'])->middleware('permission:deployments.manage');
+        Route::get('/{deployment}', [DeploymentController::class, 'show'])->middleware('permission:deployments.view');
+        Route::put('/{deployment}', [DeploymentController::class, 'update'])->middleware('permission:deployments.manage');
+        Route::delete('/{deployment}', [DeploymentController::class, 'destroy'])->middleware('permission:deployments.manage');
+        Route::post('/{deployment}/approve', [DeploymentController::class, 'approve'])->middleware('permission:deployments.manage');
+        Route::post('/{deployment}/activate', [DeploymentController::class, 'activate'])->middleware('permission:deployments.manage');
+        Route::post('/{deployment}/complete', [DeploymentController::class, 'complete'])->middleware('permission:deployments.manage');
+        Route::post('/{deployment}/extend', [DeploymentController::class, 'extend'])->middleware('permission:deployments.manage');
     });
 
     // Shifts Management - Permission-based access
@@ -498,8 +541,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // User Role Assignment (Super Admin only)
     Route::middleware('super_admin')->prefix('users')->group(function () {
+        Route::get('/', [UserRoleController::class, 'index']);
         Route::post('/{user}/assign-role', [UserRoleController::class, 'assignRole']);
         Route::delete('/{user}/remove-role', [UserRoleController::class, 'removeRole']);
+        Route::post('/{user}/toggle-active', [UserRoleController::class, 'toggleActive']);
         Route::post('/{user}/grant-permission', [UserRoleController::class, 'grantPermission']);
         Route::post('/{user}/revoke-permission', [UserRoleController::class, 'revokePermission']);
         Route::get('/{user}/permissions', [UserRoleController::class, 'permissions']);

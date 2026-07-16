@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\ProjectTask;
@@ -11,12 +12,14 @@ use Illuminate\Support\Facades\DB;
 
 class TimesheetController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     // Projects
-    public function getProjects()
+    public function getProjects(Request $request)
     {
         $projects = Project::with(['manager', 'client'])
             ->latest()
-            ->paginate(15);
+            ->paginate($request->per_page ?? 15);
         
         return response()->json($projects);
     }
@@ -106,6 +109,9 @@ class TimesheetController extends Controller
         $query = Timesheet::with(['employee.user', 'project', 'task']);
 
         if ($request->user()->role === 'employee') {
+            if (!$request->user()->employee) {
+                return response()->json(['data' => []]);
+            }
             $query->where('employee_id', $request->user()->employee->id);
         } elseif ($request->filled('employee_id')) {
             $query->where('employee_id', $request->employee_id);
@@ -138,14 +144,17 @@ class TimesheetController extends Controller
                   ->whereYear('date', $request->year);
         }
 
-        $timesheets = $query->latest('date')->paginate($request->per_page ?? 20);
+        $timesheets = $query
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate($request->per_page ?? 20);
         return response()->json($timesheets);
     }
 
     public function storeTimesheet(Request $request)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'employee_id' => 'nullable|exists:employees,id',
             'project_id' => 'required|exists:projects,id',
             'task_id' => 'nullable|exists:project_tasks,id',
             'date' => 'required|date',
@@ -153,22 +162,39 @@ class TimesheetController extends Controller
             'end_time' => 'required|date_format:H:i|after:start_time',
             'description' => 'nullable|string',
             'billable' => 'nullable|boolean',
+            'status' => 'nullable|in:draft,submitted',
         ]);
+
+        $user = $request->user()->loadMissing('employee');
+        $canEnterForOthers = in_array($user->role, ['admin', 'hr_admin', 'super_admin', 'manager', 'section_head'], true);
+
+        if (empty($validated['employee_id'])) {
+            if (!$user->employee) {
+                return response()->json([
+                    'message' => 'No employee profile is linked to your account. Please select an employee.',
+                ], 422);
+            }
+            $validated['employee_id'] = $user->employee->id;
+        } elseif (!$canEnterForOthers && $user->employee?->id != $validated['employee_id']) {
+            return response()->json(['message' => 'You can only create timesheets for yourself'], 403);
+        }
 
         // Calculate hours worked in minutes
         $start = \Carbon\Carbon::parse($validated['start_time']);
         $end = \Carbon\Carbon::parse($validated['end_time']);
         $validated['hours_worked'] = $end->diffInMinutes($start);
-        $validated['status'] = 'draft';
+        $validated['status'] = $validated['status'] ?? 'draft';
+        $validated['billable'] = $validated['billable'] ?? true;
 
         $timesheet = Timesheet::create($validated);
-        return response()->json($timesheet->load(['employee', 'project', 'task']), 201);
+        return response()->json($timesheet->load(['employee.user', 'project', 'task']), 201);
     }
 
     public function updateTimesheet(Request $request, $id)
     {
         $timesheet = Timesheet::findOrFail($id);
-        
+        $this->assertCanAccessEmployeeRecord($request, $timesheet->employee_id);
+
         $validated = $request->validate([
             'project_id' => 'sometimes|exists:projects,id',
             'task_id' => 'nullable|exists:project_tasks,id',
@@ -192,6 +218,7 @@ class TimesheetController extends Controller
     public function submitTimesheet(Request $request, $id)
     {
         $timesheet = Timesheet::findOrFail($id);
+        $this->assertCanAccessEmployeeRecord($request, $timesheet->employee_id);
         $timesheet->update(['status' => 'submitted']);
         return response()->json($timesheet);
     }
@@ -225,9 +252,18 @@ class TimesheetController extends Controller
 
     public function getTimesheetSummary(Request $request)
     {
-        $employeeId = $request->user()->role === 'employee' 
-            ? $request->user()->employee->id 
-            : $request->get('employee_id');
+        if ($request->user()->role === 'employee') {
+            if (!$request->user()->employee) {
+                return response()->json([]);
+            }
+            $employeeId = $request->user()->employee->id;
+        } else {
+            $employeeId = $request->get('employee_id');
+        }
+
+        if (!$employeeId) {
+            return response()->json([]);
+        }
 
         $summary = Timesheet::where('employee_id', $employeeId)
             ->whereMonth('date', $request->get('month', now()->month))

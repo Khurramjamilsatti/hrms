@@ -23,6 +23,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ['name' => 'View Employees', 'slug' => 'employees.view', 'module' => 'employees', 'action' => 'view'],
             ['name' => 'Create Employee', 'slug' => 'employees.create', 'module' => 'employees', 'action' => 'create'],
             ['name' => 'Edit Employee', 'slug' => 'employees.edit', 'module' => 'employees', 'action' => 'edit'],
+            ['name' => 'Update Employee', 'slug' => 'employees.update', 'module' => 'employees', 'action' => 'update'],
             ['name' => 'Delete Employee', 'slug' => 'employees.delete', 'module' => 'employees', 'action' => 'delete'],
             ['name' => 'View Own Profile', 'slug' => 'employees.view_own', 'module' => 'employees', 'action' => 'view_own'],
 
@@ -38,31 +39,50 @@ class RolesAndPermissionsSeeder extends Seeder
             ['name' => 'Approve Leave', 'slug' => 'leaves.approve', 'module' => 'leaves', 'action' => 'approve'],
             ['name' => 'Reject Leave', 'slug' => 'leaves.reject', 'module' => 'leaves', 'action' => 'reject'],
             ['name' => 'Cancel Leave', 'slug' => 'leaves.cancel', 'module' => 'leaves', 'action' => 'cancel'],
+            ['name' => 'Manage Leave Types & Balances', 'slug' => 'leaves.manage', 'module' => 'leaves', 'action' => 'manage'],
+
+            // Overtime
+            ['name' => 'View Overtime', 'slug' => 'overtime.view', 'module' => 'overtime', 'action' => 'view'],
+            ['name' => 'Create Overtime', 'slug' => 'overtime.create', 'module' => 'overtime', 'action' => 'create'],
+            ['name' => 'Approve Overtime', 'slug' => 'overtime.approve', 'module' => 'overtime', 'action' => 'approve'],
 
             // Payroll
             ['name' => 'View Payroll', 'slug' => 'payroll.view', 'module' => 'payroll', 'action' => 'view'],
             ['name' => 'Generate Payroll', 'slug' => 'payroll.generate', 'module' => 'payroll', 'action' => 'generate'],
+            ['name' => 'Create Payroll', 'slug' => 'payroll.create', 'module' => 'payroll', 'action' => 'create'],
             ['name' => 'Process Payroll', 'slug' => 'payroll.process', 'module' => 'payroll', 'action' => 'process'],
+            ['name' => 'Manage Payroll', 'slug' => 'payroll.manage', 'module' => 'payroll', 'action' => 'manage'],
             ['name' => 'View Own Payroll', 'slug' => 'payroll.view_own', 'module' => 'payroll', 'action' => 'view_own'],
 
             // Departments
             ['name' => 'View Departments', 'slug' => 'departments.view', 'module' => 'departments', 'action' => 'view'],
             ['name' => 'Create Department', 'slug' => 'departments.create', 'module' => 'departments', 'action' => 'create'],
             ['name' => 'Edit Department', 'slug' => 'departments.edit', 'module' => 'departments', 'action' => 'edit'],
+            ['name' => 'Update Department', 'slug' => 'departments.update', 'module' => 'departments', 'action' => 'update'],
             ['name' => 'Delete Department', 'slug' => 'departments.delete', 'module' => 'departments', 'action' => 'delete'],
 
             // Recruitment
             ['name' => 'View Recruitment', 'slug' => 'recruitment.view', 'module' => 'recruitment', 'action' => 'view'],
+            ['name' => 'Create Recruitment', 'slug' => 'recruitment.create', 'module' => 'recruitment', 'action' => 'create'],
+            ['name' => 'Update Recruitment', 'slug' => 'recruitment.update', 'module' => 'recruitment', 'action' => 'update'],
+            ['name' => 'Delete Recruitment', 'slug' => 'recruitment.delete', 'module' => 'recruitment', 'action' => 'delete'],
+            ['name' => 'Manage Recruitment', 'slug' => 'recruitment.manage', 'module' => 'recruitment', 'action' => 'manage'],
             ['name' => 'Manage Positions', 'slug' => 'recruitment.positions', 'module' => 'recruitment', 'action' => 'positions'],
             ['name' => 'Manage Applications', 'slug' => 'recruitment.applications', 'module' => 'recruitment', 'action' => 'applications'],
 
             // Performance
             ['name' => 'View Performance', 'slug' => 'performance.view', 'module' => 'performance', 'action' => 'view'],
+            ['name' => 'Create Performance', 'slug' => 'performance.create', 'module' => 'performance', 'action' => 'create'],
+            ['name' => 'Update Performance', 'slug' => 'performance.update', 'module' => 'performance', 'action' => 'update'],
+            ['name' => 'Manage Performance', 'slug' => 'performance.manage', 'module' => 'performance', 'action' => 'manage'],
             ['name' => 'Manage Reviews', 'slug' => 'performance.reviews', 'module' => 'performance', 'action' => 'reviews'],
             ['name' => 'Manage Goals', 'slug' => 'performance.goals', 'module' => 'performance', 'action' => 'goals'],
 
             // Assets
             ['name' => 'View Assets', 'slug' => 'assets.view', 'module' => 'assets', 'action' => 'view'],
+            ['name' => 'Create Assets', 'slug' => 'assets.create', 'module' => 'assets', 'action' => 'create'],
+            ['name' => 'Update Assets', 'slug' => 'assets.update', 'module' => 'assets', 'action' => 'update'],
+            ['name' => 'Delete Assets', 'slug' => 'assets.delete', 'module' => 'assets', 'action' => 'delete'],
             ['name' => 'Manage Assets', 'slug' => 'assets.manage', 'module' => 'assets', 'action' => 'manage'],
             ['name' => 'Assign Assets', 'slug' => 'assets.assign', 'module' => 'assets', 'action' => 'assign'],
 
@@ -70,46 +90,70 @@ class RolesAndPermissionsSeeder extends Seeder
             ['name' => 'View Announcements', 'slug' => 'announcements.view', 'module' => 'announcements', 'action' => 'view'],
             ['name' => 'Create Announcement', 'slug' => 'announcements.create', 'module' => 'announcements', 'action' => 'create'],
             ['name' => 'Edit Announcement', 'slug' => 'announcements.edit', 'module' => 'announcements', 'action' => 'edit'],
+            ['name' => 'Update Announcement', 'slug' => 'announcements.update', 'module' => 'announcements', 'action' => 'update'],
             ['name' => 'Delete Announcement', 'slug' => 'announcements.delete', 'module' => 'announcements', 'action' => 'delete'],
 
             // Timesheets
             ['name' => 'View Timesheets', 'slug' => 'timesheets.view', 'module' => 'timesheets', 'action' => 'view'],
+            ['name' => 'Create Timesheet', 'slug' => 'timesheets.create', 'module' => 'timesheets', 'action' => 'create'],
+            ['name' => 'Update Timesheet', 'slug' => 'timesheets.update', 'module' => 'timesheets', 'action' => 'update'],
             ['name' => 'Submit Timesheet', 'slug' => 'timesheets.submit', 'module' => 'timesheets', 'action' => 'submit'],
             ['name' => 'Approve Timesheet', 'slug' => 'timesheets.approve', 'module' => 'timesheets', 'action' => 'approve'],
+            ['name' => 'Manage Timesheets', 'slug' => 'timesheets.manage', 'module' => 'timesheets', 'action' => 'manage'],
             ['name' => 'Manage Projects', 'slug' => 'timesheets.projects', 'module' => 'timesheets', 'action' => 'projects'],
 
             // Onboarding
             ['name' => 'View Onboarding', 'slug' => 'onboarding.view', 'module' => 'onboarding', 'action' => 'view'],
+            ['name' => 'Create Onboarding', 'slug' => 'onboarding.create', 'module' => 'onboarding', 'action' => 'create'],
+            ['name' => 'Update Onboarding', 'slug' => 'onboarding.update', 'module' => 'onboarding', 'action' => 'update'],
+            ['name' => 'Delete Onboarding', 'slug' => 'onboarding.delete', 'module' => 'onboarding', 'action' => 'delete'],
             ['name' => 'Manage Onboarding', 'slug' => 'onboarding.manage', 'module' => 'onboarding', 'action' => 'manage'],
 
             // Training
             ['name' => 'View Training', 'slug' => 'training.view', 'module' => 'training', 'action' => 'view'],
+            ['name' => 'Create Training', 'slug' => 'training.create', 'module' => 'training', 'action' => 'create'],
+            ['name' => 'Update Training', 'slug' => 'training.update', 'module' => 'training', 'action' => 'update'],
+            ['name' => 'Delete Training', 'slug' => 'training.delete', 'module' => 'training', 'action' => 'delete'],
             ['name' => 'Manage Training', 'slug' => 'training.manage', 'module' => 'training', 'action' => 'manage'],
             ['name' => 'Enroll Training', 'slug' => 'training.enroll', 'module' => 'training', 'action' => 'enroll'],
 
             // Travel & Expenses
             ['name' => 'View Travel & Expenses', 'slug' => 'travel.view', 'module' => 'travel', 'action' => 'view'],
+            ['name' => 'Create Travel Request', 'slug' => 'travel.create', 'module' => 'travel', 'action' => 'create'],
+            ['name' => 'Update Travel Request', 'slug' => 'travel.update', 'module' => 'travel', 'action' => 'update'],
             ['name' => 'Submit Travel Request', 'slug' => 'travel.submit', 'module' => 'travel', 'action' => 'submit'],
             ['name' => 'Approve Travel', 'slug' => 'travel.approve', 'module' => 'travel', 'action' => 'approve'],
+            ['name' => 'Manage Travel', 'slug' => 'travel.manage', 'module' => 'travel', 'action' => 'manage'],
             ['name' => 'Submit Expense', 'slug' => 'travel.expense', 'module' => 'travel', 'action' => 'expense'],
 
             // Shifts
             ['name' => 'View Shifts', 'slug' => 'shifts.view', 'module' => 'shifts', 'action' => 'view'],
+            ['name' => 'Create Shifts', 'slug' => 'shifts.create', 'module' => 'shifts', 'action' => 'create'],
+            ['name' => 'Update Shifts', 'slug' => 'shifts.update', 'module' => 'shifts', 'action' => 'update'],
+            ['name' => 'Delete Shifts', 'slug' => 'shifts.delete', 'module' => 'shifts', 'action' => 'delete'],
             ['name' => 'Manage Shifts', 'slug' => 'shifts.manage', 'module' => 'shifts', 'action' => 'manage'],
             ['name' => 'Assign Shifts', 'slug' => 'shifts.assign', 'module' => 'shifts', 'action' => 'assign'],
 
             // Helpdesk
             ['name' => 'View Tickets', 'slug' => 'helpdesk.view', 'module' => 'helpdesk', 'action' => 'view'],
             ['name' => 'Create Ticket', 'slug' => 'helpdesk.create', 'module' => 'helpdesk', 'action' => 'create'],
+            ['name' => 'Update Ticket', 'slug' => 'helpdesk.update', 'module' => 'helpdesk', 'action' => 'update'],
+            ['name' => 'Delete Ticket', 'slug' => 'helpdesk.delete', 'module' => 'helpdesk', 'action' => 'delete'],
             ['name' => 'Manage Tickets', 'slug' => 'helpdesk.manage', 'module' => 'helpdesk', 'action' => 'manage'],
 
             // Files
             ['name' => 'View Files', 'slug' => 'files.view', 'module' => 'files', 'action' => 'view'],
+            ['name' => 'Create Files', 'slug' => 'files.create', 'module' => 'files', 'action' => 'create'],
+            ['name' => 'Update Files', 'slug' => 'files.update', 'module' => 'files', 'action' => 'update'],
+            ['name' => 'Delete Files', 'slug' => 'files.delete', 'module' => 'files', 'action' => 'delete'],
             ['name' => 'Upload Files', 'slug' => 'files.upload', 'module' => 'files', 'action' => 'upload'],
             ['name' => 'Manage Files', 'slug' => 'files.manage', 'module' => 'files', 'action' => 'manage'],
 
             // Calendar
             ['name' => 'View Calendar', 'slug' => 'calendar.view', 'module' => 'calendar', 'action' => 'view'],
+            ['name' => 'Create Calendar Events', 'slug' => 'calendar.create', 'module' => 'calendar', 'action' => 'create'],
+            ['name' => 'Update Calendar Events', 'slug' => 'calendar.update', 'module' => 'calendar', 'action' => 'update'],
+            ['name' => 'Delete Calendar Events', 'slug' => 'calendar.delete', 'module' => 'calendar', 'action' => 'delete'],
             ['name' => 'Manage Events', 'slug' => 'calendar.manage', 'module' => 'calendar', 'action' => 'manage'],
 
             // Notifications
@@ -174,23 +218,24 @@ class RolesAndPermissionsSeeder extends Seeder
                 'is_active' => true,
                 'permissions' => [
                     'dashboard.view', 'dashboard.stats',
-                    'employees.view', 'employees.create', 'employees.edit', 'employees.delete',
-                    'attendance.view', 'attendance.manage', 'attendance.reports',
-                    'leaves.view', 'leaves.approve', 'leaves.reject',
-                    'payroll.view', 'payroll.generate', 'payroll.process',
-                    'departments.view', 'departments.create', 'departments.edit', 'departments.delete',
-                    'recruitment.view', 'recruitment.positions', 'recruitment.applications',
-                    'performance.view', 'performance.reviews', 'performance.goals',
-                    'assets.view', 'assets.manage', 'assets.assign',
-                    'announcements.view', 'announcements.create', 'announcements.edit', 'announcements.delete',
-                    'timesheets.view', 'timesheets.approve', 'timesheets.projects',
-                    'onboarding.view', 'onboarding.manage',
-                    'training.view', 'training.manage', 'training.enroll',
-                    'travel.view', 'travel.approve', 'travel.expense',
-                    'shifts.view', 'shifts.manage', 'shifts.assign',
-                    'helpdesk.view', 'helpdesk.manage',
-                    'files.view', 'files.upload', 'files.manage',
-                    'calendar.view', 'calendar.manage',
+                    'employees.view', 'employees.create', 'employees.edit', 'employees.update', 'employees.delete',
+                    'attendance.view', 'attendance.checkin', 'attendance.manage', 'attendance.reports',
+                    'leaves.view', 'leaves.apply', 'leaves.approve', 'leaves.reject', 'leaves.cancel', 'leaves.manage',
+                    'overtime.view', 'overtime.create', 'overtime.approve',
+                    'payroll.view', 'payroll.generate', 'payroll.create', 'payroll.process', 'payroll.manage',
+                    'departments.view', 'departments.create', 'departments.edit', 'departments.update', 'departments.delete',
+                    'recruitment.view', 'recruitment.create', 'recruitment.update', 'recruitment.delete', 'recruitment.manage', 'recruitment.positions', 'recruitment.applications',
+                    'performance.view', 'performance.create', 'performance.update', 'performance.manage', 'performance.reviews', 'performance.goals',
+                    'assets.view', 'assets.create', 'assets.update', 'assets.delete', 'assets.manage', 'assets.assign',
+                    'announcements.view', 'announcements.create', 'announcements.edit', 'announcements.update', 'announcements.delete',
+                    'timesheets.view', 'timesheets.create', 'timesheets.update', 'timesheets.submit', 'timesheets.approve', 'timesheets.manage', 'timesheets.projects',
+                    'onboarding.view', 'onboarding.create', 'onboarding.update', 'onboarding.delete', 'onboarding.manage',
+                    'training.view', 'training.create', 'training.update', 'training.delete', 'training.manage', 'training.enroll',
+                    'travel.view', 'travel.create', 'travel.update', 'travel.submit', 'travel.approve', 'travel.manage', 'travel.expense',
+                    'shifts.view', 'shifts.create', 'shifts.update', 'shifts.delete', 'shifts.manage', 'shifts.assign',
+                    'helpdesk.view', 'helpdesk.create', 'helpdesk.update', 'helpdesk.delete', 'helpdesk.manage',
+                    'files.view', 'files.create', 'files.update', 'files.delete', 'files.upload', 'files.manage',
+                    'calendar.view', 'calendar.create', 'calendar.update', 'calendar.delete', 'calendar.manage',
                     'notifications.view', 'notifications.manage',
                     'organization.view',
                     'loans.view', 'loans.approve', 'loans.manage',
@@ -198,6 +243,67 @@ class RolesAndPermissionsSeeder extends Seeder
                     'salary_components.view', 'salary_components.manage',
                     'cv_bank.view', 'cv_bank.manage',
                     'deployments.view', 'deployments.manage',
+                ]
+            ],
+            [
+                'name' => 'Admin',
+                'slug' => 'admin',
+                'description' => 'Legacy admin role with full HR operational access',
+                'is_system_role' => true,
+                'is_active' => true,
+                'permissions' => [
+                    'dashboard.view', 'dashboard.stats',
+                    'employees.view', 'employees.create', 'employees.edit', 'employees.update', 'employees.delete',
+                    'attendance.view', 'attendance.checkin', 'attendance.manage', 'attendance.reports',
+                    'leaves.view', 'leaves.apply', 'leaves.approve', 'leaves.reject', 'leaves.cancel', 'leaves.manage',
+                    'overtime.view', 'overtime.create', 'overtime.approve',
+                    'payroll.view', 'payroll.generate', 'payroll.create', 'payroll.process', 'payroll.manage',
+                    'departments.view', 'departments.create', 'departments.edit', 'departments.update', 'departments.delete',
+                    'recruitment.view', 'recruitment.create', 'recruitment.update', 'recruitment.delete', 'recruitment.manage',
+                    'performance.view', 'performance.create', 'performance.update', 'performance.manage', 'performance.reviews', 'performance.goals',
+                    'assets.view', 'assets.create', 'assets.update', 'assets.delete', 'assets.manage', 'assets.assign',
+                    'announcements.view', 'announcements.create', 'announcements.edit', 'announcements.update', 'announcements.delete',
+                    'timesheets.view', 'timesheets.create', 'timesheets.update', 'timesheets.submit', 'timesheets.approve', 'timesheets.manage',
+                    'onboarding.view', 'onboarding.create', 'onboarding.update', 'onboarding.delete', 'onboarding.manage',
+                    'training.view', 'training.create', 'training.update', 'training.delete', 'training.manage', 'training.enroll',
+                    'travel.view', 'travel.create', 'travel.update', 'travel.submit', 'travel.approve', 'travel.manage', 'travel.expense',
+                    'shifts.view', 'shifts.create', 'shifts.update', 'shifts.delete', 'shifts.manage', 'shifts.assign',
+                    'helpdesk.view', 'helpdesk.create', 'helpdesk.update', 'helpdesk.delete', 'helpdesk.manage',
+                    'files.view', 'files.create', 'files.update', 'files.delete', 'files.upload', 'files.manage',
+                    'calendar.view', 'calendar.create', 'calendar.update', 'calendar.delete', 'calendar.manage',
+                    'notifications.view', 'notifications.manage',
+                    'organization.view',
+                    'loans.view', 'loans.approve', 'loans.manage',
+                    'salary_advances.view', 'salary_advances.approve',
+                    'salary_components.view', 'salary_components.manage',
+                    'cv_bank.view', 'cv_bank.manage',
+                    'deployments.view', 'deployments.manage',
+                ]
+            ],
+            [
+                'name' => 'Section Head',
+                'slug' => 'section_head',
+                'description' => 'Section head with first-level leave and team approvals',
+                'is_system_role' => true,
+                'is_active' => true,
+                'permissions' => [
+                    'dashboard.view', 'dashboard.stats',
+                    'employees.view', 'employees.view_own',
+                    'attendance.view', 'attendance.checkin', 'attendance.reports',
+                    'leaves.view', 'leaves.apply', 'leaves.approve', 'leaves.reject', 'leaves.cancel',
+                    'overtime.view', 'overtime.create', 'overtime.approve',
+                    'departments.view',
+                    'performance.view', 'performance.reviews',
+                    'announcements.view',
+                    'timesheets.view', 'timesheets.create', 'timesheets.update', 'timesheets.submit', 'timesheets.approve',
+                    'training.view',
+                    'travel.view', 'travel.create', 'travel.update', 'travel.submit', 'travel.approve',
+                    'shifts.view', 'shifts.assign',
+                    'helpdesk.view', 'helpdesk.create',
+                    'files.view', 'files.create', 'files.upload',
+                    'calendar.view',
+                    'notifications.view',
+                    'organization.view',
                 ]
             ],
             [
@@ -211,17 +317,18 @@ class RolesAndPermissionsSeeder extends Seeder
                     'employees.view', 'employees.view_own',
                     'attendance.view', 'attendance.checkin', 'attendance.reports',
                     'leaves.view', 'leaves.apply', 'leaves.approve', 'leaves.reject', 'leaves.cancel',
+                    'overtime.view', 'overtime.create', 'overtime.approve',
                     'payroll.view_own',
                     'departments.view',
-                    'performance.view', 'performance.reviews',
+                    'performance.view', 'performance.create', 'performance.update', 'performance.reviews',
                     'assets.view',
                     'announcements.view',
-                    'timesheets.view', 'timesheets.submit', 'timesheets.approve',
+                    'timesheets.view', 'timesheets.create', 'timesheets.update', 'timesheets.submit', 'timesheets.approve',
                     'training.view',
-                    'travel.view', 'travel.submit', 'travel.approve', 'travel.expense',
+                    'travel.view', 'travel.create', 'travel.update', 'travel.submit', 'travel.approve', 'travel.expense',
                     'shifts.view',
                     'helpdesk.view', 'helpdesk.create',
-                    'files.view', 'files.upload',
+                    'files.view', 'files.create', 'files.upload',
                     'calendar.view',
                     'notifications.view',
                     'organization.view',
@@ -240,15 +347,16 @@ class RolesAndPermissionsSeeder extends Seeder
                     'employees.view_own',
                     'attendance.view', 'attendance.checkin',
                     'leaves.view', 'leaves.apply', 'leaves.cancel',
+                    'overtime.view', 'overtime.create',
                     'payroll.view_own',
                     'performance.view',
                     'announcements.view',
-                    'timesheets.view', 'timesheets.submit',
+                    'timesheets.view', 'timesheets.create', 'timesheets.update', 'timesheets.submit',
                     'training.view',
-                    'travel.view', 'travel.submit', 'travel.expense',
+                    'travel.view', 'travel.create', 'travel.update', 'travel.submit', 'travel.expense',
                     'shifts.view',
                     'helpdesk.view', 'helpdesk.create',
-                    'files.view', 'files.upload',
+                    'files.view', 'files.create', 'files.upload',
                     'calendar.view',
                     'notifications.view',
                     'organization.view',
@@ -274,6 +382,15 @@ class RolesAndPermissionsSeeder extends Seeder
             }
         }
 
+        // Sync legacy users.role string to roles.id so permission checks work
+        foreach (Role::all() as $role) {
+            \App\Models\User::where('role', $role->slug)
+                ->where(function ($q) use ($role) {
+                    $q->whereNull('role_id')->orWhere('role_id', '!=', $role->id);
+                })
+                ->update(['role_id' => $role->id]);
+        }
+
         // Create Super Admin user
         $superAdminRole = Role::where('slug', 'super_admin')->first();
         
@@ -287,6 +404,13 @@ class RolesAndPermissionsSeeder extends Seeder
                 'role_id' => $superAdminRole->id,
             ]
         );
+
+        if ($superAdminRole && $superAdmin->role_id !== $superAdminRole->id) {
+            $superAdmin->update([
+                'role' => 'super_admin',
+                'role_id' => $superAdminRole->id,
+            ]);
+        }
 
         $this->command->info('Roles and permissions seeded successfully!');
         $this->command->info('Super Admin user created: admin@hrms.com / password');

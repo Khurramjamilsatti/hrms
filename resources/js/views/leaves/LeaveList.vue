@@ -152,18 +152,29 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <!-- Section Head: Can approve first level for employees in their section -->
-                <div v-if="canApproveFirstLevel(leave)" class="flex items-center space-x-2">
-                  <button @click="approveLeave(leave)" class="px-3 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors">Approve (1st)</button>
-                  <button @click="openRejectModal(leave)" class="px-3 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors">Reject</button>
+                <div class="flex items-center space-x-2">
+                  <!-- Manager / Section Head: first-level approval -->
+                  <template v-if="canApproveFirstLevel(leave)">
+                    <button @click="approveLeave(leave)" class="px-3 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors">Approve (1st)</button>
+                    <button @click="openRejectModal(leave)" class="px-3 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors">Reject</button>
+                  </template>
+                  <!-- Admin / HR / Super Admin: final approval -->
+                  <template v-else-if="canApproveFinal(leave)">
+                    <button @click="approveLeave(leave)" class="px-3 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors">
+                      {{ leave.approval_level === 'first_approved' ? 'Final Approve' : 'Approve' }}
+                    </button>
+                    <button @click="openRejectModal(leave)" class="px-3 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors">Reject</button>
+                  </template>
+                  <button
+                    v-if="canCancelLeave(leave)"
+                    @click="cancelLeave(leave)"
+                    class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <span v-else-if="!canApproveFirstLevel(leave) && !canApproveFinal(leave) && leave.approval_level === 'first_approved'" class="text-xs text-gray-500 italic">Pending admin approval</span>
+                  <span v-else-if="!canApproveFirstLevel(leave) && !canApproveFinal(leave) && !canCancelLeave(leave) && leave.status !== 'pending'" class="text-xs text-gray-400">Processed</span>
                 </div>
-                <!-- Admin: Can give final approval -->
-                <div v-else-if="canApproveFinal(leave)" class="flex items-center space-x-2">
-                  <button @click="approveLeave(leave)" class="px-3 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors">Final Approve</button>
-                  <button @click="openRejectModal(leave)" class="px-3 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors">Reject</button>
-                </div>
-                <span v-else-if="leave.approval_level === 'first_approved'" class="text-xs text-gray-500 italic">Pending admin approval</span>
-                <span v-else-if="leave.status !== 'pending'" class="text-xs text-gray-400">Processed</span>
               </td>
             </tr>
           </tbody>
@@ -188,8 +199,8 @@
           <button @click="showApplyModal = false" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
         </div>
         <div class="px-6 py-5 space-y-4">
-          <!-- Employee Selector (Admin/Manager only) -->
-          <div v-if="can('leaves.apply') && isAdminOrManager">
+          <!-- Employee Selector (HR/Admin apply on behalf of others, or users without employee profile) -->
+          <div v-if="showEmployeePicker">
             <label class="block text-sm font-semibold text-gray-700 mb-1">Employee *</label>
             <div class="relative">
               <input 
@@ -276,10 +287,14 @@
 import { ref, computed, onMounted } from 'vue';
 import { usePermissions } from '@/composables/usePermissions';
 import { useNotification } from '@/composables/useNotification';
+import { useDialog } from '@/composables/useDialog';
+import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 
 const { can } = usePermissions();
 const { success, error: showError } = useNotification();
+const { confirm } = useDialog();
+const authStore = useAuthStore();
 
 const leaves = ref([]);
 const leaveTypes = ref([]);
@@ -298,7 +313,8 @@ const rejectRemarks = ref('');
 const submitting = ref(false);
 const formError = ref(null);
 
-const user = JSON.parse(localStorage.getItem('user') || '{}');
+const user = computed(() => authStore.user || JSON.parse(localStorage.getItem('user') || '{}'));
+const role = computed(() => user.value?.role || '');
 
 const filters = ref({ status: '' });
 const form = ref({ 
@@ -319,9 +335,15 @@ const stats = computed(() => {
   };
 });
 
-const isAdminOrManager = computed(() => {
-  return user.role === 'admin' || user.role === 'manager';
-});
+// HR/Admin can apply leave on behalf of employees
+const canApplyForOthers = computed(() =>
+  ['admin', 'hr_admin', 'super_admin'].includes(role.value)
+);
+
+// Show employee picker when applying for others, or account has no linked employee
+const showEmployeePicker = computed(() =>
+  can('leaves.apply') && (canApplyForOthers.value || !user.value?.employee?.id)
+);
 
 const loadLeaves = async (page = 1) => {
   loading.value = true;
@@ -347,9 +369,14 @@ const loadLeaveTypes = async () => {
 };
 
 const loadEmployees = async () => {
-  if (!isAdminOrManager.value) return;
+  if (!showEmployeePicker.value) return;
   try {
-    const response = await axios.get('/employees');
+    let response;
+    try {
+      response = await axios.get('/employees/dropdown');
+    } catch {
+      response = await axios.get('/employees');
+    }
     employees.value = Array.isArray(response.data) ? response.data : (response.data.data || []);
     filteredEmployees.value = employees.value;
   } catch (err) { 
@@ -390,28 +417,34 @@ const getEmployeeFullName = (emp) => {
 
 const submitLeave = async () => {
   formError.value = null;
-  
-  // Validation
-  const requiredEmployeeId = isAdminOrManager.value
-    ? form.value.employee_id 
-    : (user.employee?.id || user.id);
-  
-  if (isAdminOrManager.value && !form.value.employee_id) {
+
+  if (showEmployeePicker.value && !form.value.employee_id) {
     formError.value = 'Please select an employee';
     return;
   }
-  
+
   if (!form.value.leave_type_id || !form.value.start_date || !form.value.end_date || !form.value.reason) { 
     formError.value = 'Please fill in all fields'; 
     return; 
   }
+
+  const payload = {
+    leave_type_id: form.value.leave_type_id,
+    start_date: form.value.start_date,
+    end_date: form.value.end_date,
+    reason: form.value.reason,
+  };
+
+  // Self-service employees omit employee_id (backend uses linked profile)
+  if (form.value.employee_id) {
+    payload.employee_id = form.value.employee_id;
+  } else if (user.value?.employee?.id) {
+    payload.employee_id = user.value.employee.id;
+  }
   
   submitting.value = true;
   try {
-    await axios.post('/leave-applications', { 
-      ...form.value, 
-      employee_id: requiredEmployeeId 
-    });
+    await axios.post('/leave-applications', payload);
     success('Leave application submitted successfully');
     showApplyModal.value = false;
     form.value = { 
@@ -454,42 +487,63 @@ const rejectLeave = async () => {
   }
 };
 
-const resetFilters = () => { filters.value = { status: '' }; loadLeaves(); };
-
-// Approval workflow helpers
-const canApproveFirstLevel = (leave) => {
-  // Section Head can approve first level if:
-  // 1. User is section_head
-  // 2. Leave is pending (not yet approved)
-  // 3. Employee reports to them (manager_id matches)
-  // 4. It's not their own leave
-  if (!user.role || user.role !== 'section_head') return false;
-  if (leave.status !== 'pending' || leave.approval_level !== 'pending') return false;
-  if (leave.employee_id === user.employee?.id) return false; // Cannot approve own leave
-  
-  // Check if the employee reports to this section head
-  const employeeManagerId = leave.employee?.manager_id || leave.employee?.user?.id;
-  return employeeManagerId && employeeManagerId === user.id && can('leaves.approve');
+const cancelLeave = async (leave) => {
+  if (!(await confirm({
+    title: 'Cancel leave?',
+    message: 'Cancel this leave application?',
+    confirmText: 'Cancel Leave',
+    cancelText: 'Keep',
+    variant: 'danger',
+  }))) return;
+  try {
+    await axios.post(`/leave-applications/${leave.id}/cancel`);
+    success('Leave cancelled successfully');
+    loadLeaves(pagination.value?.current_page || 1);
+  } catch (err) {
+    showError(err.response?.data?.message || 'Failed to cancel leave');
+  }
 };
 
-const canApproveFinal = (leave) => {
-  // Admin/HR can give final approval if:
-  // 1. User is admin/hr_admin/super_admin
-  // 2. For section employees: Must have first_approved status
-  // 3. For section heads (their own leaves): Can approve directly
-  if (!['admin', 'hr_admin', 'super_admin'].includes(user.role)) return false;
-  if (leave.status !== 'pending') return false;
-  
-  // If employee is in a section and it's not the section head themselves, require first approval
-  const isInSection = leave.employee?.department_id !== null;
-  const isSectionHeadOwnLeave = leave.employee?.user?.role === 'section_head';
-  
-  if (isInSection && !isSectionHeadOwnLeave) {
-    return leave.approval_level === 'first_approved' && can('leaves.approve');
+const resetFilters = () => { filters.value = { status: '' }; loadLeaves(); };
+
+const isOwnLeave = (leave) =>
+  !!user.value?.employee?.id && leave.employee_id === user.value.employee.id;
+
+// Manager / Section Head: first-level approval for team (not own leave)
+const canApproveFirstLevel = (leave) => {
+  if (!can('leaves.approve')) return false;
+  if (!['section_head', 'manager'].includes(role.value)) return false;
+  if (leave.status !== 'pending' || leave.approval_level !== 'pending') return false;
+  if (isOwnLeave(leave)) return false;
+
+  if (role.value === 'manager') {
+    return leave.employee?.manager_id === user.value.id;
   }
-  
-  // Section head's own leave or non-section employees can be approved directly by admin
-  return can('leaves.approve');
+
+  // section_head: same department (backend also enforces)
+  if (role.value === 'section_head') {
+    const sameDept = user.value?.employee?.department_id
+      && leave.employee?.department_id === user.value.employee.department_id;
+    const reportsToMe = leave.employee?.manager_id === user.value.id;
+    return sameDept || reportsToMe;
+  }
+
+  return false;
+};
+
+// Admin / HR / Super Admin: final (or direct) approval
+const canApproveFinal = (leave) => {
+  if (!can('leaves.approve')) return false;
+  if (!['admin', 'hr_admin', 'super_admin'].includes(role.value)) return false;
+  return leave.status === 'pending';
+};
+
+// Cancel: own pending/approved leave, or privileged cancel
+const canCancelLeave = (leave) => {
+  if (!can('leaves.cancel')) return false;
+  if (!['pending', 'approved'].includes(leave.status)) return false;
+  if (canApplyForOthers.value) return true;
+  return isOwnLeave(leave);
 };
 
 const formatApprovalLevel = (level) => {
@@ -524,7 +578,7 @@ const leaveTypeBadge = (name) => ({ 'Annual Leave': 'bg-blue-100 text-blue-800',
 onMounted(() => { 
   loadLeaves(); 
   loadLeaveTypes(); 
-  if (isAdminOrManager.value) {
+  if (showEmployeePicker.value) {
     loadEmployees();
   }
   

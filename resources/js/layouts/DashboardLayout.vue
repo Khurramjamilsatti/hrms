@@ -1,8 +1,5 @@
 <template>
   <div class="flex h-screen bg-gray-50">
-    <!-- Global Notification Container -->
-    <NotificationContainer />
-    
     <!-- Sidebar -->
     <aside class="w-64 bg-white border-r border-gray-300 flex flex-col shadow-sm">
       <!-- Logo -->
@@ -58,6 +55,10 @@
             <!-- Leaves Icon -->
             <svg v-else-if="item.name === 'leaves'" class="w-5 h-5" :class="route.path === item.path || route.path.startsWith(item.path + '/') ? 'text-white' : 'text-gray-600'" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <!-- Leave Settings Icon -->
+            <svg v-else-if="item.name === 'leave-settings'" class="w-5 h-5" :class="route.path === item.path || route.path.startsWith(item.path + '/') ? 'text-white' : 'text-gray-600'" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/>
             </svg>
             <!-- Payroll Icon -->
             <svg v-else-if="item.name === 'payroll'" class="w-5 h-5" :class="route.path === item.path || route.path.startsWith(item.path + '/') ? 'text-white' : 'text-gray-600'" fill="currentColor" viewBox="0 0 24 24">
@@ -125,6 +126,30 @@
             </svg>
             <!-- Profile Icon -->
             <svg v-else-if="item.name === 'profile'" class="w-5 h-5" :class="route.path === item.path || route.path.startsWith(item.path + '/') ? 'text-white' : 'text-gray-600'" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+            <!-- Recruitment Icon -->
+            <svg v-else-if="item.name === 'recruitment'" class="w-5 h-5" :class="route.path === item.path || route.path.startsWith(item.path + '/') ? 'text-white' : 'text-gray-600'" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            </svg>
+            <!-- Performance Icon -->
+            <svg v-else-if="item.name === 'performance'" class="w-5 h-5" :class="route.path === item.path || route.path.startsWith(item.path + '/') ? 'text-white' : 'text-gray-600'" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/>
+            </svg>
+            <!-- Assets Icon -->
+            <svg v-else-if="item.name === 'assets'" class="w-5 h-5" :class="route.path === item.path || route.path.startsWith(item.path + '/') ? 'text-white' : 'text-gray-600'" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/>
+            </svg>
+            <!-- Announcements Icon -->
+            <svg v-else-if="item.name === 'announcements'" class="w-5 h-5" :class="route.path === item.path || route.path.startsWith(item.path + '/') ? 'text-white' : 'text-gray-600'" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.61.75-1.26 1.06-1.96-.98-.74-2.23-1.68-3.2-2.4-.37.66-.71 1.32-1.06 1.97zM20.26 5.96c-.31-.7-.66-1.35-1.06-1.96-.99.74-2.24 1.68-3.2 2.4.35.65.69 1.31 1.06 1.96.97-.72 2.22-1.67 3.2-2.4zM12 8H4v8h8c1.1 0 2-.9 2-2v-4c0-1.1-.9-2-2-2zm-2 6H6v-4h4v4z"/>
+            </svg>
+            <!-- Overtime Icon -->
+            <svg v-else-if="item.name === 'overtime'" class="w-5 h-5" :class="route.path === item.path || route.path.startsWith(item.path + '/') ? 'text-white' : 'text-gray-600'" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+            </svg>
+            <!-- Designations Icon -->
+            <svg v-else-if="item.name === 'designations'" class="w-5 h-5" :class="route.path === item.path || route.path.startsWith(item.path + '/') ? 'text-white' : 'text-gray-600'" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
                 <span>{{ item.label }}</span>
@@ -239,7 +264,6 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { usePermissionStore } from '@/stores/permission';
 import axios from 'axios';
-import NotificationContainer from '@/components/NotificationContainer.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -265,6 +289,7 @@ const pageTitle = computed(() => {
     '/employees': 'Employees',
     '/attendance': 'Attendance',
     '/leaves': 'Leave Management',
+    '/leave-settings': 'Leave Settings',
     '/payroll': 'Payroll',
     '/salary-components': 'Salary Components',
     '/loans': 'Loans',
@@ -272,11 +297,19 @@ const pageTitle = computed(() => {
     '/cvs': 'CV Bank',
     '/deployments': 'Deployments',
     '/departments': 'Departments',
+    '/designations': 'Designations',
     '/timesheets': 'Timesheets',
     '/onboarding': 'Onboarding',
+    '/recruitment': 'Recruitment',
+    '/performance': 'Performance',
+    '/assets': 'Assets',
+    '/announcements': 'Announcements',
+    '/overtime': 'Overtime',
     '/training': 'Training',
     '/travel-expenses': 'Travel & Expenses',
     '/shifts': 'Shift Scheduling',
+    '/shifts/my': 'My Schedule',
+    '/shifts/rosters': 'Shift Rosters',
     '/helpdesk': 'Helpdesk',
     '/files': 'Files',
     '/calendar': 'Calendar',
@@ -287,10 +320,11 @@ const pageTitle = computed(() => {
   };
   
   const path = route.path;
-  for (const [key, value] of Object.entries(titles)) {
-    if (path.startsWith(key)) return value;
-  }
-  return 'HRMS';
+  if (path === '/') return titles['/'];
+  const match = Object.entries(titles)
+    .filter(([key]) => key !== '/' && (path === key || path.startsWith(key + '/')))
+    .sort((a, b) => b[0].length - a[0].length)[0];
+  return match ? match[1] : 'HRMS';
 });
 
 const menuItems = computed(() => {
@@ -298,19 +332,26 @@ const menuItems = computed(() => {
     { name: 'dashboard', path: '/', label: 'Dashboard', icon: '📊', module: 'dashboard' },
     { name: 'employees', path: '/employees', label: 'Employees', icon: '👥', module: 'employees' },
     { name: 'attendance', path: '/attendance', label: 'Attendance', icon: '📅', module: 'attendance' },
+    { name: 'overtime', path: '/overtime', label: 'Overtime', icon: '⏰', module: 'overtime' },
     { name: 'leaves', path: '/leaves', label: 'Leave Requests', icon: '🏖️', module: 'leaves' },
+    { name: 'leave-settings', path: '/leave-settings', label: 'Leave Settings', icon: '📋', module: 'leaves' },
     { name: 'payroll', path: '/payroll', label: 'Payroll', icon: '💰', module: 'payroll' },
     { name: 'salary-components', path: '/salary-components', label: 'Salary Components', icon: '💼', module: 'salary_components' },
     { name: 'loans', path: '/loans', label: 'Loans', icon: '💵', module: 'loans' },
     { name: 'salary-advances', path: '/salary-advances', label: 'Salary Advances', icon: '💸', module: 'salary_advances' },
+    { name: 'recruitment', path: '/recruitment', label: 'Recruitment', icon: '🧑‍💼', module: 'recruitment' },
     { name: 'cvs', path: '/cvs', label: 'CV Bank', icon: '📄', module: 'cv_bank' },
     { name: 'deployments', path: '/deployments', label: 'Deployments', icon: '🌍', module: 'deployments' },
     { name: 'departments', path: '/departments', label: 'Departments', icon: '🏢', module: 'departments' },
+    { name: 'designations', path: '/designations', label: 'Designations', icon: '🏷️', module: 'departments' },
     { name: 'timesheets', path: '/timesheets', label: 'Timesheets', icon: '⏱️', module: 'timesheets' },
     { name: 'onboarding', path: '/onboarding', label: 'Onboarding', icon: '🎯', module: 'onboarding' },
+    { name: 'performance', path: '/performance', label: 'Performance', icon: '📈', module: 'performance' },
     { name: 'training', path: '/training', label: 'Training', icon: '📚', module: 'training' },
     { name: 'travel', path: '/travel-expenses', label: 'Travel & Expenses', icon: '✈️', module: 'travel' },
     { name: 'shifts', path: '/shifts', label: 'Shift Scheduling', icon: '🕐', module: 'shifts' },
+    { name: 'assets', path: '/assets', label: 'Assets', icon: '💼', module: 'assets' },
+    { name: 'announcements', path: '/announcements', label: 'Announcements', icon: '📢', module: 'announcements' },
     { name: 'helpdesk', path: '/helpdesk', label: 'Helpdesk', icon: '🎫', module: 'helpdesk' },
     { name: 'files', path: '/files', label: 'Files', icon: '📁', module: 'files' },
     { name: 'calendar', path: '/calendar', label: 'Calendar', icon: '📆', module: 'calendar' },
@@ -349,22 +390,23 @@ const menuItems = computed(() => {
   
   // HR Admin - Full HR access
   if (userRole === 'hr_admin') {
-    return allMenuItems.filter(item => !['organization'].includes(item.name));
+    return allMenuItems.filter(item => !['organization', 'roles', 'user-roles'].includes(item.name));
   }
   
   // Section Head - Department management
   if (userRole === 'section_head') {
     return allMenuItems.filter(item => [
-      'dashboard', 'employees', 'attendance', 'leaves', 'timesheets',
-      'departments', 'training', 'shifts', 'helpdesk', 'files', 'calendar', 'profile'
+      'dashboard', 'employees', 'attendance', 'overtime', 'leaves', 'leave-settings', 'timesheets',
+      'departments', 'designations', 'training', 'performance', 'announcements',
+      'shifts', 'helpdesk', 'files', 'calendar', 'profile'
     ].includes(item.name));
   }
   
   // Manager - Team management
   if (userRole === 'manager') {
     return allMenuItems.filter(item => [
-      'dashboard', 'employees', 'attendance', 'leaves', 'timesheets',
-      'training', 'helpdesk', 'files', 'calendar', 'profile'
+      'dashboard', 'employees', 'attendance', 'overtime', 'leaves', 'timesheets',
+      'performance', 'announcements', 'training', 'helpdesk', 'files', 'calendar', 'profile'
     ].includes(item.name));
   }
   
@@ -376,8 +418,8 @@ const menuItems = computed(() => {
   // Employee - Self-service
   if (userRole === 'employee') {
     return allMenuItems.filter(item => [
-      'dashboard', 'attendance', 'leaves', 'loans', 'salary-advances',
-      'training', 'travel', 'helpdesk', 'files', 'calendar', 'profile'
+      'dashboard', 'attendance', 'overtime', 'leaves', 'loans', 'salary-advances',
+      'announcements', 'training', 'travel', 'helpdesk', 'files', 'calendar', 'profile'
     ].includes(item.name));
   }
   
@@ -395,7 +437,7 @@ const menuSections = computed(() => {
     },
     {
       title: 'Workforce',
-      items: allItems.filter(item => ['employees', 'attendance', 'leaves', 'timesheets', 'shifts'].includes(item.name))
+      items: allItems.filter(item => ['employees', 'attendance', 'overtime', 'leaves', 'leave-settings', 'timesheets', 'shifts'].includes(item.name))
     },
     {
       title: 'Compensation',
@@ -403,19 +445,19 @@ const menuSections = computed(() => {
     },
     {
       title: 'Recruitment',
-      items: allItems.filter(item => ['cvs', 'deployments', 'onboarding'].includes(item.name))
+      items: allItems.filter(item => ['recruitment', 'cvs', 'deployments', 'onboarding'].includes(item.name))
     },
     {
       title: 'Organization',
-      items: allItems.filter(item => ['departments', 'organization'].includes(item.name))
+      items: allItems.filter(item => ['departments', 'designations', 'organization'].includes(item.name))
     },
     {
       title: 'Development',
-      items: allItems.filter(item => ['training', 'travel'].includes(item.name))
+      items: allItems.filter(item => ['performance', 'training', 'travel'].includes(item.name))
     },
     {
       title: 'Resources',
-      items: allItems.filter(item => ['helpdesk', 'files', 'calendar'].includes(item.name))
+      items: allItems.filter(item => ['assets', 'announcements', 'helpdesk', 'files', 'calendar'].includes(item.name))
     },
     {
       title: 'Administration',

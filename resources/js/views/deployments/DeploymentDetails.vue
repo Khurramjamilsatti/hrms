@@ -267,8 +267,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import { useDialog } from '@/composables/useDialog';
 
 const route = useRoute();
+const { alert } = useDialog();
 const deployment = ref({});
 
 const hasLogisticsInfo = computed(() => {
@@ -282,11 +284,17 @@ const hasLogisticsInfo = computed(() => {
 
 const fetchDeploymentDetails = async () => {
   try {
-    const response = await axios.get(`/api/deployments/${route.params.id}`);
+    const response = await axios.get(`/deployments/${route.params.id}`);
     deployment.value = response.data;
   } catch (error) {
     console.error('Error fetching deployment details:', error);
-    alert('Failed to load deployment details');
+    await alert({
+      title: 'Error',
+      message: 'Failed to load deployment details',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 

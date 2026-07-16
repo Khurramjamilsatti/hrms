@@ -288,8 +288,10 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Pagination from '@/components/Pagination.vue';
+import { useDialog } from '@/composables/useDialog';
 
 const router = useRouter();
+const { confirm, alert } = useDialog();
 const deployments = ref([]);
 const pagination = ref({ current_page: 1, last_page: 1, total: 0, from: 0, to: 0 });
 const employees = ref([]);
@@ -329,7 +331,7 @@ const fetchDeployments = async (page = 1) => {
     if (filters.value.deployment_type) params.append('deployment_type', filters.value.deployment_type);
     if (filters.value.departure_from_long_leave) params.append('departure_from_long_leave', 'true');
     
-    const response = await axios.get(`/api/deployments?${params}`);
+    const response = await axios.get(`/deployments?${params}`);
     deployments.value = response.data.data || response.data;
     
     // Update pagination data
@@ -363,7 +365,7 @@ const viewDetails = (deploymentId) => {
 
 const fetchEmployees = async () => {
   try {
-    const response = await axios.get('/api/employees/dropdown');
+    const response = await axios.get('/employees/dropdown');
     employees.value = response.data.data || response.data;
   } catch (error) {
     console.error('Failed to fetch employees:', error);
@@ -372,7 +374,7 @@ const fetchEmployees = async () => {
 
 const submitDeployment = async () => {
   try {
-    await axios.post('/api/deployments', deploymentForm.value);
+    await axios.post('/deployments', deploymentForm.value);
     showCreateModal.value = false;
     deploymentForm.value = {
       employee_id: '',
@@ -390,49 +392,115 @@ const submitDeployment = async () => {
       allowance_currency: 'PKR'
     };
     fetchDeployments();
-    alert('Deployment created successfully!');
+    await alert({
+      title: 'Success',
+      message: 'Deployment created successfully!',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'success',
+    });
   } catch (error) {
     console.error('Failed to create deployment:', error);
-    alert('Failed to create deployment');
+    await alert({
+      title: 'Error',
+      message: 'Failed to create deployment',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 
 const approveDeployment = async (deployment) => {
-  if (!confirm(`Approve deployment ${deployment.deployment_number}?`)) return;
+  if (!(await confirm({
+    title: 'Approve deployment?',
+    message: `Approve deployment ${deployment.deployment_number}?`,
+    confirmText: 'Approve',
+    cancelText: 'Cancel',
+    variant: 'primary',
+  }))) return;
   try {
-    await axios.post(`/api/deployments/${deployment.id}/approve`, { remarks: 'Approved' });
+    await axios.post(`/deployments/${deployment.id}/approve`, { remarks: 'Approved' });
     fetchDeployments();
-    alert('Deployment approved successfully!');
+    await alert({
+      title: 'Success',
+      message: 'Deployment approved successfully!',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'success',
+    });
   } catch (error) {
     console.error('Failed to approve deployment:', error);
-    alert('Failed to approve deployment');
+    await alert({
+      title: 'Error',
+      message: 'Failed to approve deployment',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 
 const activateDeployment = async (deployment) => {
-  if (!confirm(`Activate deployment ${deployment.deployment_number}?`)) return;
+  if (!(await confirm({
+    title: 'Activate deployment?',
+    message: `Activate deployment ${deployment.deployment_number}?`,
+    confirmText: 'Activate',
+    cancelText: 'Cancel',
+    variant: 'primary',
+  }))) return;
   try {
-    await axios.post(`/api/deployments/${deployment.id}/activate`, { remarks: 'Employee deployed' });
+    await axios.post(`/deployments/${deployment.id}/activate`, { remarks: 'Employee deployed' });
     fetchDeployments();
-    alert('Deployment activated successfully!');
+    await alert({
+      title: 'Success',
+      message: 'Deployment activated successfully!',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'success',
+    });
   } catch (error) {
     console.error('Failed to activate deployment:', error);
-    alert('Failed to activate deployment');
+    await alert({
+      title: 'Error',
+      message: 'Failed to activate deployment',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 
 const completeDeployment = async (deployment) => {
-  if (!confirm(`Complete deployment ${deployment.deployment_number}?`)) return;
+  if (!(await confirm({
+    title: 'Complete deployment?',
+    message: `Complete deployment ${deployment.deployment_number}?`,
+    confirmText: 'Complete',
+    cancelText: 'Cancel',
+    variant: 'primary',
+  }))) return;
   try {
-    await axios.post(`/api/deployments/${deployment.id}/complete`, {
+    await axios.post(`/deployments/${deployment.id}/complete`, {
       actual_end_date: new Date().toISOString().split('T')[0],
       remarks: 'Deployment completed'
     });
     fetchDeployments();
-    alert('Deployment completed successfully!');
+    await alert({
+      title: 'Success',
+      message: 'Deployment completed successfully!',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'success',
+    });
   } catch (error) {
     console.error('Failed to complete deployment:', error);
-    alert('Failed to complete deployment');
+    await alert({
+      title: 'Error',
+      message: 'Failed to complete deployment',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 
@@ -444,26 +512,50 @@ const showExtendModal = (deployment) => {
 
 const submitExtension = async () => {
   try {
-    await axios.post(`/api/deployments/${selectedDeployment.value.id}/extend`, extensionForm.value);
+    await axios.post(`/deployments/${selectedDeployment.value.id}/extend`, extensionForm.value);
     showExtensionModal.value = false;
     extensionForm.value = { new_end_date: '', reason: '', remarks: '' };
     fetchDeployments();
-    alert('Extension request submitted successfully!');
+    await alert({
+      title: 'Success',
+      message: 'Extension request submitted successfully!',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'success',
+    });
   } catch (error) {
     console.error('Failed to submit extension:', error);
-    alert('Failed to submit extension');
+    await alert({
+      title: 'Error',
+      message: 'Failed to submit extension',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 
 const viewHistory = async (deployment) => {
   try {
-    const response = await axios.get(`/api/deployments/employees/${deployment.employee_id}/history`);
+    const response = await axios.get(`/deployments/employees/${deployment.employee_id}/history`);
     const history = response.data.data || response.data;
-    alert(`Employee has ${history.length} deployment(s) in history`);
+    await alert({
+      title: 'Deployment history',
+      message: `Employee has ${history.length} deployment(s) in history`,
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'primary',
+    });
     // You can create a history modal here similar to CV history
   } catch (error) {
     console.error('Failed to fetch deployment history:', error);
-    alert('Failed to fetch deployment history');
+    await alert({
+      title: 'Error',
+      message: 'Failed to fetch deployment history',
+      confirmText: 'OK',
+      cancelText: 'Close',
+      variant: 'danger',
+    });
   }
 };
 

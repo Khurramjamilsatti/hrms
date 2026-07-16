@@ -345,9 +345,11 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
+import { useDialog } from '@/composables/useDialog';
 
 const route = useRoute();
 const router = useRouter();
+const { confirm } = useDialog();
 const employeeId = route.params.id;
 
 const employee = ref(null);
@@ -488,7 +490,13 @@ const saveSalaryStructure = async () => {
     }
 
     if (salaryForm.value.components.length === 0) {
-        if (!confirm('No salary components added. Do you want to continue with basic salary only?')) {
+        if (!(await confirm({
+            title: 'Confirm',
+            message: 'No salary components added. Do you want to continue with basic salary only?',
+            confirmText: 'Continue',
+            cancelText: 'Cancel',
+            variant: 'primary',
+        }))) {
             return;
         }
     }

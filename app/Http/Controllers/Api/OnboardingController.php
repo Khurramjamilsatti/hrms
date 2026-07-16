@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\OnboardingTemplate;
 use App\Models\OnboardingTemplateTask;
@@ -12,6 +13,8 @@ use Carbon\Carbon;
 
 class OnboardingController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     // Templates
     public function getTemplates()
     {
@@ -166,10 +169,13 @@ class OnboardingController extends Controller
         return response()->json($onboarding->load(['employee', 'template', 'tasks']), 201);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $onboarding = EmployeeOnboarding::with(['employee.user', 'employee.department', 'template', 'buddy.user', 'tasks'])
             ->findOrFail($id);
+
+        $this->assertCanAccessEmployeeRecord($request, $onboarding->employee_id);
+
         return response()->json($onboarding);
     }
 

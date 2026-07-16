@@ -1362,9 +1362,11 @@ import { ref, onMounted, reactive, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useNotification } from '@/composables/useNotification';
+import { useDialog } from '@/composables/useDialog';
 
 const authStore = useAuthStore();
 const { success, error: showError } = useNotification();
+const { confirm } = useDialog();
 const isEmployee = computed(() => authStore.user?.role === 'employee');
 const currentEmployeeId = computed(() => authStore.user?.employee?.id || null);
 const activeTab = ref('travel');
@@ -1875,7 +1877,13 @@ const loadPolicies = async () => {
 };
 
 const submitRecord = async (id, type) => {
-  if (!confirm(`Submit this ${type}?`)) return;
+  if (!(await confirm({
+    title: 'Confirm',
+    message: `Submit this ${type}?`,
+    confirmText: 'Submit',
+    cancelText: 'Cancel',
+    variant: 'primary',
+  }))) return;
   try {
     let endpoint = '';
     if (type === 'travel') endpoint = `/travel-expenses/travel-requests/${id}/submit`;

@@ -57,6 +57,12 @@ const routes = [
         meta: { module: 'leaves' }
       },
       {
+        path: 'leave-settings',
+        name: 'LeaveSettings',
+        component: () => import('@/views/leaves/LeaveSettings.vue'),
+        meta: { module: 'leaves' }
+      },
+      {
         path: 'payroll',
         name: 'Payroll',
         component: () => import('@/views/payroll/PayrollList.vue'),
@@ -129,10 +135,22 @@ const routes = [
         meta: { module: 'departments' }
       },
       {
+        path: 'designations',
+        name: 'Designations',
+        component: () => import('@/views/designations/DesignationList.vue'),
+        meta: { module: 'departments' }
+      },
+      {
         path: 'profile',
         name: 'Profile',
         component: () => import('@/views/Profile.vue'),
         meta: { module: 'employees' }
+      },
+      {
+        path: 'overtime',
+        name: 'Overtime',
+        component: () => import('@/views/overtime/OvertimeList.vue'),
+        meta: { module: 'overtime' }
       },
       {
         path: 'recruitment',
@@ -218,6 +236,12 @@ const routes = [
         meta: { module: 'shifts' }
       },
       {
+        path: 'shifts/my',
+        name: 'MyShifts',
+        component: () => import('@/views/shifts/ShiftList.vue'),
+        meta: { module: 'shifts' }
+      },
+      {
         path: 'shifts/rosters',
         name: 'ShiftRosters',
         component: () => import('@/views/shifts/RosterList.vue'),
@@ -230,6 +254,7 @@ const routes = [
         component: () => import('@/views/helpdesk/HelpdeskList.vue'),
         meta: { module: 'helpdesk' }
       },
+
       // Files
       {
         path: 'files',

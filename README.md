@@ -171,6 +171,47 @@ php artisan serve
 
 Visit `http://localhost:8000` in your browser.
 
+## CI/CD
+
+This repository uses **GitHub Actions** for production deploy only.
+
+### Deploy (`.github/workflows/ci.yml`)
+
+Runs on push to `main` / `master` (and manual **Run workflow**):
+
+1. SSH to the VPS
+2. `git pull`
+3. `php artisan migrate --force`
+4. `php artisan optimize:clear`
+
+Pull requests are **not** deployed — review and merge them with normal Git SOPs; deploy runs after merge to `main` / `master`.
+
+#### GitHub secrets to configure
+
+| Secret | Purpose |
+|--------|---------|
+| `DEPLOY_HOST` | VPS hostname or IP |
+| `DEPLOY_USER` | SSH user |
+| `DEPLOY_SSH_KEY` | Private key for that user |
+| `DEPLOY_PATH` | Absolute path to the app on the VPS (git clone root) |
+
+#### VPS one-time setup
+
+```bash
+# App already lives on the server with a working .env (DB_HOST=127.0.0.1, etc.)
+cd /path/to/hrms   # same as DEPLOY_PATH
+# Ensure the deploy SSH user can: git pull, run php artisan
+chmod +x scripts/deploy.sh
+```
+
+Manual deploy on the server (same steps as CI):
+
+```bash
+./scripts/deploy.sh
+```
+
+Optional Docker stack files (`Dockerfile`, `docker-compose.prod.yml`) remain in the repo for local/container use but are **not** used by this workflow.
+
 ## Default Login Credentials
 
 After running seeders, you can login with:

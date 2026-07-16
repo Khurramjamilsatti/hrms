@@ -23,6 +23,7 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_SSH_PASSPHRASE: ${{ secrets.DEPLOY_SSH_PASSPHRASE }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           missing=0
@@ -34,6 +35,11 @@ jobs:
               echo "OK: $key is set"
             fi
           done
+          if [ -z "$DEPLOY_SSH_PASSPHRASE" ]; then
+            echo "NOTE: DEPLOY_SSH_PASSPHRASE is empty (OK only if the private key has no passphrase)"
+          else
+            echo "OK: DEPLOY_SSH_PASSPHRASE is set"
+          fi
           if [ "$missing" -ne 0 ]; then
             echo ""
             echo "Add these repository secrets (Settings → Secrets and variables → Actions):"

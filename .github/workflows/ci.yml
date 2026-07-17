@@ -83,6 +83,7 @@ jobs:
             php artisan migrate --force --no-interaction
 
             echo "==> Syncing roles & permissions"
+            php artisan db:seed --class=LandingPageSeeder --force --no-interaction
             php artisan db:seed --class=RolesAndPermissionsSeeder --force --no-interaction
 
             echo "==> Clearing caches"

@@ -7,7 +7,7 @@
                 <p class="text-gray-600 mt-1">Manage and track support tickets</p>
             </div>
             <button @click="openCreateModal"
-                class="flex items-center space-x-2 px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition-colors">
+                class="flex items-center space-x-2 px-4 py-2 bg-black hover:bg-accent-dark text-white rounded-lg transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -229,7 +229,7 @@
                                     :disabled="updatingStatusId === ticket.id"
                                     :class="[
                                         getStatusClass(ticket.status),
-                                        'px-2 py-1 text-xs font-medium rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-gray-900 cursor-pointer disabled:opacity-50'
+                                        'px-2 py-1 text-xs font-medium rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-accent cursor-pointer disabled:opacity-50'
                                     ]"
                                     title="Change status"
                                 >
@@ -326,7 +326,7 @@
                                 @focus="showEmployeeDropdown = true"
                                 type="text"
                                 placeholder="Search employee by name or code..."
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                                 autocomplete="off"
                             />
                             <div
@@ -359,7 +359,7 @@
                         <select
                             v-model="formData.category_id"
                             required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                         >
                             <option value="">Select Category</option>
                             <option v-for="category in categories" :key="category.id" :value="category.id">
@@ -374,7 +374,7 @@
                         <select
                             v-model="formData.priority"
                             required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                         >
                             <option value="low">Low</option>
                             <option value="medium">Medium</option>
@@ -389,7 +389,7 @@
                             type="text"
                             v-model="formData.subject"
                             required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                             placeholder="Brief description of the issue"
                         />
                     </div>
@@ -400,7 +400,7 @@
                             v-model="formData.description"
                             rows="5"
                             required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                             placeholder="Detailed description of the issue"
                         ></textarea>
                     </div>
@@ -416,7 +416,7 @@
                         <button
                             type="submit"
                             :disabled="submitting || !canSubmitTicket"
-                            class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg disabled:opacity-50"
+                            class="px-5 py-2.5 text-sm font-medium text-white bg-accent hover:bg-accent-dark rounded-lg disabled:opacity-50"
                         >
                             {{ submitting ? 'Creating...' : 'Create Ticket' }}
                         </button>
@@ -507,7 +507,7 @@
                                     placeholder="Type your reply here..."
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-2"></textarea>
                                 <button @click="addReply" :disabled="submitting || !replyMessage.trim()"
-                                    class="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">
+                                    class="px-4 py-2 bg-black text-white rounded-lg hover:bg-accent-dark disabled:opacity-50">
                                     {{ submitting ? 'Sending...' : 'Send Reply' }}
                                 </button>
                             </div>
@@ -584,7 +584,7 @@
 
                             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                                 <button type="submit" :disabled="submitting"
-                                    class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50">
+                                    class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50">
                                     {{ submitting ? 'Updating...' : 'Update Ticket' }}
                                 </button>
                                 <button type="button" @click="closeEditModal"

@@ -8,7 +8,7 @@
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           View Policies
         </button>
-        <button @click="openModal(activeTab)" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
+        <button @click="openModal(activeTab)" class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
           New {{ getTabLabel() }}
         </button>
@@ -94,7 +94,7 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-          <select v-model="filters.status" @change="loadData()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.status" @change="loadData()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Status</option>
             <option value="draft">Draft</option>
             <option value="submitted">Submitted</option>
@@ -105,11 +105,11 @@
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Date From</label>
-          <input type="date" v-model="filters.dateFrom" @change="loadData()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <input type="date" v-model="filters.dateFrom" @change="loadData()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Date To</label>
-          <input type="date" v-model="filters.dateTo" @change="loadData()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <input type="date" v-model="filters.dateTo" @change="loadData()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
         </div>
         <div class="flex items-end">
           <button @click="resetFilters" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors w-full">Reset Filters</button>
@@ -510,7 +510,7 @@
                 @focus="showEmployeeDropdown = true"
                 type="text"
                 required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 placeholder="Search employee by name or ID..."
               />
               <div
@@ -536,32 +536,32 @@
 
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Purpose <span class="text-red-500">*</span></label>
-              <input v-model="travelForm.purpose" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="e.g., Client Meeting, Conference Attendance">
+              <input v-model="travelForm.purpose" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="e.g., Client Meeting, Conference Attendance">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">From Location <span class="text-red-500">*</span></label>
-              <input v-model="travelForm.from_location" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="e.g., Karachi">
+              <input v-model="travelForm.from_location" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="e.g., Karachi">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">To Location <span class="text-red-500">*</span></label>
-              <input v-model="travelForm.to_location" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="e.g., Lahore">
+              <input v-model="travelForm.to_location" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="e.g., Lahore">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Departure Date <span class="text-red-500">*</span></label>
-              <input v-model="travelForm.departure_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <input v-model="travelForm.departure_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Return Date <span class="text-red-500">*</span></label>
-              <input v-model="travelForm.return_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <input v-model="travelForm.return_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Travel Mode <span class="text-red-500">*</span></label>
-              <select v-model="travelForm.travel_mode" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="travelForm.travel_mode" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="">Select Travel Mode</option>
                 <option value="flight">Flight</option>
                 <option value="train">Train</option>
@@ -573,12 +573,12 @@
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Estimated Cost (PKR) <span class="text-red-500">*</span></label>
-              <input v-model="travelForm.estimated_cost" type="number" step="0.01" min="0" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="0.00">
+              <input v-model="travelForm.estimated_cost" type="number" step="0.01" min="0" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="0.00">
             </div>
 
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-              <textarea v-model="travelForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="Additional details about the travel..."></textarea>
+              <textarea v-model="travelForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="Additional details about the travel..."></textarea>
             </div>
           </div>
 
@@ -586,7 +586,7 @@
             <button type="button" @click="closeTravelModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
               Cancel
             </button>
-            <button type="submit" :disabled="submitting" class="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="submit" :disabled="submitting" class="px-6 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed">
               {{ submitting ? 'Saving...' : (editingTravel ? 'Update' : 'Create') }}
             </button>
           </div>
@@ -615,7 +615,7 @@
                 @focus="showEmployeeDropdown = true"
                 type="text"
                 required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 placeholder="Search employee by name or ID..."
               />
               <div
@@ -641,12 +641,12 @@
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Expense Date <span class="text-red-500">*</span></label>
-              <input v-model="expenseForm.expense_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <input v-model="expenseForm.expense_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
-              <select v-model="expenseForm.category_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="expenseForm.category_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="">Select Category</option>
                 <option value="1">Transportation</option>
                 <option value="2">Accommodation</option>
@@ -657,17 +657,17 @@
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Amount (PKR) <span class="text-red-500">*</span></label>
-              <input v-model="expenseForm.amount" type="number" step="0.01" min="0" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="0.00">
+              <input v-model="expenseForm.amount" type="number" step="0.01" min="0" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="0.00">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Merchant Name</label>
-              <input v-model="expenseForm.merchant_name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="e.g., Hotel Name, Restaurant">
+              <input v-model="expenseForm.merchant_name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="e.g., Hotel Name, Restaurant">
             </div>
 
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Description <span class="text-red-500">*</span></label>
-              <textarea v-model="expenseForm.description" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="Describe the expense..."></textarea>
+              <textarea v-model="expenseForm.description" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="Describe the expense..."></textarea>
             </div>
           </div>
 
@@ -675,7 +675,7 @@
             <button type="button" @click="closeExpenseModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
               Cancel
             </button>
-            <button type="submit" :disabled="submitting" class="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="submit" :disabled="submitting" class="px-6 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed">
               {{ submitting ? 'Saving...' : (editingExpense ? 'Update' : 'Create') }}
             </button>
           </div>
@@ -704,7 +704,7 @@
                 @focus="showEmployeeDropdown = true"
                 type="text"
                 required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 placeholder="Search employee by name or ID..."
               />
               <div
@@ -730,17 +730,17 @@
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Amount (PKR) <span class="text-red-500">*</span></label>
-              <input v-model="advanceForm.amount" type="number" step="0.01" min="0" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="0.00">
+              <input v-model="advanceForm.amount" type="number" step="0.01" min="0" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="0.00">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Required Date <span class="text-red-500">*</span></label>
-              <input v-model="advanceForm.required_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <input v-model="advanceForm.required_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             </div>
 
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Purpose <span class="text-red-500">*</span></label>
-              <textarea v-model="advanceForm.purpose" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="Explain why you need this advance..."></textarea>
+              <textarea v-model="advanceForm.purpose" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="Explain why you need this advance..."></textarea>
             </div>
           </div>
 
@@ -748,7 +748,7 @@
             <button type="button" @click="closeAdvanceModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
               Cancel
             </button>
-            <button type="submit" :disabled="submitting" class="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="submit" :disabled="submitting" class="px-6 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed">
               {{ submitting ? 'Saving...' : 'Create' }}
             </button>
           </div>
@@ -777,7 +777,7 @@
                 @focus="showEmployeeDropdown = true"
                 type="text"
                 required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 placeholder="Search employee by name or ID..."
               />
               <div
@@ -803,12 +803,12 @@
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Travel Date <span class="text-red-500">*</span></label>
-              <input v-model="mileageForm.travel_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <input v-model="mileageForm.travel_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Vehicle Type <span class="text-red-500">*</span></label>
-              <select v-model="mileageForm.vehicle_type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="mileageForm.vehicle_type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="">Select Vehicle</option>
                 <option value="car">Car</option>
                 <option value="motorcycle">Motorcycle</option>
@@ -818,22 +818,22 @@
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">From Location <span class="text-red-500">*</span></label>
-              <input v-model="mileageForm.from_location" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="e.g., Office">
+              <input v-model="mileageForm.from_location" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="e.g., Office">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">To Location <span class="text-red-500">*</span></label>
-              <input v-model="mileageForm.to_location" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="e.g., Client Site">
+              <input v-model="mileageForm.to_location" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="e.g., Client Site">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Distance (KM) <span class="text-red-500">*</span></label>
-              <input v-model="mileageForm.distance_km" type="number" step="0.01" min="0" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="0.00">
+              <input v-model="mileageForm.distance_km" type="number" step="0.01" min="0" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="0.00">
             </div>
 
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Purpose <span class="text-red-500">*</span></label>
-              <textarea v-model="mileageForm.purpose" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="Describe the purpose of travel..."></textarea>
+              <textarea v-model="mileageForm.purpose" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="Describe the purpose of travel..."></textarea>
             </div>
           </div>
 
@@ -841,7 +841,7 @@
             <button type="button" @click="closeMileageModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
               Cancel
             </button>
-            <button type="submit" :disabled="submitting" class="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="submit" :disabled="submitting" class="px-6 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed">
               {{ submitting ? 'Saving...' : (editingMileage ? 'Update' : 'Create') }}
             </button>
           </div>
@@ -863,17 +863,17 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Policy Name <span class="text-red-500">*</span></label>
-              <input v-model="policyForm.policy_name" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="e.g., Standard Travel Policy">
+              <input v-model="policyForm.policy_name" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="e.g., Standard Travel Policy">
             </div>
 
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-              <textarea v-model="policyForm.description" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="Describe the policy..."></textarea>
+              <textarea v-model="policyForm.description" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="Describe the policy..."></textarea>
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Travel Type</label>
-              <select v-model="policyForm.travel_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="policyForm.travel_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="domestic">Domestic</option>
                 <option value="international">International</option>
               </select>
@@ -881,7 +881,7 @@
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Designation Level</label>
-              <select v-model="policyForm.designation_level" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="policyForm.designation_level" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="all">All Levels</option>
                 <option value="executive">Executive</option>
                 <option value="senior">Senior</option>
@@ -892,59 +892,59 @@
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Max Flight Cost (PKR)</label>
-              <input v-model="policyForm.max_flight_cost" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="0.00">
+              <input v-model="policyForm.max_flight_cost" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="0.00">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Max Hotel Per Night (PKR)</label>
-              <input v-model="policyForm.max_hotel_per_night" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="0.00">
+              <input v-model="policyForm.max_hotel_per_night" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="0.00">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Per Diem Rate (PKR)</label>
-              <input v-model="policyForm.per_diem_rate" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="0.00">
+              <input v-model="policyForm.per_diem_rate" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="0.00">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Mileage Rate (PKR/KM)</label>
-              <input v-model="policyForm.mileage_rate_per_km" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="0.00">
+              <input v-model="policyForm.mileage_rate_per_km" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="0.00">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Max Advance (%)</label>
-              <input v-model="policyForm.max_advance_percentage" type="number" step="1" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="80">
+              <input v-model="policyForm.max_advance_percentage" type="number" step="1" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="80">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Advance Days Before Travel</label>
-              <input v-model="policyForm.advance_days_before_travel" type="number" step="1" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="7">
+              <input v-model="policyForm.advance_days_before_travel" type="number" step="1" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="7">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Settlement Days After Return</label>
-              <input v-model="policyForm.settlement_days_after_return" type="number" step="1" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="15">
+              <input v-model="policyForm.settlement_days_after_return" type="number" step="1" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="15">
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Finance Approval Threshold (PKR)</label>
-              <input v-model="policyForm.finance_approval_threshold" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="0.00">
+              <input v-model="policyForm.finance_approval_threshold" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="0.00">
             </div>
 
             <div class="md:col-span-2 space-y-2">
               <label class="flex items-center space-x-2">
-                <input v-model="policyForm.advance_allowed" type="checkbox" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900">
+                <input v-model="policyForm.advance_allowed" type="checkbox" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-accent">
                 <span class="text-sm font-semibold text-gray-700">Advance Allowed</span>
               </label>
               <label class="flex items-center space-x-2">
-                <input v-model="policyForm.requires_manager_approval" type="checkbox" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900">
+                <input v-model="policyForm.requires_manager_approval" type="checkbox" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-accent">
                 <span class="text-sm font-semibold text-gray-700">Requires Manager Approval</span>
               </label>
               <label class="flex items-center space-x-2">
-                <input v-model="policyForm.requires_finance_approval" type="checkbox" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900">
+                <input v-model="policyForm.requires_finance_approval" type="checkbox" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-accent">
                 <span class="text-sm font-semibold text-gray-700">Requires Finance Approval</span>
               </label>
               <label class="flex items-center space-x-2">
-                <input v-model="policyForm.is_active" type="checkbox" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900">
+                <input v-model="policyForm.is_active" type="checkbox" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-accent">
                 <span class="text-sm font-semibold text-gray-700">Active Policy</span>
               </label>
             </div>
@@ -954,7 +954,7 @@
             <button type="button" @click="closePolicyModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
               Cancel
             </button>
-            <button type="submit" :disabled="submitting" class="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="submit" :disabled="submitting" class="px-6 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed">
               {{ submitting ? 'Saving...' : (editingPolicy ? 'Update' : 'Create') }}
             </button>
           </div>
@@ -1344,7 +1344,7 @@
         </div>
 
         <div class="flex justify-end space-x-3 pt-6 border-t mt-6">
-          <button @click="showDetailsModal = false" class="px-6 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800">
+          <button @click="showDetailsModal = false" class="px-6 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark">
             Close
           </button>
         </div>

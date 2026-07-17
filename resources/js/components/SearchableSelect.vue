@@ -23,7 +23,7 @@
             v-model="searchQuery"
             type="text"
             :placeholder="searchPlaceholder"
-            class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
             @click.stop
           />
         </div>

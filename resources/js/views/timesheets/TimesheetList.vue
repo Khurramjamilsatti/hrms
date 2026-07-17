@@ -17,7 +17,7 @@
         <button
           v-if="can('timesheets.create')"
           @click="openAddModal"
-          class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+          class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
           Add Timesheet Entry
@@ -51,19 +51,19 @@
         <div v-if="showEmployeeColumn" class="flex-1 min-w-[200px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Search Employee</label>
           <input v-model="filters.search" type="text" placeholder="Search by name or code..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             @input="debouncedSearch" />
         </div>
         <div class="min-w-[180px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Project</label>
-          <select v-model="filters.project_id" @change="loadTimesheets()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.project_id" @change="loadTimesheets()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Projects</option>
             <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
           </select>
         </div>
         <div class="min-w-[140px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-          <select v-model="filters.status" @change="loadTimesheets()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.status" @change="loadTimesheets()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Status</option>
             <option value="draft">Draft</option>
             <option value="submitted">Submitted</option>
@@ -129,7 +129,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-center">
                 <div class="flex items-center justify-center gap-1">
-                  <button v-if="ts.status === 'draft'" @click="submitEntry(ts)" class="px-2.5 py-1 text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-md">Submit</button>
+                  <button v-if="ts.status === 'draft'" @click="submitEntry(ts)" class="px-2.5 py-1 text-xs font-medium text-white bg-accent hover:bg-accent-dark rounded-md">Submit</button>
                   <button v-if="canApprove && ts.status === 'submitted'" @click="approveEntry(ts)" class="px-2.5 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md">Approve</button>
                   <button v-if="canApprove && ts.status === 'submitted'" @click="openRejectModal(ts)" class="px-2.5 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md">Reject</button>
                 </div>
@@ -141,9 +141,9 @@
       <div v-if="pagination" class="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
         <div class="text-sm text-gray-600">Showing <span class="font-semibold text-gray-900">{{ pagination.total }}</span> records</div>
         <div class="flex items-center space-x-2">
-          <button @click="loadTimesheets(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50" :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">Previous</button>
+          <button @click="loadTimesheets(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50" :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">Previous</button>
           <span class="text-sm text-gray-600">Page {{ pagination.current_page }} of {{ pagination.last_page }}</span>
-          <button @click="loadTimesheets(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50" :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">Next</button>
+          <button @click="loadTimesheets(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50" :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">Next</button>
         </div>
       </div>
     </div>
@@ -165,7 +165,7 @@
           <!-- Employee (admin / users without profile) -->
           <div v-if="showEmployeePicker" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <label class="block text-sm font-semibold text-gray-700 mb-1">Employee <span class="text-red-500">*</span></label>
-            <select v-model="form.employee_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white">
+            <select v-model="form.employee_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent bg-white">
               <option value="">Select employee</option>
               <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ empLabel(emp) }}</option>
             </select>
@@ -178,18 +178,18 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Work Date <span class="text-red-500">*</span></label>
-                <input v-model="form.date" type="date" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="form.date" type="date" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Project <span class="text-red-500">*</span></label>
-                <select v-model="form.project_id" @change="onProjectChange" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <select v-model="form.project_id" @change="onProjectChange" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                   <option value="">Select project</option>
                   <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
                 </select>
               </div>
               <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Task</label>
-                <select v-model="form.task_id" :disabled="!form.project_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100">
+                <select v-model="form.task_id" :disabled="!form.project_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100">
                   <option value="">{{ form.project_id ? 'Select task (optional)' : 'Select a project first' }}</option>
                   <option v-for="t in tasks" :key="t.id" :value="t.id">{{ t.title }}</option>
                 </select>
@@ -203,11 +203,11 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Start Time <span class="text-red-500">*</span></label>
-                <input v-model="form.start_time" type="time" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="form.start_time" type="time" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">End Time <span class="text-red-500">*</span></label>
-                <input v-model="form.end_time" type="time" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="form.end_time" type="time" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Duration</label>
@@ -228,9 +228,9 @@
           <div>
             <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Notes</h4>
             <textarea v-model="form.description" rows="3" placeholder="Describe the work completed..."
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
             <label class="mt-3 inline-flex items-center gap-2 cursor-pointer">
-              <input v-model="form.billable" type="checkbox" class="h-4 w-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" />
+              <input v-model="form.billable" type="checkbox" class="h-4 w-4 text-gray-900 border-gray-300 rounded focus:ring-accent" />
               <span class="text-sm font-medium text-gray-700">Mark as billable hours</span>
             </label>
           </div>
@@ -243,7 +243,7 @@
           <button @click="saveEntry('draft')" :disabled="saving" class="px-5 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
             {{ saving ? 'Saving...' : 'Save as Draft' }}
           </button>
-          <button @click="saveEntry('submitted')" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveEntry('submitted')" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : 'Save & Submit' }}
           </button>
         </div>
@@ -258,7 +258,7 @@
         </div>
         <div class="px-6 py-5">
           <label class="block text-sm font-semibold text-gray-700 mb-1">Rejection Reason <span class="text-red-500">*</span></label>
-          <textarea v-model="rejectReason" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+          <textarea v-model="rejectReason" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50">
           <button @click="showRejectModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>

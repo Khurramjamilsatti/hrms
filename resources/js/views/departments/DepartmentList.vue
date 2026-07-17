@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900">Departments</h1>
-      <button v-if="can('departments.create')" @click="openCreateModal" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
+      <button v-if="can('departments.create')" @click="openCreateModal" class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         Add Department
       </button>
@@ -116,22 +116,22 @@
         <div class="px-6 py-5 space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Department Name</label>
-            <input v-model="form.name" type="text" placeholder="e.g. Engineering" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="form.name" type="text" placeholder="e.g. Engineering" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-            <textarea v-model="form.description" rows="3" placeholder="Department description..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+            <textarea v-model="form.description" rows="3" placeholder="Department description..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Parent Department</label>
-            <select v-model="form.parent_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="form.parent_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option :value="null">None (Top-level)</option>
               <option v-for="d in departments.filter(d => d.id !== editingDept?.id)" :key="d.id" :value="d.id">{{ d.name }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Department Head (Section Head)</label>
-            <select v-model="form.manager_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="form.manager_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option :value="null">None</option>
               <option v-for="head in sectionHeads" :key="head.id" :value="head.id">
                 {{ head.name }}{{ head.employee_code ? ` (${head.employee_code})` : '' }}{{ head.department ? ` — ${head.department}` : '' }}
@@ -142,7 +142,7 @@
           <div class="flex items-center space-x-3">
             <label class="relative inline-flex items-center cursor-pointer">
               <input v-model="form.is_active" type="checkbox" class="sr-only peer" />
-              <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gray-900 peer-focus:ring-2 peer-focus:ring-gray-300 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+              <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-accent peer-focus:ring-2 peer-focus:ring-gray-300 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
             </label>
             <span class="text-sm font-medium text-gray-700">Active</span>
           </div>
@@ -150,7 +150,7 @@
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveDepartment" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">{{ saving ? 'Saving...' : (editingDept ? 'Update' : 'Create') }}</button>
+          <button @click="saveDepartment" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">{{ saving ? 'Saving...' : (editingDept ? 'Update' : 'Create') }}</button>
         </div>
       </div>
     </div>

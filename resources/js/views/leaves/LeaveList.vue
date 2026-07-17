@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900">Leave Management</h1>
-      <button v-if="can('leaves.apply')" @click="showApplyModal = true" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
+      <button v-if="can('leaves.apply')" @click="showApplyModal = true" class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         Apply Leave
       </button>
@@ -62,7 +62,7 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-          <select v-model="filters.status" @change="loadLeaves()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.status" @change="loadLeaves()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Status</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
@@ -185,9 +185,9 @@
       <div v-if="pagination" class="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
         <div class="text-sm text-gray-600">Showing <span class="font-semibold text-gray-900">{{ pagination.total }}</span> records</div>
         <div class="flex items-center space-x-2">
-          <button @click="loadLeaves(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">Previous</button>
+          <button @click="loadLeaves(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">Previous</button>
           <span class="text-sm text-gray-600">Page {{ pagination.current_page }} of {{ pagination.last_page }}</span>
-          <button @click="loadLeaves(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">Next</button>
+          <button @click="loadLeaves(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">Next</button>
         </div>
       </div>
     </div>
@@ -210,7 +210,7 @@
                 @focus="showEmployeeDropdown = true"
                 type="text" 
                 placeholder="Search employee by name or code..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
               />
               <div v-if="showEmployeeDropdown && filteredEmployees.length > 0" 
                    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -239,7 +239,7 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Leave Type</label>
-            <select v-model="form.leave_type_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="form.leave_type_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="">Select Leave Type</option>
               <option v-for="lt in leaveTypes" :key="lt.id" :value="lt.id">{{ lt.name }} ({{ lt.days_per_year }} days/yr)</option>
             </select>
@@ -247,22 +247,22 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Start Date</label>
-              <input v-model="form.start_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="form.start_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">End Date</label>
-              <input v-model="form.end_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="form.end_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Reason</label>
-            <textarea v-model="form.reason" rows="3" placeholder="Describe the reason for leave..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+            <textarea v-model="form.reason" rows="3" placeholder="Describe the reason for leave..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
           </div>
           <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showApplyModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
-          <button @click="submitLeave" :disabled="submitting" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50">{{ submitting ? 'Submitting...' : 'Submit Application' }}</button>
+          <button @click="submitLeave" :disabled="submitting" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark transition-colors disabled:opacity-50">{{ submitting ? 'Submitting...' : 'Submit Application' }}</button>
         </div>
       </div>
     </div>
@@ -273,7 +273,7 @@
         <div class="px-6 py-4 border-b border-gray-200"><h3 class="text-lg font-bold text-gray-900">Reject Leave Application</h3></div>
         <div class="px-6 py-5">
           <label class="block text-sm font-semibold text-gray-700 mb-1">Remarks (required)</label>
-          <textarea v-model="rejectRemarks" rows="3" placeholder="Reason for rejection..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+          <textarea v-model="rejectRemarks" rows="3" placeholder="Reason for rejection..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showRejectModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>

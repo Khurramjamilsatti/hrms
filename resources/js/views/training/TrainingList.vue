@@ -17,7 +17,7 @@
         <button
           v-if="can('training.manage')"
           @click="openEnrollModal"
-          class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+          class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -35,13 +35,13 @@
           <div class="relative">
             <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             <input v-model="filters.search" type="text" placeholder="Search by course name..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
               @input="debounceSearch" />
           </div>
         </div>
         <div class="min-w-[160px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-          <select v-model="filters.status" @change="fetchEnrollments()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.status" @change="fetchEnrollments()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Status</option>
             <option value="enrolled">Enrolled</option>
             <option value="in_progress">In Progress</option>
@@ -51,7 +51,7 @@
         </div>
         <div class="min-w-[160px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Type</label>
-          <select v-model="filters.type" @change="fetchEnrollments()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.type" @change="fetchEnrollments()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Types</option>
             <option value="technical">Technical</option>
             <option value="soft_skills">Soft Skills</option>
@@ -192,7 +192,7 @@
             </svg>
             View
           </button>
-          <button v-if="can('training.manage')" @click="editEnrollment(enrollment)" class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
+          <button v-if="can('training.manage')" @click="editEnrollment(enrollment)" class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-accent hover:bg-accent-dark rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
@@ -211,9 +211,9 @@
     <div v-if="enrollments.length > 0 && pagination && pagination.last_page > 1" class="flex items-center justify-between bg-white rounded-lg shadow border border-gray-200 px-6 py-4 mt-6">
       <div class="text-sm text-gray-600">Showing <span class="font-semibold text-gray-900">{{ pagination.total }}</span> records</div>
       <div class="flex items-center space-x-2">
-        <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">Previous</button>
+        <button @click="changePage(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">Previous</button>
         <span class="text-sm text-gray-600">Page {{ pagination.current_page }} of {{ pagination.last_page }}</span>
-        <button @click="changePage(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">Next</button>
+        <button @click="changePage(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">Next</button>
       </div>
     </div>
 
@@ -238,7 +238,7 @@
                 @focus="showEmployeeDropdown = true"
                 type="text" 
                 placeholder="Search employee by name or ID..." 
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 required
               />
               <div v-if="showEmployeeDropdown && filteredEmployees.length > 0" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -261,7 +261,7 @@
 
           <div v-if="!editingEnrollment && enrollmentForm.employee_id">
             <label class="block text-sm font-semibold text-gray-700 mb-2">Training Session *</label>
-            <select v-model="enrollmentForm.session_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="enrollmentForm.session_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="">Select Session</option>
               <option v-for="session in filteredSessions" :key="session.id" :value="session.id">
                 {{ session.session_name }} ({{ session.course?.name }}){{ session.course?.department?.name ? ` — ${session.course.department.name}` : ' — Company-wide' }}
@@ -274,7 +274,7 @@
 
           <div v-if="editingEnrollment">
             <label class="block text-sm font-semibold text-gray-700 mb-2">Status *</label>
-            <select v-model="enrollmentForm.status" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="enrollmentForm.status" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="enrolled">Enrolled</option>
               <option value="in_progress">In Progress</option>
               <option value="completed">Completed</option>
@@ -285,27 +285,27 @@
 
           <div v-if="editingEnrollment && (enrollmentForm.status === 'completed' || enrollmentForm.status === 'failed')">
             <label class="block text-sm font-semibold text-gray-700 mb-2">Score (%)</label>
-            <input v-model.number="enrollmentForm.score" type="number" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model.number="enrollmentForm.score" type="number" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
 
           <div v-if="editingEnrollment">
             <label class="block text-sm font-semibold text-gray-700 mb-2">Attendance (%)</label>
-            <input v-model.number="enrollmentForm.attendance_percentage" type="number" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model.number="enrollmentForm.attendance_percentage" type="number" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
 
           <div v-if="editingEnrollment && enrollmentForm.status === 'completed'">
             <label class="block text-sm font-semibold text-gray-700 mb-2">Completion Date</label>
-            <input v-model="enrollmentForm.completion_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="enrollmentForm.completion_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
 
           <div v-if="editingEnrollment">
             <label class="block text-sm font-semibold text-gray-700 mb-2">Feedback</label>
-            <textarea v-model="enrollmentForm.feedback" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="Enter feedback..."></textarea>
+            <textarea v-model="enrollmentForm.feedback" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="Enter feedback..."></textarea>
           </div>
 
           <div v-if="editingEnrollment">
             <label class="block text-sm font-semibold text-gray-700 mb-2">Rating (1-5)</label>
-            <select v-model.number="enrollmentForm.rating" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model.number="enrollmentForm.rating" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option :value="null">No Rating</option>
               <option :value="1">⭐ 1 - Poor</option>
               <option :value="2">⭐⭐ 2 - Fair</option>
@@ -319,7 +319,7 @@
             <button type="button" @click="closeEnrollModal" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
               Cancel
             </button>
-            <button type="submit" :disabled="submitting" class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50">
+            <button type="submit" :disabled="submitting" class="px-5 py-2.5 text-sm font-medium text-white bg-accent hover:bg-accent-dark rounded-lg transition-colors disabled:opacity-50">
               {{ submitting ? 'Saving...' : (editingEnrollment ? 'Update' : 'Enroll') }}
             </button>
           </div>

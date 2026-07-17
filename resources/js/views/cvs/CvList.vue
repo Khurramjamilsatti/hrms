@@ -9,7 +9,7 @@
       <button
         v-if="canManage"
         @click="openUploadModal"
-        class="inline-flex items-center justify-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+        class="inline-flex items-center justify-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -49,7 +49,7 @@
           @input="handleSearch"
           type="text"
           placeholder="Search by employee name or email..."
-          class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+          class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
         />
       </div>
     </div>
@@ -79,7 +79,7 @@
       <button
         v-if="canManage && !searchQuery"
         @click="openUploadModal"
-        class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors"
+        class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors"
       >
         Upload CV
       </button>
@@ -243,7 +243,7 @@
               v-model="cvForm.employee_id"
               required
               :disabled="uploading"
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100"
             >
               <option value="">Select employee</option>
               <option v-for="emp in employees" :key="emp.id" :value="emp.id">
@@ -276,7 +276,7 @@
                 min="0"
                 step="1"
                 :disabled="uploading"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100"
               />
             </div>
             <div>
@@ -284,7 +284,7 @@
               <select
                 v-model="cvForm.education_level"
                 :disabled="uploading"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100"
               >
                 <option value="">Select level</option>
                 <option value="High School">High School</option>
@@ -302,7 +302,7 @@
               rows="3"
               :disabled="uploading"
               placeholder="Brief professional summary..."
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100"
             ></textarea>
           </div>
 
@@ -313,7 +313,7 @@
               type="text"
               :disabled="uploading"
               placeholder="PHP, Laravel, Vue.js, PostgreSQL"
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100"
             />
             <p class="mt-1 text-xs text-gray-500">Comma-separated</p>
           </div>
@@ -325,7 +325,7 @@
               type="text"
               :disabled="uploading"
               placeholder="AWS Certified, PMP"
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100"
             />
             <p class="mt-1 text-xs text-gray-500">Comma-separated</p>
           </div>
@@ -346,7 +346,7 @@
             type="button"
             @click="submitCvUpload"
             :disabled="uploading"
-            class="inline-flex items-center px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="inline-flex items-center px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg v-if="uploading" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

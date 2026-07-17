@@ -53,7 +53,7 @@
                 v-if="stats?.my_attendance_today"
                 @click="handleCheckOut"
                 :disabled="processingAttendance"
-                class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                class="px-5 py-2.5 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
               >
                 {{ processingAttendance ? 'Processing...' : 'Check Out' }}
               </button>
@@ -61,7 +61,7 @@
                 v-else
                 @click="handleCheckIn"
                 :disabled="processingAttendance"
-                class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                class="px-5 py-2.5 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
               >
                 {{ processingAttendance ? 'Processing...' : 'Check In' }}
               </button>
@@ -301,7 +301,7 @@
                 v-if="stats?.my_attendance_today"
                 @click="handleCheckOut"
                 :disabled="processingAttendance"
-                class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                class="px-5 py-2.5 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
               >
                 {{ processingAttendance ? 'Processing...' : 'Check Out' }}
               </button>
@@ -309,7 +309,7 @@
                 v-else
                 @click="handleCheckIn"
                 :disabled="processingAttendance"
-                class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                class="px-5 py-2.5 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
               >
                 {{ processingAttendance ? 'Processing...' : 'Check In' }}
               </button>
@@ -430,7 +430,7 @@
               v-if="stats?.my_attendance_today"
               @click="handleCheckOut"
               :disabled="processingAttendance"
-              class="px-6 py-3 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+              class="px-6 py-3 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
             >
               {{ processingAttendance ? 'Processing...' : 'Check Out' }}
             </button>
@@ -438,7 +438,7 @@
               v-else
               @click="handleCheckIn"
               :disabled="processingAttendance"
-              class="px-6 py-3 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+              class="px-6 py-3 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
             >
               {{ processingAttendance ? 'Processing...' : 'Check In' }}
             </button>

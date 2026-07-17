@@ -16,7 +16,7 @@
         <button
           v-if="canManage"
           @click="openCreateModal()"
-          class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
+          class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           Create Event
@@ -218,13 +218,13 @@
         <form @submit.prevent="saveEvent" class="px-6 py-5 space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Title *</label>
-            <input v-model="eventForm.title" required type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="eventForm.title" required type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Event Type *</label>
-              <select v-model="eventForm.event_type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="eventForm.event_type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option v-for="type in creatableEventTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
               </select>
               <div class="mt-2 inline-flex items-center gap-2 text-xs text-gray-600">
@@ -234,7 +234,7 @@
             </div>
             <div class="flex items-end">
               <label class="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <input v-model="eventForm.is_all_day" type="checkbox" class="rounded border-gray-300 text-gray-900 focus:ring-gray-900" />
+                <input v-model="eventForm.is_all_day" type="checkbox" class="rounded border-gray-300 text-gray-900 focus:ring-accent" />
                 All-day event
               </label>
             </div>
@@ -247,7 +247,7 @@
                 v-model="eventForm.start_datetime"
                 :type="eventForm.is_all_day ? 'date' : 'datetime-local'"
                 required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
             <div>
@@ -256,7 +256,7 @@
                 v-model="eventForm.end_datetime"
                 :type="eventForm.is_all_day ? 'date' : 'datetime-local'"
                 required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
           </div>
@@ -264,17 +264,17 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-              <input v-model="eventForm.location" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="eventForm.location" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Meeting link</label>
-              <input v-model="eventForm.meeting_link" type="url" placeholder="https://" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="eventForm.meeting_link" type="url" placeholder="https://" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-            <textarea v-model="eventForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+            <textarea v-model="eventForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
           </div>
 
           <div>
@@ -286,7 +286,7 @@
                 @focus="openAttendeeDropdown"
                 type="text"
                 placeholder="Search employees to add..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 autocomplete="off"
               />
               <div
@@ -319,7 +319,7 @@
 
           <div class="flex justify-end gap-3 pt-2">
             <button type="button" @click="closeEventForm" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
-            <button type="submit" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+            <button type="submit" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
               {{ saving ? 'Saving...' : (editingEventId ? 'Update Event' : 'Create Event') }}
             </button>
           </div>
@@ -573,7 +573,7 @@ const dayCellClass = (cell) => {
 };
 
 const dayNumberClass = (cell) => {
-  if (isToday(cell.date)) return 'bg-gray-900 text-white';
+  if (isToday(cell.date)) return 'bg-accent text-white';
   if (!cell.inMonth) return 'text-gray-400';
   if (cell.events.length) return 'text-gray-900';
   return 'text-gray-700';

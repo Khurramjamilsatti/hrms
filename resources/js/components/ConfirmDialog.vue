@@ -72,8 +72,8 @@ const iconWrapClass = computed(() => ({
 const confirmButtonClass = computed(() => ({
   danger: 'bg-red-600 hover:bg-red-700',
   success: 'bg-green-600 hover:bg-green-700',
-  primary: 'bg-gray-900 hover:bg-gray-800',
-}[state.variant] || 'bg-gray-900 hover:bg-gray-800'));
+  primary: 'bg-accent hover:bg-accent-dark',
+}[state.variant] || 'bg-accent hover:bg-accent-dark'));
 </script>
 
 <style scoped>

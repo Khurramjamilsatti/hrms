@@ -72,7 +72,7 @@
           <input 
             v-model="filters.date" 
             type="date" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             @change="loadAttendance"
           />
         </div>
@@ -80,7 +80,7 @@
           <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
           <select 
             v-model="filters.status" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             @change="loadAttendance"
           >
             <option value="">All Status</option>
@@ -97,14 +97,14 @@
             v-model="filters.search" 
             type="text" 
             placeholder="Search by name or code..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             @input="loadAttendance"
           />
         </div>
         <div class="flex items-end">
           <button 
             @click="resetFilters"
-            class="w-full px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors"
+            class="w-full px-4 py-2 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors"
           >
             Reset Filters
           </button>
@@ -234,7 +234,7 @@
             @click="loadPage(pagination.current_page - 1)"
             :disabled="pagination.current_page === 1"
             class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'"
+            :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'"
           >
             Previous
           </button>
@@ -242,7 +242,7 @@
             @click="loadPage(pagination.current_page + 1)"
             :disabled="pagination.current_page === pagination.last_page"
             class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'"
+            :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'"
           >
             Next
           </button>

@@ -11,7 +11,7 @@
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
           Templates
         </button>
-        <button @click="openStartModal" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
+        <button @click="openStartModal" class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
           Start Onboarding
         </button>
@@ -74,13 +74,13 @@
           <div class="relative">
             <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             <input v-model="filters.search" type="text" placeholder="Search by employee name..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
               @input="debouncedSearch" />
           </div>
         </div>
         <div class="min-w-[160px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-          <select v-model="filters.status" @change="fetchOnboardings()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.status" @change="fetchOnboardings()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Status</option>
             <option value="not_started">Not Started</option>
             <option value="in_progress">In Progress</option>
@@ -176,7 +176,7 @@
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
             View
           </button>
-          <button @click="editOnboarding(ob)" class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
+          <button @click="editOnboarding(ob)" class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-accent hover:bg-accent-dark rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
             Edit
           </button>
@@ -191,9 +191,9 @@
     <div v-if="onboardings.length > 0 && pagination && pagination.last_page > 1" class="flex items-center justify-between bg-white rounded-lg shadow border border-gray-200 px-6 py-4 mt-6">
       <div class="text-sm text-gray-600">Showing <span class="font-semibold text-gray-900">{{ pagination.total }}</span> records</div>
       <div class="flex items-center space-x-2">
-        <button @click="fetchOnboardings(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">Previous</button>
+        <button @click="fetchOnboardings(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">Previous</button>
         <span class="text-sm text-gray-600">Page {{ pagination.current_page }} of {{ pagination.last_page }}</span>
-        <button @click="fetchOnboardings(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">Next</button>
+        <button @click="fetchOnboardings(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">Next</button>
       </div>
     </div>
 
@@ -218,7 +218,7 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Onboarding Template <span class="text-red-500">*</span></label>
-            <select v-model="form.template_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+            <select v-model="form.template_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
               <option value="">Select Template</option>
               <option v-for="tmpl in templates" :key="tmpl.id" :value="tmpl.id">
                 {{ tmpl.name }} <span v-if="tmpl.department">({{ tmpl.department?.name }})</span> — {{ tmpl.duration_days }} days
@@ -227,7 +227,7 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date <span class="text-red-500">*</span></label>
-            <input v-model="form.start_date" type="date" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+            <input v-model="form.start_date" type="date" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Onboarding Buddy</label>
@@ -242,7 +242,7 @@
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showStartModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="startOnboarding" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="startOnboarding" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Starting...' : 'Start Onboarding' }}
           </button>
         </div>
@@ -344,11 +344,11 @@
         </div>
         <div class="px-6 py-5">
           <label class="block text-sm font-semibold text-gray-700 mb-1">Reason for Skipping <span class="text-red-500">*</span></label>
-          <textarea v-model="skipNotes" rows="3" required placeholder="Provide a reason..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"></textarea>
+          <textarea v-model="skipNotes" rows="3" required placeholder="Provide a reason..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"></textarea>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showSkipModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="skipTask" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800">Skip Task</button>
+          <button @click="skipTask" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark">Skip Task</button>
         </div>
       </div>
     </div>

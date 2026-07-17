@@ -5,7 +5,7 @@
       <h1 class="text-3xl font-bold text-gray-900">Roles & Permissions</h1>
       <button
         @click="showCreateModal = true"
-        class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+        class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -25,7 +25,7 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search roles by name, slug, description..."
-            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
           />
         </div>
       </div>
@@ -141,7 +141,7 @@
       aria-modal="true"
     >
       <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" @click="closeModal"></div>
+        <div class="fixed inset-0 bg-accent bg-opacity-50 transition-opacity backdrop-blur-sm" @click="closeModal"></div>
 
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
@@ -197,7 +197,7 @@
                       type="text"
                       required
                       placeholder="e.g., HR Manager"
-                      class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-opacity-50 text-sm transition-colors bg-white"
+                      class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-accent focus:ring-opacity-50 text-sm transition-colors bg-white"
                     />
                   </div>
 
@@ -209,7 +209,7 @@
                       v-model="form.slug"
                       type="text"
                       placeholder="auto-generated-from-name"
-                      class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-opacity-50 text-sm transition-colors bg-white"
+                      class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-accent focus:ring-opacity-50 text-sm transition-colors bg-white"
                     />
                     <p class="mt-1 text-xs text-gray-500">Leave empty to auto-generate</p>
                   </div>
@@ -222,7 +222,7 @@
                       v-model="form.description"
                       rows="3"
                       placeholder="Brief description of role responsibilities..."
-                      class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-opacity-50 text-sm transition-colors bg-white resize-none"
+                      class="block w-full px-4 py-2.5 rounded-lg border border-gray-300 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-accent focus:ring-opacity-50 text-sm transition-colors bg-white resize-none"
                     ></textarea>
                   </div>
 
@@ -231,7 +231,7 @@
                       <input
                         v-model="form.is_active"
                         type="checkbox"
-                        class="rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-offset-0 h-5 w-5 cursor-pointer"
+                        class="rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-accent focus:ring-offset-0 h-5 w-5 cursor-pointer"
                       />
                       <span class="ml-3 text-sm font-medium text-gray-700 group-hover:text-gray-900">
                         Active Status
@@ -302,7 +302,7 @@
                                 type="checkbox"
                                 :checked="isModuleSelected(module)"
                                 @change="toggleModule(module)"
-                                class="rounded border-gray-400 text-gray-900 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-offset-0 h-5 w-5"
+                                class="rounded border-gray-400 text-gray-900 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-accent focus:ring-offset-0 h-5 w-5"
                               />
                               <div class="ml-3 flex items-center">
                                 <svg class="w-5 h-5 mr-2 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -349,7 +349,7 @@
                                 v-model="form.permission_ids"
                                 :value="permission.id"
                                 type="checkbox"
-                                class="mt-0.5 rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-offset-0 h-4 w-4"
+                                class="mt-0.5 rounded border-gray-300 text-gray-900 shadow-sm focus:border-gray-900 focus:ring-2 focus:ring-accent focus:ring-offset-0 h-4 w-4"
                               />
                               <div class="ml-3 flex-1">
                                 <div class="flex items-center">
@@ -392,7 +392,7 @@
               <button
                 type="submit"
                 :disabled="saving"
-                class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-accent hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <svg v-if="!saving" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />

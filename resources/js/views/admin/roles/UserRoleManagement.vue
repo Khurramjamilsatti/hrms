@@ -42,7 +42,7 @@
             v-model="filters.search"
             type="text"
             placeholder="Name, email, or employee code..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             @input="debounceSearch"
           />
         </div>
@@ -50,7 +50,7 @@
           <label class="block text-sm font-semibold text-gray-700 mb-2">Role</label>
           <select
             v-model="filters.role_id"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             @change="fetchUsers(1)"
           >
             <option value="">All Roles</option>
@@ -61,7 +61,7 @@
           <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
           <select
             v-model="filters.is_active"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
             @change="fetchUsers(1)"
           >
             <option value="">All</option>
@@ -121,7 +121,7 @@
               <td class="px-6 py-4">
                 <span
                   v-if="user.assigned_role"
-                  class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-900 text-white"
+                  class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full bg-accent text-white"
                 >
                   {{ user.assigned_role.name }}
                 </span>
@@ -162,14 +162,14 @@
           <button
             @click="fetchUsers(pagination.current_page - 1)"
             :disabled="pagination.current_page <= 1"
-            class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50 bg-gray-900 text-white hover:bg-gray-800"
+            class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50 bg-accent text-white hover:bg-accent-dark"
           >
             Previous
           </button>
           <button
             @click="fetchUsers(pagination.current_page + 1)"
             :disabled="pagination.current_page >= pagination.last_page"
-            class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50 bg-gray-900 text-white hover:bg-gray-800"
+            class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50 bg-accent text-white hover:bg-accent-dark"
           >
             Next
           </button>
@@ -196,7 +196,7 @@
             <select
               v-model="selectedRoleId"
               required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
               @change="loadRolePermissions(selectedRoleId)"
             >
               <option value="">Select a role</option>
@@ -241,7 +241,7 @@
             <button
               type="submit"
               :disabled="saving || !selectedRoleId"
-              class="px-5 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg disabled:opacity-50"
+              class="px-5 py-2 text-sm font-medium text-white bg-accent hover:bg-accent-dark rounded-lg disabled:opacity-50"
             >
               {{ saving ? 'Saving...' : 'Assign Role' }}
             </button>
@@ -306,7 +306,7 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Permission</label>
                 <select
                   v-model="overridePermissionId"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 >
                   <option value="">Select permission</option>
                   <option v-for="perm in allPermissions" :key="perm.id" :value="perm.id">
@@ -319,7 +319,7 @@
                   type="button"
                   :disabled="!overridePermissionId || savingOverride"
                   @click="grantOverride"
-                  class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                  class="px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
                 >
                   Grant
                 </button>

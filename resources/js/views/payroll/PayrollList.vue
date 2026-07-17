@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900">Payroll Management</h1>
-      <button v-if="isAdminOrManager" @click="showGenerateModal = true" :disabled="generating" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow disabled:opacity-60 disabled:cursor-not-allowed">
+      <button v-if="isAdminOrManager" @click="showGenerateModal = true" :disabled="generating" class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow disabled:opacity-60 disabled:cursor-not-allowed">
         <svg v-if="generating" class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
         <svg v-else class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         {{ generating ? 'Processing…' : 'Generate Payroll' }}
@@ -63,26 +63,26 @@
             </svg>
             <input v-model="searchQuery" @input="handleSearch" type="text"
               placeholder="Search by employee name, code, email..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
         </div>
         <div class="min-w-[160px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Month</label>
-          <select v-model="filters.month" @change="loadPayrolls()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.month" @change="loadPayrolls()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Months</option>
             <option v-for="m in months" :key="m.value" :value="m.value">{{ m.label }}</option>
           </select>
         </div>
         <div class="min-w-[120px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Year</label>
-          <select v-model="filters.year" @change="loadPayrolls()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.year" @change="loadPayrolls()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Years</option>
             <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
           </select>
         </div>
         <div class="min-w-[140px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-          <select v-model="filters.status" @change="loadPayrolls()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.status" @change="loadPayrolls()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Status</option>
             <option value="draft">Draft</option>
             <option value="processed">Processed</option>
@@ -157,7 +157,7 @@
                 <div class="flex items-center space-x-2">
                   <button @click="viewPayrollDetails(payroll)" class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">Details</button>
                   <button @click="printPayslip(payroll)" class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-md transition-colors">Print</button>
-                  <button v-if="isAdminOrManager && payroll.status === 'draft'" @click="processPayroll(payroll)" :disabled="rowActionId === payroll.id" class="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                  <button v-if="isAdminOrManager && payroll.status === 'draft'" @click="processPayroll(payroll)" :disabled="rowActionId === payroll.id" class="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-accent hover:bg-accent-dark rounded-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
                     <svg v-if="rowActionId === payroll.id" class="animate-spin w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                     {{ rowActionId === payroll.id ? 'Processing…' : 'Process' }}
                   </button>
@@ -175,9 +175,9 @@
       <div v-if="pagination" class="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
         <div class="text-sm text-gray-600">Showing <span class="font-semibold text-gray-900">{{ pagination.total }}</span> records</div>
         <div class="flex items-center space-x-2">
-          <button @click="loadPayrolls(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">Previous</button>
+          <button @click="loadPayrolls(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">Previous</button>
           <span class="text-sm text-gray-600">Page {{ pagination.current_page }} of {{ pagination.last_page }}</span>
-          <button @click="loadPayrolls(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">Next</button>
+          <button @click="loadPayrolls(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">Next</button>
         </div>
       </div>
     </div>
@@ -305,7 +305,7 @@
         </div>
         
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
-          <button @click="printPayslip(selectedPayroll)" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800">Print Payslip</button>
+          <button @click="printPayslip(selectedPayroll)" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark">Print Payslip</button>
           <button @click="showDetailsModal = false" class="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Close</button>
         </div>
       </div>
@@ -325,14 +325,14 @@
           </p>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Month</label>
-            <select v-model="generateForm.month" :disabled="generating" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100">
+            <select v-model="generateForm.month" :disabled="generating" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100">
               <option value="">Select Month</option>
               <option v-for="m in months" :key="m.value" :value="m.value">{{ m.label }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Year</label>
-            <select v-model="generateForm.year" :disabled="generating" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100">
+            <select v-model="generateForm.year" :disabled="generating" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100">
               <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
             </select>
           </div>
@@ -340,7 +340,7 @@
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="closeGenerateModal" :disabled="generating" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Cancel</button>
-          <button @click="generatePayroll" :disabled="generating" class="inline-flex items-center px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button @click="generatePayroll" :disabled="generating" class="inline-flex items-center px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed">
             <svg v-if="generating" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
             {{ generating ? 'Processing…' : 'Generate' }}
           </button>

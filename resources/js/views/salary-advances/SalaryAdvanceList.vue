@@ -67,7 +67,7 @@
                     </svg>
                     <input v-model="searchQuery" @input="handleSearch" type="text"
                         placeholder="Search by employee name, code, email..."
-                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"/>
                 </div>
                 <select v-model="filters.status" @change="fetchAdvances"
                     class="px-4 py-2 border border-gray-300 rounded-lg">
@@ -80,7 +80,7 @@
             </div>
 
             <button @click="showApplyModal = true"
-                class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+                class="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent-dark">
                 Request Advance
             </button>
         </div>
@@ -142,7 +142,7 @@
                                 </button>
                                 <button v-if="advance.status === 'approved' && isAdminOrManager" 
                                     @click="openDisburseModal(advance)"
-                                    class="px-3 py-1 text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-md">
+                                    class="px-3 py-1 text-xs font-medium text-white bg-accent hover:bg-accent-dark rounded-md">
                                     Disburse
                                 </button>
                                 <button v-if="advance.status === 'pending'" 
@@ -167,13 +167,13 @@
                         <button @click="fetchAdvances(pagination.current_page - 1)" 
                             :disabled="pagination.current_page === 1"
                             class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                            :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">
+                            :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">
                             Previous
                         </button>
                         <button @click="fetchAdvances(pagination.current_page + 1)" 
                             :disabled="pagination.current_page === pagination.last_page"
                             class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                            :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'">
+                            :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'">
                             Next
                         </button>
                     </div>
@@ -248,7 +248,7 @@
                             Cancel
                         </button>
                         <button type="submit"
-                            class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+                            class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-dark">
                             Submit Request
                         </button>
                     </div>
@@ -298,7 +298,7 @@
                             Cancel
                         </button>
                         <button type="submit"
-                            class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+                            class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-dark">
                             Update Request
                         </button>
                     </div>
@@ -408,7 +408,7 @@
                         Cancel
                     </button>
                     <button @click="disburseAdvance"
-                        class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800">
+                        class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark">
                         Confirm Disburse
                     </button>
                 </div>

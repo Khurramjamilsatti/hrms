@@ -5,7 +5,7 @@
       <button
         v-if="canManageProjects"
         @click="openCreateModal"
-        class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+        class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         Create Project
@@ -66,15 +66,15 @@
           <div class="px-6 py-5 space-y-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Project Name</label>
-              <input v-model="form.name" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="form.name" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Client Name</label>
-              <input v-model="form.client_name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="form.client_name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Project Manager</label>
-              <select v-model="form.manager_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="form.manager_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="">Select Manager</option>
                 <option v-for="manager in managers" :key="manager.id" :value="manager.id">{{ manager.name || `${manager.first_name} ${manager.last_name}` }}</option>
               </select>
@@ -82,24 +82,24 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Start Date</label>
-                <input v-model="form.start_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="form.start_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">End Date</label>
-                <input v-model="form.end_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="form.end_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Budget (PKR)</label>
-              <input v-model="form.budget" type="number" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="form.budget" type="number" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-              <textarea v-model="form.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+              <textarea v-model="form.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-              <select v-model="form.status" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="form.status" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="planning">Planning</option>
                 <option value="active">Active</option>
                 <option value="on_hold">On Hold</option>
@@ -111,7 +111,7 @@
           </div>
           <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
             <button type="button" @click="closeForm" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-            <button type="submit" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">{{ saving ? 'Saving...' : 'Save' }}</button>
+            <button type="submit" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">{{ saving ? 'Saving...' : 'Save' }}</button>
           </div>
         </form>
       </div>
@@ -128,7 +128,7 @@
           <button @click="closeTasks" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
         </div>
         <div class="px-6 py-4 border-b border-gray-100 flex justify-end">
-          <button @click="openTaskForm()" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg">Add Task</button>
+          <button @click="openTaskForm()" class="inline-flex items-center px-4 py-2 bg-accent hover:bg-accent-dark text-white text-sm font-medium rounded-lg">Add Task</button>
         </div>
         <div class="px-6 py-4 overflow-y-auto flex-1">
           <div v-if="tasksLoading" class="flex justify-center py-10">
@@ -169,16 +169,16 @@
           <div class="px-6 py-5 space-y-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Title</label>
-              <input v-model="taskForm.title" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="taskForm.title" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-              <textarea v-model="taskForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+              <textarea v-model="taskForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Priority</label>
-                <select v-model="taskForm.priority" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <select v-model="taskForm.priority" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
@@ -187,7 +187,7 @@
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-                <select v-model="taskForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <select v-model="taskForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                   <option value="todo">To Do</option>
                   <option value="in_progress">In Progress</option>
                   <option value="review">Review</option>
@@ -197,13 +197,13 @@
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Due Date</label>
-              <input v-model="taskForm.due_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="taskForm.due_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div v-if="taskError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ taskError }}</div>
           </div>
           <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
             <button type="button" @click="showTaskForm = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-            <button type="submit" :disabled="taskSaving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">{{ taskSaving ? 'Saving...' : 'Save' }}</button>
+            <button type="submit" :disabled="taskSaving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">{{ taskSaving ? 'Saving...' : 'Save' }}</button>
           </div>
         </form>
       </div>

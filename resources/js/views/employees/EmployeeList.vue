@@ -6,7 +6,7 @@
       <router-link 
         v-if="can('employees.create')"
         to="/employees/create" 
-        class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+        class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -26,14 +26,14 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search employees by name, code, email..."
-            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
             @input="handleSearch"
           />
         </div>
         <select 
           v-model="statusFilter" 
           @change="handleStatusFilter"
-          class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white text-gray-700 font-medium"
+          class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-white text-gray-700 font-medium"
         >
           <option value="">All Status</option>
           <option value="active">Active</option>
@@ -43,7 +43,7 @@
         <select 
           v-model="departmentFilter" 
           @change="handleDepartmentFilter"
-          class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white text-gray-700 font-medium"
+          class="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-white text-gray-700 font-medium"
         >
           <option value="">All Departments</option>
           <option v-for="dept in departments" :key="dept.id" :value="dept.id">
@@ -154,7 +154,7 @@
             @click="loadPage(pagination.current_page - 1)"
             :disabled="pagination.current_page === 1"
             class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'"
+            :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'"
           >
             Previous
           </button>
@@ -165,7 +165,7 @@
               @click="loadPage(page)"
               class="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
               :class="page === pagination.current_page 
-                ? 'bg-gray-900 text-white' 
+                ? 'bg-accent text-white' 
                 : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'"
             >
               {{ page }}
@@ -175,7 +175,7 @@
             @click="loadPage(pagination.current_page + 1)"
             :disabled="pagination.current_page === pagination.last_page"
             class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-gray-900 text-white hover:bg-gray-800'"
+            :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'"
           >
             Next
           </button>

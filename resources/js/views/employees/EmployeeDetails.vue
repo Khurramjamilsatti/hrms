@@ -12,7 +12,7 @@
       </div>
       <div v-if="employee" class="flex items-center gap-2">
         <router-link v-if="canManageSalary" :to="`/employees/${employee.id}/salary`"
-          class="inline-flex items-center px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors">
+          class="inline-flex items-center px-4 py-2 bg-accent text-white font-medium rounded-lg hover:bg-accent-dark transition-colors">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -45,7 +45,7 @@
       <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
           <!-- Avatar -->
-          <div class="w-20 h-20 rounded-full bg-gray-900 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+          <div class="w-20 h-20 rounded-full bg-accent flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
             {{ initials }}
           </div>
           <!-- Info -->
@@ -230,7 +230,7 @@
             </svg>
             Documents
           </h3>
-          <button @click="showDocModal = true" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
+          <button @click="showDocModal = true" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-accent hover:bg-accent-dark rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
             Upload
           </button>
@@ -277,11 +277,11 @@
           <div class="px-6 py-5 space-y-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Title</label>
-              <input v-model="docForm.title" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="e.g. CNIC Copy" />
+              <input v-model="docForm.title" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="e.g. CNIC Copy" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Document Type</label>
-              <select v-model="docForm.document_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="docForm.document_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="cnic">CNIC / National ID</option>
                 <option value="passport">Passport</option>
                 <option value="contract">Contract</option>
@@ -292,7 +292,7 @@
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Expiry Date (optional)</label>
-              <input v-model="docForm.expiry_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="docForm.expiry_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">File</label>
@@ -302,7 +302,7 @@
           </div>
           <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
             <button @click="showDocModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-            <button @click="uploadDocument" :disabled="uploadingDoc" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">{{ uploadingDoc ? 'Uploading...' : 'Upload' }}</button>
+            <button @click="uploadDocument" :disabled="uploadingDoc" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">{{ uploadingDoc ? 'Uploading...' : 'Upload' }}</button>
           </div>
         </div>
       </div>

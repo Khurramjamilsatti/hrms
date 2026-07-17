@@ -7,7 +7,7 @@
         <button
           v-if="can('leaves.manage') && activeTab === 'types'"
           @click="openTypeModal()"
-          class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+          class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
           Add Leave Type
@@ -15,7 +15,7 @@
         <button
           v-if="can('leaves.manage') && activeTab === 'balances'"
           @click="openBalanceModal()"
-          class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+          class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
           Allocate Balance
@@ -95,11 +95,11 @@
       <div class="bg-white rounded-lg shadow border border-gray-200 mb-4 p-4 flex flex-wrap gap-3 items-end">
         <div>
           <label class="block text-xs font-semibold text-gray-500 mb-1">Year</label>
-          <input v-model.number="balanceFilters.year" type="number" min="2000" max="2100" @change="loadBalances" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 w-28" />
+          <input v-model.number="balanceFilters.year" type="number" min="2000" max="2100" @change="loadBalances" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent w-28" />
         </div>
         <div class="flex-1 min-w-[180px]">
           <label class="block text-xs font-semibold text-gray-500 mb-1">Leave Type</label>
-          <select v-model="balanceFilters.leave_type_id" @change="loadBalances" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="balanceFilters.leave_type_id" @change="loadBalances" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All types</option>
             <option v-for="lt in leaveTypes" :key="lt.id" :value="lt.id">{{ lt.name }}</option>
           </select>
@@ -158,46 +158,46 @@
         <div class="px-6 py-5 space-y-4 overflow-y-auto">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Name *</label>
-            <input v-model="typeForm.name" type="text" placeholder="e.g. Annual Leave" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="typeForm.name" type="text" placeholder="e.g. Annual Leave" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-            <textarea v-model="typeForm.description" rows="2" placeholder="Optional description..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+            <textarea v-model="typeForm.description" rows="2" placeholder="Optional description..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Days Per Year *</label>
-            <input v-model.number="typeForm.days_per_year" type="number" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model.number="typeForm.days_per_year" type="number" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div v-if="typeForm.is_carry_forward">
             <label class="block text-sm font-semibold text-gray-700 mb-1">Max Carry Forward Days</label>
-            <input v-model.number="typeForm.max_carry_forward_days" type="number" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model.number="typeForm.max_carry_forward_days" type="number" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div class="space-y-3">
             <div class="flex items-center space-x-3">
               <label class="relative inline-flex items-center cursor-pointer">
                 <input v-model="typeForm.is_paid" type="checkbox" class="sr-only peer" />
-                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gray-900 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-accent after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
               </label>
               <span class="text-sm font-medium text-gray-700">Paid leave</span>
             </div>
             <div class="flex items-center space-x-3">
               <label class="relative inline-flex items-center cursor-pointer">
                 <input v-model="typeForm.is_carry_forward" type="checkbox" class="sr-only peer" />
-                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gray-900 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-accent after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
               </label>
               <span class="text-sm font-medium text-gray-700">Allow carry forward</span>
             </div>
             <div class="flex items-center space-x-3">
               <label class="relative inline-flex items-center cursor-pointer">
                 <input v-model="typeForm.requires_document" type="checkbox" class="sr-only peer" />
-                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gray-900 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-accent after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
               </label>
               <span class="text-sm font-medium text-gray-700">Requires document</span>
             </div>
             <div class="flex items-center space-x-3">
               <label class="relative inline-flex items-center cursor-pointer">
                 <input v-model="typeForm.is_active" type="checkbox" class="sr-only peer" />
-                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gray-900 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-accent after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
               </label>
               <span class="text-sm font-medium text-gray-700">Active</span>
             </div>
@@ -206,7 +206,7 @@
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showTypeModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveType" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveType" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : (editingType ? 'Update' : 'Create') }}
           </button>
         </div>
@@ -225,14 +225,14 @@
         <div class="px-6 py-5 space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Employee *</label>
-            <select v-model="balanceForm.employee_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="balanceForm.employee_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="">Select employee</option>
               <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ empDisplayName(emp) }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Leave Type *</label>
-            <select v-model="balanceForm.leave_type_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="balanceForm.leave_type_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="">Select leave type</option>
               <option v-for="lt in leaveTypes" :key="lt.id" :value="lt.id">{{ lt.name }}</option>
             </select>
@@ -240,22 +240,22 @@
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Year *</label>
-              <input v-model.number="balanceForm.year" type="number" min="2000" max="2100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model.number="balanceForm.year" type="number" min="2000" max="2100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Total Days *</label>
-              <input v-model.number="balanceForm.total_days" type="number" min="0" step="0.5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model.number="balanceForm.total_days" type="number" min="0" step="0.5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Used Days</label>
-              <input v-model.number="balanceForm.used_days" type="number" min="0" step="0.5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model.number="balanceForm.used_days" type="number" min="0" step="0.5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
           </div>
           <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showBalanceModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveBalance" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveBalance" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : 'Allocate' }}
           </button>
         </div>

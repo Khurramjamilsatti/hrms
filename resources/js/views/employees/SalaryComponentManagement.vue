@@ -100,7 +100,7 @@
                     <p class="text-sm text-gray-600">Automatically apply increment to basic salary and allowances</p>
                 </div>
                 <button v-if="!showIncrementForm" @click="showIncrementForm = true" type="button"
-                    class="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
+                    class="px-4 py-2 bg-black text-white rounded-lg hover:bg-accent-dark">
                     Apply Increment
                 </button>
             </div>
@@ -161,7 +161,7 @@
                         Cancel
                     </button>
                     <button type="submit" :disabled="loading"
-                        class="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50">
+                        class="px-6 py-2 bg-black text-white rounded-lg hover:bg-accent-dark disabled:opacity-50">
                         {{ loading ? 'Applying...' : 'Apply Increment' }}
                     </button>
                 </div>
@@ -199,7 +199,7 @@
                             <p class="text-xs text-gray-500 mt-0.5">Add earning components like HRA, Medical, Transport or deductions like Tax, EOBI</p>
                         </div>
                         <button type="button" @click="addComponent"
-                            class="px-4 py-2 text-sm bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
+                            class="px-4 py-2 text-sm bg-black text-white rounded-lg hover:bg-accent-dark transition-colors">
                             + Add Component
                         </button>
                     </div>
@@ -332,7 +332,7 @@
                         Cancel
                     </button>
                     <button type="submit" :disabled="!salaryForm.basic_salary"
-                        class="px-6 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        class="px-6 py-2.5 bg-black text-white rounded-lg hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                         💾 Save Salary Structure
                     </button>
                 </div>

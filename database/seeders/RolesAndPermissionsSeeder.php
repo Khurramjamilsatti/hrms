@@ -93,6 +93,10 @@ class RolesAndPermissionsSeeder extends Seeder
             ['name' => 'Update Announcement', 'slug' => 'announcements.update', 'module' => 'announcements', 'action' => 'update'],
             ['name' => 'Delete Announcement', 'slug' => 'announcements.delete', 'module' => 'announcements', 'action' => 'delete'],
 
+            // Landing Page CMS
+            ['name' => 'View Landing CMS', 'slug' => 'cms.view', 'module' => 'cms', 'action' => 'view'],
+            ['name' => 'Update Landing CMS', 'slug' => 'cms.update', 'module' => 'cms', 'action' => 'update'],
+
             // Timesheets
             ['name' => 'View Timesheets', 'slug' => 'timesheets.view', 'module' => 'timesheets', 'action' => 'view'],
             ['name' => 'Create Timesheet', 'slug' => 'timesheets.create', 'module' => 'timesheets', 'action' => 'create'],
@@ -228,6 +232,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'performance.view', 'performance.create', 'performance.update', 'performance.manage', 'performance.reviews', 'performance.goals',
                     'assets.view', 'assets.create', 'assets.update', 'assets.delete', 'assets.manage', 'assets.assign',
                     'announcements.view', 'announcements.create', 'announcements.edit', 'announcements.update', 'announcements.delete',
+                    'cms.view', 'cms.update',
                     'timesheets.view', 'timesheets.create', 'timesheets.update', 'timesheets.submit', 'timesheets.approve', 'timesheets.manage', 'timesheets.projects',
                     'onboarding.view', 'onboarding.create', 'onboarding.update', 'onboarding.delete', 'onboarding.manage',
                     'training.view', 'training.create', 'training.update', 'training.delete', 'training.manage', 'training.enroll',
@@ -263,6 +268,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'performance.view', 'performance.create', 'performance.update', 'performance.manage', 'performance.reviews', 'performance.goals',
                     'assets.view', 'assets.create', 'assets.update', 'assets.delete', 'assets.manage', 'assets.assign',
                     'announcements.view',
+                    'cms.view', 'cms.update',
                     'timesheets.view', 'timesheets.create', 'timesheets.update', 'timesheets.submit', 'timesheets.approve', 'timesheets.manage',
                     'onboarding.view', 'onboarding.create', 'onboarding.update', 'onboarding.delete', 'onboarding.manage',
                     'training.view', 'training.create', 'training.update', 'training.delete', 'training.manage', 'training.enroll',

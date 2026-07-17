@@ -32,37 +32,37 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="text-red-500">*</span></label>
             <input v-model="form.first_name" type="text" required
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="text-red-500">*</span></label>
             <input v-model="form.last_name" type="text" required
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
             <input v-model="form.email" type="email" required :disabled="isEdit"
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500" />
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500" />
           </div>
 
           <div v-if="!isEdit">
             <label class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
             <input v-model="form.password" type="password" required
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
             <input v-model="form.phone" type="text"
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
             <select v-model="form.gender"
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
               <option value="">Select Gender</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
@@ -73,13 +73,13 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
             <input v-model="form.date_of_birth" type="date"
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">National ID / CNIC</label>
             <input v-model="form.national_id" type="text" placeholder="e.g. 12345-1234567-1"
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
         </div>
       </div>
@@ -97,13 +97,13 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Employee Code <span class="text-red-500">*</span></label>
             <input v-model="form.employee_code" type="text" required :disabled="isEdit" placeholder="e.g. EMP-004"
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500" />
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500" />
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Role <span class="text-red-500">*</span></label>
             <select v-model="form.role" required
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
               <option value="super_admin">Super Admin</option>
               <option value="hr_admin">HR Admin</option>
               <option value="section_head">Section Head</option>
@@ -116,7 +116,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
             <select v-model="form.department_id"
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
               <option value="">Select Department</option>
               <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.name }}</option>
             </select>
@@ -125,7 +125,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
             <select v-model="form.designation_id"
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
               <option value="">Select Designation</option>
               <option v-for="desig in designations" :key="desig.id" :value="desig.id">{{ desig.title }}</option>
             </select>
@@ -134,7 +134,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Employment Type <span class="text-red-500">*</span></label>
             <select v-model="form.employment_type" required
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
               <option value="full_time">Full Time</option>
               <option value="part_time">Part Time</option>
               <option value="contract">Contract</option>
@@ -145,7 +145,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Joining Date <span class="text-red-500">*</span></label>
             <input v-model="form.joining_date" type="date" required
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
 
           <div class="relative">
@@ -159,7 +159,7 @@
                 @input="filterManagers"
                 type="text"
                 placeholder="Search section heads..."
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
               />
               <div v-if="selectedManager" class="absolute inset-y-0 right-0 flex items-center pr-3">
                 <button
@@ -201,7 +201,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact</label>
             <input v-model="form.emergency_contact" type="text" placeholder="Name & Phone"
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
         </div>
       </div>
@@ -220,26 +220,26 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
             <textarea v-model="form.address" rows="2" placeholder="House #, Street, Area"
-              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"></textarea>
+              class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"></textarea>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
               <input v-model="form.city" type="text"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">State / Province</label>
               <input v-model="form.state" type="text"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
               <input v-model="form.postal_code" type="text"
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
             </div>
           </div>
         </div>
@@ -252,7 +252,7 @@
           Cancel
         </router-link>
         <button type="submit" :disabled="saving"
-          class="px-6 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed">
+          class="px-6 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed">
           <span v-if="saving" class="flex items-center gap-2">
             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

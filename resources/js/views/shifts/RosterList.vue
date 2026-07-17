@@ -25,7 +25,7 @@
           v-if="can('shifts.create') || can('shifts.manage')"
           type="button"
           @click="openCreate"
-          class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
+          class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           Create Roster
@@ -45,7 +45,7 @@
         <select
           v-model="filters.status"
           @change="fetchRosters"
-          class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+          class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
         >
           <option value="">All statuses</option>
           <option value="draft">Draft</option>
@@ -54,7 +54,7 @@
         <select
           v-model="filters.department_id"
           @change="fetchRosters"
-          class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 min-w-[200px]"
+          class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent min-w-[200px]"
         >
           <option value="">All departments</option>
           <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.name }}</option>
@@ -76,7 +76,7 @@
         v-if="can('shifts.create') || can('shifts.manage')"
         type="button"
         @click="openCreate"
-        class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
+        class="px-5 py-2.5 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark"
       >
         Create Roster
       </button>
@@ -129,7 +129,7 @@
             v-if="!isPublished(roster) && can('shifts.manage')"
             type="button"
             @click="publishRoster(roster)"
-            class="px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
+            class="px-3 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark"
           >
             Publish
           </button>
@@ -148,11 +148,11 @@
         <form @submit.prevent="saveRoster" class="px-6 py-5 space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Roster name *</label>
-            <input v-model="form.name" type="text" required placeholder="e.g. July Ops Roster" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="form.name" type="text" required placeholder="e.g. July Ops Roster" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Department</label>
-            <select v-model="form.department_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="form.department_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="">All departments</option>
               <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.name }}</option>
             </select>
@@ -160,17 +160,17 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Start date *</label>
-              <input v-model="form.start_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="form.start_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">End date *</label>
-              <input v-model="form.end_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="form.end_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
           </div>
           <p v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</p>
           <div class="flex justify-end gap-2 pt-2">
             <button type="button" @click="closeForm" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
-            <button type="submit" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+            <button type="submit" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
               {{ saving ? 'Saving...' : 'Save Roster' }}
             </button>
           </div>

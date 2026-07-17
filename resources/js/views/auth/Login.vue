@@ -1,11 +1,10 @@
 <template>
   <div class="min-h-screen flex">
     <!-- Brand panel -->
-    <div class="hidden lg:flex lg:w-[52%] relative overflow-hidden bg-gray-900 text-white flex-col justify-between p-12 xl:p-16">
-      <!-- Background decoration -->
+    <div class="hidden lg:flex lg:w-[52%] relative overflow-hidden bg-brand text-white flex-col justify-between p-12 xl:p-16">
       <div class="absolute inset-0 pointer-events-none">
-        <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5 blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-white/5 blur-3xl"></div>
+        <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-accent/20 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-gold/10 blur-3xl"></div>
         <div class="absolute top-1/2 left-1/3 w-64 h-64 rounded-full bg-white/[0.03] blur-2xl"></div>
         <svg class="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -20,13 +19,13 @@
       <div class="relative z-10">
         <div class="flex items-center gap-3">
           <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 ring-1 ring-white/10">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
           <div>
-            <h1 class="text-2xl font-bold tracking-tight">HRMS</h1>
-            <p class="text-sm text-gray-400 font-medium">Payroll Digital</p>
+            <h1 class="text-2xl font-bold tracking-tight text-gold">HRMS</h1>
+            <p class="text-sm text-white/50 font-medium">Payroll Digital</p>
           </div>
         </div>
       </div>
@@ -35,7 +34,7 @@
         <h2 class="text-4xl xl:text-5xl font-bold leading-tight tracking-tight">
           Manage your workforce with confidence
         </h2>
-        <p class="mt-5 text-lg text-gray-400 leading-relaxed">
+        <p class="mt-5 text-lg text-white/60 leading-relaxed">
           Streamline payroll, attendance, leaves, and employee records — all in one unified platform.
         </p>
 
@@ -46,47 +45,49 @@
             class="flex items-center gap-3 rounded-xl bg-white/5 ring-1 ring-white/10 px-4 py-3 backdrop-blur-sm"
           >
             <div class="flex-shrink-0 w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
-              <svg class="w-4.5 h-4.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4.5 h-4.5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="feature.icon" />
               </svg>
             </div>
-            <span class="text-sm font-medium text-gray-200">{{ feature.label }}</span>
+            <span class="text-sm font-medium text-white/80">{{ feature.label }}</span>
           </div>
         </div>
       </div>
 
-      <p class="relative z-10 text-sm text-gray-500">
+      <p class="relative z-10 text-sm text-white/40">
         &copy; {{ new Date().getFullYear() }} Payroll Digital. All rights reserved.
       </p>
     </div>
 
     <!-- Login form -->
-    <div class="flex-1 flex flex-col min-h-screen bg-gray-50">
+    <div class="flex-1 flex flex-col min-h-screen bg-surface">
       <!-- Mobile header -->
-      <div class="lg:hidden bg-gray-900 px-6 py-8 text-white">
+      <div class="lg:hidden bg-brand px-6 py-8 text-white">
         <div class="flex items-center gap-3">
           <div class="bg-white/10 rounded-lg p-2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
           <div>
-            <h1 class="text-lg font-bold">HRMS</h1>
-            <p class="text-xs text-gray-400">Payroll Digital</p>
+            <h1 class="text-lg font-bold text-gold">HRMS</h1>
+            <p class="text-xs text-white/50">Payroll Digital</p>
           </div>
         </div>
       </div>
 
-      <div class="flex-1 flex items-center justify-center px-6 py-10 sm:px-10">
+      <div class="flex-1 flex items-center justify-center px-6 py-10 sm:px-10 relative">
+        <div class="absolute top-4 right-4 sm:top-6 sm:right-6">
+          <ThemeToggle variant="muted" />
+        </div>
         <div class="w-full max-w-md">
           <div class="mb-8">
-            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Welcome back</h2>
-            <p class="mt-2 text-gray-500">Sign in to your account to continue</p>
+            <h2 class="text-2xl sm:text-3xl font-bold text-ink tracking-tight">Welcome back</h2>
+            <p class="mt-2 text-ink-muted">Sign in to your account to continue</p>
           </div>
 
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
+          <div class="bg-surface-card rounded-2xl shadow-card border border-surface-border p-6 sm:p-8">
             <form @submit.prevent="handleLogin" class="space-y-5">
-              <!-- Error alert -->
               <div
                 v-if="error"
                 class="flex items-start gap-3 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl"
@@ -98,7 +99,6 @@
                 <p class="text-sm font-medium">{{ error }}</p>
               </div>
 
-              <!-- Email -->
               <div>
                 <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
                   Email address
@@ -115,13 +115,12 @@
                     type="email"
                     required
                     autocomplete="email"
-                    class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow"
+                    class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-transparent transition-shadow"
                     placeholder="you@company.com"
                   />
                 </div>
               </div>
 
-              <!-- Password -->
               <div>
                 <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
                   Password
@@ -138,7 +137,7 @@
                     :type="showPassword ? 'text' : 'password'"
                     required
                     autocomplete="current-password"
-                    class="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-shadow"
+                    class="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-transparent transition-shadow"
                     placeholder="Enter your password"
                   />
                   <button
@@ -158,11 +157,10 @@
                 </div>
               </div>
 
-              <!-- Submit -->
               <button
                 type="submit"
                 :disabled="loading"
-                class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+                class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-accent text-white font-semibold rounded-xl hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
               >
                 <svg
                   v-if="loading"
@@ -178,7 +176,7 @@
             </form>
           </div>
 
-          <p class="mt-8 text-center text-sm text-gray-400 lg:hidden">
+          <p class="mt-8 text-center text-sm text-brand/40 lg:hidden">
             &copy; {{ new Date().getFullYear() }} Payroll Digital
           </p>
         </div>
@@ -191,6 +189,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import ThemeToggle from '@/components/ThemeToggle.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -217,7 +216,7 @@ const handleLogin = async () => {
 
   try {
     await authStore.login(form.value);
-    router.push('/');
+    router.push('/dashboard');
   } catch (err) {
     error.value = err.response?.data?.message || 'Login failed. Please check your credentials.';
   } finally {

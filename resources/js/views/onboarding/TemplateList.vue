@@ -11,7 +11,7 @@
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           Back to Onboarding
         </button>
-        <button @click="openCreateModal" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
+        <button @click="openCreateModal" class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
           Create Template
         </button>
@@ -123,7 +123,7 @@
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
             View Tasks
           </button>
-          <button @click="editTemplate(tmpl)" class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
+          <button @click="editTemplate(tmpl)" class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-accent hover:bg-accent-dark rounded-lg transition-colors">
             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
             Edit
           </button>
@@ -143,32 +143,32 @@
         <div class="px-6 py-5 space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Template Name <span class="text-red-500">*</span></label>
-            <input v-model="form.name" type="text" required placeholder="e.g., Software Engineer Onboarding" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+            <input v-model="form.name" type="text" required placeholder="e.g., Software Engineer Onboarding" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-            <textarea v-model="form.description" rows="3" placeholder="Describe this onboarding template..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"></textarea>
+            <textarea v-model="form.description" rows="3" placeholder="Describe this onboarding template..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"></textarea>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Department</label>
-            <select v-model="form.department_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+            <select v-model="form.department_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
               <option value="">All Departments</option>
               <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.name }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Duration (Days) <span class="text-red-500">*</span></label>
-            <input v-model.number="form.duration_days" type="number" required min="1" max="365" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent" />
+            <input v-model.number="form.duration_days" type="number" required min="1" max="365" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent" />
           </div>
           <div class="flex items-center">
-            <input v-model="form.is_active" type="checkbox" id="is_active" class="h-4 w-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" />
+            <input v-model="form.is_active" type="checkbox" id="is_active" class="h-4 w-4 text-gray-900 border-gray-300 rounded focus:ring-accent" />
             <label for="is_active" class="ml-2 text-sm font-medium text-gray-700">Active (can be used for new onboardings)</label>
           </div>
           <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showFormModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveTemplate" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveTemplate" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : (editingTemplate ? 'Update' : 'Create') }}
           </button>
         </div>
@@ -199,20 +199,20 @@
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="block text-xs font-semibold text-gray-700 mb-1">Task Title <span class="text-red-500">*</span></label>
-                  <input v-model="taskForm.title" type="text" required placeholder="e.g., IT Setup" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                  <input v-model="taskForm.title" type="text" required placeholder="e.g., IT Setup" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-gray-700 mb-1">Day Number <span class="text-red-500">*</span></label>
-                  <input v-model.number="taskForm.day_number" type="number" required min="1" :max="selectedTemplate?.duration_days" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                  <input v-model.number="taskForm.day_number" type="number" required min="1" :max="selectedTemplate?.duration_days" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
                 </div>
               </div>
               <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Description</label>
-                <input v-model="taskForm.description" type="text" placeholder="What needs to be done?" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="taskForm.description" type="text" placeholder="What needs to be done?" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
               <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Task Type <span class="text-red-500">*</span></label>
-                <select v-model="taskForm.task_type" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <select v-model="taskForm.task_type" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                   <option value="document">Document</option>
                   <option value="training">Training</option>
                   <option value="meeting">Meeting</option>
@@ -226,7 +226,7 @@
               </div>
               <div class="flex items-center justify-end space-x-2">
                 <button @click="cancelAddTask" class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md">Cancel</button>
-                <button @click="saveTask" :disabled="savingTask" class="px-3 py-1.5 text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-md disabled:opacity-50">
+                <button @click="saveTask" :disabled="savingTask" class="px-3 py-1.5 text-xs font-medium text-white bg-accent hover:bg-accent-dark rounded-md disabled:opacity-50">
                   {{ savingTask ? 'Saving...' : (editingTask ? 'Update Task' : 'Add Task') }}
                 </button>
               </div>

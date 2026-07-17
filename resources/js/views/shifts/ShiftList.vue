@@ -39,7 +39,7 @@
           v-if="canManage"
           type="button"
           @click="$router.push('/shifts/rosters')"
-          class="px-4 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
+          class="px-4 py-2.5 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark"
         >
           Rosters
         </button>
@@ -72,7 +72,7 @@
           <input
             v-model="currentMonth"
             type="month"
-            class="w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            class="w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
           />
         </div>
 
@@ -310,7 +310,7 @@ const cellClass = (cell) => {
 };
 
 const dayNumberClass = (cell) => {
-  if (cell.isToday) return 'bg-gray-900 text-white';
+  if (cell.isToday) return 'bg-accent text-white';
   if (!cell.inMonth) return 'text-gray-400';
   return 'text-gray-800';
 };

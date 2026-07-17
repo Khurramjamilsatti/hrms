@@ -50,7 +50,7 @@
                 <div class="flex justify-between items-center">
                     <h2 class="text-lg font-bold text-gray-900">Salary Components</h2>
                     <button @click="showAddModal = true"
-                        class="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
+                        class="px-4 py-2 bg-black text-white rounded-lg hover:bg-accent-dark">
                         + Add Component
                     </button>
                 </div>
@@ -162,7 +162,7 @@
                         Cancel
                     </button>
                     <button @click="addComponent"
-                        class="px-5 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800">
+                        class="px-5 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-accent-dark">
                         Add Component
                     </button>
                 </div>

@@ -6,7 +6,7 @@
       <button
         v-if="can('assets.create')"
         @click="openAssetModal()"
-        class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+        class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         Add Asset
@@ -38,7 +38,7 @@
       <div class="flex flex-wrap items-end gap-4">
         <div class="min-w-[160px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-          <select v-model="filters.status" @change="loadAssets()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.status" @change="loadAssets()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Status</option>
             <option value="available">Available</option>
             <option value="assigned">Assigned</option>
@@ -48,14 +48,14 @@
         </div>
         <div class="min-w-[160px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-          <select v-model="filters.category" @change="loadAssets()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <select v-model="filters.category" @change="loadAssets()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="">All Categories</option>
             <option v-for="c in categories" :key="c" :value="c">{{ formatCategory(c) }}</option>
           </select>
         </div>
         <div class="flex-1 min-w-[200px]">
           <label class="block text-sm font-semibold text-gray-700 mb-2">Search</label>
-          <input v-model="filters.search" type="text" placeholder="Name or asset code..." @input="debounceSearch" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+          <input v-model="filters.search" type="text" placeholder="Name or asset code..." @input="debounceSearch" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
         </div>
       </div>
     </div>
@@ -131,22 +131,22 @@
         <div class="px-6 py-5 space-y-4 overflow-y-auto">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Asset Code *</label>
-            <input v-model="assetForm.asset_code" type="text" :disabled="!!editingAsset" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100" placeholder="e.g. LAP-001" />
+            <input v-model="assetForm.asset_code" type="text" :disabled="!!editingAsset" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100" placeholder="e.g. LAP-001" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Name *</label>
-            <input v-model="assetForm.name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="assetForm.name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Category *</label>
-              <select v-model="assetForm.category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="assetForm.category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option v-for="c in categories" :key="c" :value="c">{{ formatCategory(c) }}</option>
               </select>
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
-              <select v-model="assetForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="assetForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="available">Available</option>
                 <option value="assigned">Assigned</option>
                 <option value="maintenance">Maintenance</option>
@@ -156,27 +156,27 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-            <textarea v-model="assetForm.description" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+            <textarea v-model="assetForm.description" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Purchase Date</label>
-              <input v-model="assetForm.purchase_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="assetForm.purchase_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Purchase Cost</label>
-              <input v-model.number="assetForm.purchase_cost" type="number" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model.number="assetForm.purchase_cost" type="number" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Warranty Expiry</label>
-            <input v-model="assetForm.warranty_expiry" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="assetForm.warranty_expiry" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showAssetModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveAsset" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveAsset" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : (editingAsset ? 'Update' : 'Create') }}
           </button>
         </div>
@@ -220,12 +220,12 @@
           <button
             v-if="can('assets.assign') && viewingAsset?.status === 'available'"
             @click="openAssignModal(viewingAsset); showViewModal = false"
-            class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
+            class="px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark"
           >Assign</button>
           <button
             v-if="can('assets.assign') && viewingAsset?.status === 'assigned'"
             @click="openReturnModal(viewingAsset); showViewModal = false"
-            class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
+            class="px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark"
           >Return</button>
           <button @click="showViewModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Close</button>
         </div>
@@ -245,24 +245,24 @@
           <p class="text-sm text-gray-600">Assigning <span class="font-semibold text-gray-900">{{ assigningAsset?.name }}</span> ({{ assigningAsset?.asset_code }})</p>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Employee *</label>
-            <select v-model="assignForm.employee_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="assignForm.employee_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="">Select employee</option>
               <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ getEmployeeName(emp) }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Assigned Date *</label>
-            <input v-model="assignForm.assigned_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="assignForm.assigned_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
-            <textarea v-model="assignForm.notes" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+            <textarea v-model="assignForm.notes" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
           </div>
           <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showAssignModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveAssign" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveAssign" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Assigning...' : 'Assign' }}
           </button>
         </div>
@@ -285,11 +285,11 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Returned Date *</label>
-            <input v-model="returnForm.returned_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="returnForm.returned_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Condition on Return *</label>
-            <select v-model="returnForm.condition_on_return" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="returnForm.condition_on_return" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="good">Good</option>
               <option value="fair">Fair</option>
               <option value="damaged">Damaged</option>
@@ -297,13 +297,13 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Return Notes</label>
-            <textarea v-model="returnForm.return_notes" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+            <textarea v-model="returnForm.return_notes" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
           </div>
           <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showReturnModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveReturn" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveReturn" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Returning...' : 'Return Asset' }}
           </button>
         </div>

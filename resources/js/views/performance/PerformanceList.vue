@@ -23,7 +23,7 @@
         <button
           v-if="can('performance.create')"
           @click="openReviewModal()"
-          class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+          class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
           Create Review
@@ -131,7 +131,7 @@
               <td class="px-5 py-4 text-sm text-gray-600">{{ formatDate(goal.target_date) }}</td>
               <td class="px-5 py-4 min-w-[140px]">
                 <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
-                  <div class="bg-gray-900 h-2 rounded-full" :style="{ width: Math.min(100, goalProgress(goal)) + '%' }"></div>
+                  <div class="bg-accent h-2 rounded-full" :style="{ width: Math.min(100, goalProgress(goal)) + '%' }"></div>
                 </div>
                 <span class="text-xs text-gray-500">{{ goalProgress(goal) }}%</span>
               </td>
@@ -190,29 +190,29 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Employee *</label>
-              <select v-model="reviewForm.employee_id" :disabled="!!editingReview" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100">
+              <select v-model="reviewForm.employee_id" :disabled="!!editingReview" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100">
                 <option value="">Select employee</option>
                 <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ getEmployeeName(emp) }}</option>
               </select>
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Cycle *</label>
-              <select v-model="reviewForm.cycle_id" :disabled="!!editingReview" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100">
+              <select v-model="reviewForm.cycle_id" :disabled="!!editingReview" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100">
                 <option value="">Select cycle</option>
                 <option v-for="c in cycles" :key="c.id" :value="c.id">{{ c.name || c.title }}</option>
               </select>
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Review Date *</label>
-              <input v-model="reviewForm.review_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="reviewForm.review_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Overall Rating (1–5) *</label>
-              <input v-model.number="reviewForm.overall_rating" type="number" min="1" max="5" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model.number="reviewForm.overall_rating" type="number" min="1" max="5" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
-              <select v-model="reviewForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="reviewForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="draft">Draft</option>
                 <option value="submitted">Submitted</option>
                 <option value="acknowledged">Acknowledged</option>
@@ -220,26 +220,26 @@
             </div>
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-1">Strengths</label>
-              <textarea v-model="reviewForm.strengths" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+              <textarea v-model="reviewForm.strengths" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
             </div>
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-1">Areas for Improvement</label>
-              <textarea v-model="reviewForm.areas_for_improvement" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+              <textarea v-model="reviewForm.areas_for_improvement" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
             </div>
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-1">Goals for Next Period</label>
-              <textarea v-model="reviewForm.goals_for_next_period" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+              <textarea v-model="reviewForm.goals_for_next_period" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
             </div>
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-1">Reviewer Comments</label>
-              <textarea v-model="reviewForm.reviewer_comments" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+              <textarea v-model="reviewForm.reviewer_comments" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
             </div>
           </div>
           <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showReviewModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveReview" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveReview" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : (editingReview ? 'Update' : 'Create') }}
           </button>
         </div>
@@ -280,7 +280,7 @@
           <div><p class="font-semibold text-gray-700 mb-1">Reviewer Comments</p><p class="text-gray-600 whitespace-pre-wrap">{{ viewingReview.reviewer_comments || viewingReview.comments || '—' }}</p></div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
-          <button v-if="can('performance.update')" @click="openReviewModal(viewingReview); showViewReview = false" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800">Edit</button>
+          <button v-if="can('performance.update')" @click="openReviewModal(viewingReview); showViewReview = false" class="px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark">Edit</button>
           <button @click="showViewReview = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Close</button>
         </div>
       </div>
@@ -298,32 +298,32 @@
         <div class="px-6 py-5 space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Employee *</label>
-            <select v-model="goalForm.employee_id" :disabled="!!editingGoal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100">
+            <select v-model="goalForm.employee_id" :disabled="!!editingGoal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100">
               <option value="">Select employee</option>
               <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ getEmployeeName(emp) }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Title *</label>
-            <input v-model="goalForm.title" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="goalForm.title" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-            <textarea v-model="goalForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+            <textarea v-model="goalForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Target Date *</label>
-              <input v-model="goalForm.target_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="goalForm.target_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Progress %</label>
-              <input v-model.number="goalForm.progress_percentage" type="number" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model.number="goalForm.progress_percentage" type="number" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
-            <select v-model="goalForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="goalForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="not_started">Not Started</option>
               <option value="in_progress">In Progress</option>
               <option value="completed">Completed</option>
@@ -334,7 +334,7 @@
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showGoalModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveGoal" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveGoal" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : (editingGoal ? 'Update' : 'Create') }}
           </button>
         </div>
@@ -363,7 +363,7 @@
           <div><p class="font-semibold text-gray-700 mb-1">Description</p><p class="text-gray-600 whitespace-pre-wrap">{{ viewingGoal.description || '—' }}</p></div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
-          <button v-if="can('performance.update')" @click="openGoalModal(viewingGoal); showViewGoal = false" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800">Edit</button>
+          <button v-if="can('performance.update')" @click="openGoalModal(viewingGoal); showViewGoal = false" class="px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark">Edit</button>
           <button @click="showViewGoal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Close</button>
         </div>
       </div>
@@ -381,21 +381,21 @@
         <div class="px-6 py-5 space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Name *</label>
-            <input v-model="cycleForm.name" type="text" placeholder="e.g. Q1 2026" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="cycleForm.name" type="text" placeholder="e.g. Q1 2026" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Start Date *</label>
-              <input v-model="cycleForm.start_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="cycleForm.start_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">End Date *</label>
-              <input v-model="cycleForm.end_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="cycleForm.end_date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
-            <select v-model="cycleForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="cycleForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="upcoming">Upcoming</option>
               <option value="active">Active</option>
               <option value="completed">Completed</option>
@@ -405,7 +405,7 @@
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showCycleModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveCycle" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveCycle" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : 'Create' }}
           </button>
         </div>

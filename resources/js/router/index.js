@@ -4,6 +4,11 @@ import { usePermissionStore } from '@/stores/permission';
 
 const routes = [
   {
+    path: '/',
+    name: 'Landing',
+    component: () => import('@/views/landing/LandingPage.vue'),
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('@/views/auth/Login.vue'),
@@ -15,7 +20,7 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       {
-        path: '',
+        path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/Dashboard.vue'),
         meta: { module: 'dashboard' }
@@ -294,6 +299,12 @@ const routes = [
         component: () => import('@/views/admin/roles/UserRoleManagement.vue'),
         meta: { module: 'users' }
       },
+      {
+        path: 'admin/landing',
+        name: 'LandingCms',
+        component: () => import('@/views/admin/LandingCms.vue'),
+        meta: { module: 'cms' }
+      },
     ]
   },
 ];
@@ -310,7 +321,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Handle guest routes (like login)
   if (to.meta.guest && isAuthenticated) {
-    return next('/');
+    return next('/dashboard');
   }
 
   // Handle protected routes

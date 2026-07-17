@@ -11,8 +11,8 @@
         {{ message }}
       </p>
       <router-link
-        to="/"
-        class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors"
+        to="/dashboard"
+        class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors"
       >
         Back to Dashboard
       </router-link>

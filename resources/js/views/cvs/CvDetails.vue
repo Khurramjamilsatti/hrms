@@ -30,7 +30,7 @@
       <button
         @click="downloadCv"
         :disabled="!cv.id || downloading"
-        class="inline-flex items-center justify-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow disabled:opacity-50"
+        class="inline-flex items-center justify-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow disabled:opacity-50"
       >
         <svg v-if="downloading" class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

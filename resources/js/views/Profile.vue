@@ -11,7 +11,7 @@
           type="button"
           @click="startEditing"
           :disabled="!hasEmployeeProfile"
-          class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+          class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
         >
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
           Edit Profile
@@ -20,7 +20,7 @@
           <button type="button" @click="cancelEditing" class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
             Cancel
           </button>
-          <button type="button" @click="saveProfile" :disabled="saving" class="px-4 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button type="button" @click="saveProfile" :disabled="saving" class="px-4 py-2.5 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : 'Save Changes' }}
           </button>
         </template>
@@ -43,7 +43,7 @@
             />
             <div
               v-else
-              class="w-24 h-24 rounded-full bg-gray-900 text-white flex items-center justify-center text-2xl font-bold"
+              class="w-24 h-24 rounded-full bg-accent text-white flex items-center justify-center text-2xl font-bold"
             >
               {{ getInitials(profileData.name) }}
             </div>
@@ -126,7 +126,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Full name</label>
-                <input v-if="isEditing" v-model="editForm.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-if="isEditing" v-model="editForm.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
                 <p v-else class="text-sm text-gray-900">{{ profileData.name || '—' }}</p>
               </div>
               <div>
@@ -135,17 +135,17 @@
               </div>
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Phone</label>
-                <input v-if="isEditing" v-model="editForm.phone" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-if="isEditing" v-model="editForm.phone" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
                 <p v-else class="text-sm text-gray-900">{{ profileData.employee?.phone || '—' }}</p>
               </div>
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Date of birth</label>
-                <input v-if="isEditing" v-model="editForm.date_of_birth" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-if="isEditing" v-model="editForm.date_of_birth" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
                 <p v-else class="text-sm text-gray-900">{{ formatDate(profileData.employee?.date_of_birth) }}</p>
               </div>
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Gender</label>
-                <select v-if="isEditing" v-model="editForm.gender" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <select v-if="isEditing" v-model="editForm.gender" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                   <option value="">Select</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
@@ -155,12 +155,12 @@
               </div>
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">CNIC / National ID</label>
-                <input v-if="isEditing" v-model="editForm.cnic" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-if="isEditing" v-model="editForm.cnic" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
                 <p v-else class="text-sm text-gray-900">{{ profileData.employee?.cnic || profileData.employee?.national_id || '—' }}</p>
               </div>
               <div class="md:col-span-2">
                 <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Address</label>
-                <textarea v-if="isEditing" v-model="editForm.address" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+                <textarea v-if="isEditing" v-model="editForm.address" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
                 <p v-else class="text-sm text-gray-900">{{ profileData.employee?.address || '—' }}</p>
               </div>
             </div>
@@ -201,17 +201,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Contact name</label>
-                <input v-if="isEditing" v-model="editForm.emergency_contact_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-if="isEditing" v-model="editForm.emergency_contact_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
                 <p v-else class="text-sm text-gray-900">{{ profileData.employee?.emergency_contact_name || '—' }}</p>
               </div>
               <div>
                 <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Contact phone</label>
-                <input v-if="isEditing" v-model="editForm.emergency_contact_phone" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-if="isEditing" v-model="editForm.emergency_contact_phone" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
                 <p v-else class="text-sm text-gray-900">{{ profileData.employee?.emergency_contact_phone || '—' }}</p>
               </div>
               <div class="md:col-span-2">
                 <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">Relationship</label>
-                <input v-if="isEditing" v-model="editForm.emergency_contact_relationship" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-if="isEditing" v-model="editForm.emergency_contact_relationship" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
                 <p v-else class="text-sm text-gray-900">{{ profileData.employee?.emergency_contact_relationship || '—' }}</p>
               </div>
             </div>
@@ -231,19 +231,19 @@
         <form @submit.prevent="changePassword" class="px-6 py-5 space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Current password</label>
-            <input v-model="passwordForm.current_password" type="password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="passwordForm.current_password" type="password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">New password</label>
-            <input v-model="passwordForm.new_password" type="password" required minlength="8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="passwordForm.new_password" type="password" required minlength="8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Confirm new password</label>
-            <input v-model="passwordForm.new_password_confirmation" type="password" required minlength="8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="passwordForm.new_password_confirmation" type="password" required minlength="8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div class="flex justify-end gap-2 pt-2">
             <button type="button" @click="closePasswordModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
-            <button type="submit" :disabled="changingPassword" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+            <button type="submit" :disabled="changingPassword" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
               {{ changingPassword ? 'Updating...' : 'Update password' }}
             </button>
           </div>

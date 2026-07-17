@@ -70,7 +70,7 @@
                     </svg>
                     <input v-model="searchQuery" @input="handleSearch" type="text"
                         placeholder="Search by employee name, code, email, or loan number..."
-                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
                 </div>
                 <select v-model="filters.status" @change="fetchLoans"
                     class="px-4 py-2 border border-gray-300 rounded-lg">
@@ -95,7 +95,7 @@
             </div>
 
             <button @click="showApplyModal = true"
-                class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+                class="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent-dark">
                 Apply for Loan
             </button>
         </div>
@@ -296,7 +296,7 @@
                         <button type="button" @click="showApplyModal = false"
                             class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
                         <button type="submit"
-                            class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">Submit
+                            class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-dark">Submit
                             Application</button>
                     </div>
                 </form>
@@ -355,7 +355,7 @@
                         <button type="button" @click="closeEditModal"
                             class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
                         <button type="submit"
-                            class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">Update Loan</button>
+                            class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-dark">Update Loan</button>
                     </div>
                 </form>
             </div>
@@ -401,7 +401,7 @@
                         <button type="button" @click="showAddPaymentModal = false"
                             class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
                         <button type="submit"
-                            class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">Record
+                            class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-dark">Record
                             Payment</button>
                     </div>
                 </form>
@@ -450,7 +450,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Reason for rejection*</label>
                         <textarea v-model="rejectionReason" rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                             placeholder="Please provide a reason..."></textarea>
                     </div>
                 </div>

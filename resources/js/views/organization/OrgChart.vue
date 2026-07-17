@@ -158,7 +158,7 @@
                         </div>
                     </div>
                     
-                    <button @click="viewDepartmentDetails(dept)" class="mt-4 w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
+                    <button @click="viewDepartmentDetails(dept)" class="mt-4 w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-accent-dark transition-colors">
                         View Details
                     </button>
                 </div>
@@ -247,7 +247,7 @@
                         </select>
                     </div>
                     <div class="flex items-end">
-                        <button @click="fetchDirectory" class="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
+                        <button @click="fetchDirectory" class="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-accent-dark">
                             Search
                         </button>
                     </div>
@@ -397,7 +397,7 @@
 
                 <!-- Modal Footer -->
                 <div class="bg-gray-50 px-6 py-4 flex justify-end">
-                    <button @click="closeDeptModal" class="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
+                    <button @click="closeDeptModal" class="px-6 py-2 bg-black text-white rounded-lg hover:bg-accent-dark transition-colors">
                         Close
                     </button>
                 </div>

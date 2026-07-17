@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
             FileManagementSeeder::class,
             CalendarSeeder::class,
             NotificationSeeder::class,
+            LandingPageSeeder::class,
         ]);
     }
 }

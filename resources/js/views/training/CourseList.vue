@@ -2,7 +2,7 @@
   <div class="p-6">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900">Training Courses</h1>
-      <button v-if="can('training.create')" @click="openCreateModal" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
+      <button v-if="can('training.create')" @click="openCreateModal" class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         Create Course
       </button>
@@ -31,7 +31,7 @@
         </div>
         <div class="flex space-x-2 pt-3 border-t border-gray-100">
           <button v-if="can('training.update')" @click="editCourse(course)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg">Edit</button>
-          <button @click="openSessions(course)" class="px-3 py-1.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg">Sessions</button>
+          <button @click="openSessions(course)" class="px-3 py-1.5 text-sm font-medium text-white bg-accent hover:bg-accent-dark rounded-lg">Sessions</button>
         </div>
       </div>
     </div>
@@ -47,16 +47,16 @@
           <div class="px-6 py-5 space-y-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Course Name</label>
-              <input v-model="form.name" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="form.name" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
-              <textarea v-model="form.description" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+              <textarea v-model="form.description" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Type</label>
-                <select v-model="form.type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <select v-model="form.type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                   <option value="technical">Technical</option>
                   <option value="soft_skills">Soft Skills</option>
                   <option value="compliance">Compliance</option>
@@ -66,13 +66,13 @@
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Duration (Hours)</label>
-                <input v-model="form.duration_hours" type="number" min="1" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="form.duration_hours" type="number" min="1" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Delivery Mode</label>
-                <select v-model="form.delivery_mode" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <select v-model="form.delivery_mode" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                   <option value="online">Online</option>
                   <option value="in_person">In Person</option>
                   <option value="hybrid">Hybrid</option>
@@ -80,14 +80,14 @@
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Cost (PKR)</label>
-                <input v-model="form.cost" type="number" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="form.cost" type="number" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
             </div>
             <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
           </div>
           <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
             <button type="button" @click="closeForm" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-            <button type="submit" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">{{ saving ? 'Saving...' : 'Save' }}</button>
+            <button type="submit" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">{{ saving ? 'Saving...' : 'Save' }}</button>
           </div>
         </form>
       </div>
@@ -104,7 +104,7 @@
           <button @click="closeSessions" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
         </div>
         <div class="px-6 py-4 border-b border-gray-100 flex justify-end">
-          <button v-if="can('training.create')" @click="openSessionForm()" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg">
+          <button v-if="can('training.create')" @click="openSessionForm()" class="inline-flex items-center px-4 py-2 bg-accent hover:bg-accent-dark text-white text-sm font-medium rounded-lg">
             Add Session
           </button>
         </div>
@@ -143,44 +143,44 @@
           <div class="px-6 py-5 space-y-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Session Name</label>
-              <input v-model="sessionForm.session_name" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="sessionForm.session_name" type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Start Date</label>
-                <input v-model="sessionForm.start_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="sessionForm.start_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">End Date</label>
-                <input v-model="sessionForm.end_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="sessionForm.end_date" type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Start Time</label>
-                <input v-model="sessionForm.start_time" type="time" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="sessionForm.start_time" type="time" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">End Time</label>
-                <input v-model="sessionForm.end_time" type="time" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="sessionForm.end_time" type="time" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Location</label>
-              <input v-model="sessionForm.location" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="sessionForm.location" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Meeting Link</label>
-              <input v-model="sessionForm.meeting_link" type="url" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="sessionForm.meeting_link" type="url" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Available Seats</label>
-                <input v-model="sessionForm.available_seats" type="number" min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+                <input v-model="sessionForm.available_seats" type="number" min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-                <select v-model="sessionForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <select v-model="sessionForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                   <option value="scheduled">Scheduled</option>
                   <option value="ongoing">Ongoing</option>
                   <option value="completed">Completed</option>
@@ -192,7 +192,7 @@
           </div>
           <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
             <button type="button" @click="showSessionForm = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-            <button type="submit" :disabled="sessionSaving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">{{ sessionSaving ? 'Saving...' : 'Save' }}</button>
+            <button type="submit" :disabled="sessionSaving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">{{ sessionSaving ? 'Saving...' : 'Save' }}</button>
           </div>
         </form>
       </div>

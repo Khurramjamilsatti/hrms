@@ -23,7 +23,7 @@
         <button
           v-if="can('recruitment.create')"
           @click="openPositionModal()"
-          class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow"
+          class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
           Post New Job
@@ -199,7 +199,7 @@
         <div class="px-6 py-5 space-y-4 overflow-y-auto">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Application *</label>
-            <select v-model="interviewForm.job_application_id" :disabled="!!editingInterview" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100">
+            <select v-model="interviewForm.job_application_id" :disabled="!!editingInterview" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100">
               <option value="">Select application</option>
               <option v-for="app in applications" :key="app.id" :value="app.id">
                 {{ applicantName(app) }} — {{ positionTitle(app) }}
@@ -208,15 +208,15 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Title *</label>
-            <input v-model="interviewForm.title" type="text" placeholder="e.g. Technical Round 1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="interviewForm.title" type="text" placeholder="e.g. Technical Round 1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Scheduled At *</label>
-            <input v-model="interviewForm.scheduled_at" type="datetime-local" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="interviewForm.scheduled_at" type="datetime-local" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Interviewer *</label>
-            <select v-model="interviewForm.interviewer_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="interviewForm.interviewer_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="">Select interviewer</option>
               <option v-for="emp in interviewers" :key="emp.user_id || emp.id" :value="emp.user_id || emp.user?.id">
                 {{ emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || emp.user?.name || emp.name }}
@@ -226,11 +226,11 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Location</label>
-              <input v-model="interviewForm.location" type="text" placeholder="Office / Room" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="interviewForm.location" type="text" placeholder="Office / Room" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-              <select v-model="interviewForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="interviewForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="scheduled">Scheduled</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
@@ -240,17 +240,17 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Meeting Link</label>
-            <input v-model="interviewForm.meeting_link" type="url" placeholder="https://..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="interviewForm.meeting_link" type="url" placeholder="https://..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Agenda</label>
-            <textarea v-model="interviewForm.agenda" rows="3" placeholder="Interview agenda..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+            <textarea v-model="interviewForm.agenda" rows="3" placeholder="Interview agenda..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
           </div>
           <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showInterviewModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveInterview" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveInterview" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : (editingInterview ? 'Update' : 'Schedule') }}
           </button>
         </div>
@@ -270,18 +270,18 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-1">Job Title *</label>
-              <input v-model="positionForm.title" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="e.g. Senior Developer" />
+              <input v-model="positionForm.title" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="e.g. Senior Developer" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Department *</label>
-              <select v-model="positionForm.department_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="positionForm.department_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="">Select department</option>
                 <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
               </select>
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Employment Type *</label>
-              <select v-model="positionForm.employment_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="positionForm.employment_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="full_time">Full Time</option>
                 <option value="part_time">Part Time</option>
                 <option value="contract">Contract</option>
@@ -290,11 +290,11 @@
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Positions Available *</label>
-              <input v-model.number="positionForm.positions_available" type="number" min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model.number="positionForm.positions_available" type="number" min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
-              <select v-model="positionForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+              <select v-model="positionForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
                 <option value="draft">Draft</option>
                 <option value="open">Open</option>
                 <option value="closed">Closed</option>
@@ -302,30 +302,30 @@
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Salary Min</label>
-              <input v-model.number="positionForm.salary_range_min" type="number" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model.number="positionForm.salary_range_min" type="number" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Salary Max</label>
-              <input v-model.number="positionForm.salary_range_max" type="number" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model.number="positionForm.salary_range_max" type="number" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-1">Description *</label>
-              <textarea v-model="positionForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="Role overview..."></textarea>
+              <textarea v-model="positionForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" placeholder="Role overview..."></textarea>
             </div>
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-1">Requirements</label>
-              <textarea v-model="positionForm.requirements" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+              <textarea v-model="positionForm.requirements" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
             </div>
             <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-1">Responsibilities</label>
-              <textarea v-model="positionForm.responsibilities" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+              <textarea v-model="positionForm.responsibilities" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
             </div>
           </div>
           <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showPositionModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="savePosition" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="savePosition" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : (editingPosition ? 'Update' : 'Create') }}
           </button>
         </div>
@@ -365,7 +365,7 @@
           </div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
-          <button v-if="can('recruitment.update')" @click="openPositionModal(viewingPosition); showViewPosition = false" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800">Edit</button>
+          <button v-if="can('recruitment.update')" @click="openPositionModal(viewingPosition); showViewPosition = false" class="px-4 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark">Edit</button>
           <button @click="showViewPosition = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Close</button>
         </div>
       </div>
@@ -383,32 +383,32 @@
         <div class="px-6 py-5 space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Job Position *</label>
-            <select v-model="applicationForm.job_position_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="applicationForm.job_position_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="">Select position</option>
               <option v-for="p in openPositions" :key="p.id" :value="p.id">{{ p.title }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Applicant Name *</label>
-            <input v-model="applicationForm.applicant_name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            <input v-model="applicationForm.applicant_name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Email *</label>
-              <input v-model="applicationForm.email" type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="applicationForm.email" type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Phone *</label>
-              <input v-model="applicationForm.phone" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900" />
+              <input v-model="applicationForm.phone" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" />
             </div>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Cover Letter</label>
-            <textarea v-model="applicationForm.cover_letter" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"></textarea>
+            <textarea v-model="applicationForm.cover_letter" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-            <select v-model="applicationForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="applicationForm.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
               <option value="applied">Applied</option>
               <option value="screening">Screening</option>
               <option value="interview">Interview</option>
@@ -421,7 +421,7 @@
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showApplicationModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="saveApplication" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button @click="saveApplication" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : 'Create' }}
           </button>
         </div>
@@ -447,7 +447,7 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
-            <select v-model="reviewForm.status" :disabled="!can('recruitment.manage')" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100">
+            <select v-model="reviewForm.status" :disabled="!can('recruitment.manage')" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100">
               <option value="applied">Applied</option>
               <option value="screening">Screening</option>
               <option value="interview">Interview</option>
@@ -458,13 +458,13 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Notes / Interview Schedule</label>
-            <textarea v-model="reviewForm.notes" rows="3" :disabled="!can('recruitment.manage')" placeholder="e.g. Interview on Monday 10am via Zoom..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100"></textarea>
+            <textarea v-model="reviewForm.notes" rows="3" :disabled="!can('recruitment.manage')" placeholder="e.g. Interview on Monday 10am via Zoom..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100"></textarea>
           </div>
           <div v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
           <button @click="showReviewModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Close</button>
-          <button v-if="can('recruitment.manage')" @click="saveReview" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">
+          <button v-if="can('recruitment.manage')" @click="saveReview" :disabled="saving" class="px-5 py-2 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50">
             {{ saving ? 'Saving...' : 'Update Status' }}
           </button>
         </div>

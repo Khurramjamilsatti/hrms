@@ -106,7 +106,7 @@
               <button 
                 @click="bulkAssignEmployees"
                 :disabled="selectedEmployees.length === 0 || assigning"
-                class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-black hover:bg-gray-800 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-black hover:bg-accent-dark text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -299,7 +299,7 @@
           <button 
             @click="removeAssignment"
             :disabled="removing"
-            class="px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg disabled:opacity-50">
+            class="px-4 py-2 bg-black hover:bg-accent-dark text-white rounded-lg disabled:opacity-50">
             {{ removing ? 'Removing...' : 'Remove' }}
           </button>
         </div>

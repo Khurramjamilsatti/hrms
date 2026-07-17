@@ -1,240 +1,328 @@
 <template>
-  <div class="min-h-screen bg-surface text-ink">
-    <!-- Loading -->
-    <div v-if="loading" class="min-h-screen flex items-center justify-center bg-brand">
+  <div>
+    <div v-if="loading" class="flex min-h-screen items-center justify-center bg-brand">
       <div class="flex flex-col items-center gap-4">
-        <div class="h-10 w-10 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
+        <div class="h-10 w-10 animate-spin rounded-full border-2 border-gold/30 border-t-gold" />
         <p class="text-sm text-white/60">Loading…</p>
       </div>
     </div>
 
-    <template v-else>
-      <!-- Sticky nav -->
-      <header class="sticky top-0 z-40 border-b border-white/10 bg-brand/95 backdrop-blur-md">
-        <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <router-link to="/" class="text-lg font-bold tracking-tight text-gold sm:text-xl">
-            {{ brandName }}
-          </router-link>
-          <nav class="flex items-center gap-3 sm:gap-4">
-            <ThemeToggle variant="header" />
-            <a
-              href="#features"
-              class="hidden text-sm font-medium text-white/70 transition hover:text-white sm:inline"
-            >
-              Features
-            </a>
-            <router-link
-              v-if="isAuthenticated"
-              to="/dashboard"
-              class="inline-flex items-center rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:bg-accent-dark"
-            >
-              Go to Dashboard
-            </router-link>
-            <router-link
-              v-else
-              to="/login"
-              class="inline-flex items-center rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:bg-accent-dark"
-            >
-              Sign In
-            </router-link>
-          </nav>
-        </div>
-      </header>
-
-      <!-- Full-bleed hero -->
+    <LandingShell v-else :settings="settings" :pages="pages">
+      <!-- Hero -->
       <section class="relative overflow-hidden bg-brand text-white">
         <div class="pointer-events-none absolute inset-0">
-          <div class="absolute -left-32 -top-40 h-[28rem] w-[28rem] rounded-full bg-accent/20 blur-3xl" />
-          <div class="absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-gold/10 blur-3xl" />
-          <div class="absolute inset-0 opacity-[0.06]" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 28px 28px;" />
+          <div class="absolute -left-32 -top-40 h-[28rem] w-[28rem] rounded-full bg-accent/25 blur-3xl" />
+          <div class="absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-gold/15 blur-3xl" />
+          <div class="absolute inset-0 opacity-[0.05]" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 28px 28px;" />
         </div>
 
-        <div class="relative mx-auto flex min-h-[78vh] max-w-6xl flex-col justify-center px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-          <p v-if="settings.brand_tagline" class="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-gold">
-            {{ settings.brand_tagline }}
-          </p>
-          <h1 class="max-w-3xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-            {{ settings.hero_title || 'Modern HR & Payroll' }}
-          </h1>
-          <p class="mt-5 max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
-            {{ settings.hero_subtitle || 'Run payroll, attendance, leaves, and employee records from one platform.' }}
-          </p>
-          <div class="mt-10 flex flex-wrap items-center gap-3">
-            <a
-              :href="primaryCtaHref"
-              class="inline-flex items-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-accent-dark"
-            >
-              {{ settings.hero_cta_text || 'Sign In' }}
-            </a>
-            <a
-              v-if="settings.hero_secondary_cta_text"
-              :href="settings.hero_secondary_cta_link || '#features'"
-              class="inline-flex items-center rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
-            >
-              {{ settings.hero_secondary_cta_text }}
-            </a>
+        <div class="relative mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 lg:py-28">
+          <div>
+            <p v-if="settings.brand_tagline" class="mb-4 inline-flex items-center rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-gold">
+              {{ settings.brand_tagline }}
+            </p>
+            <h1 class="text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl lg:text-[3.25rem]">
+              {{ settings.hero_title || 'Modern HR & Payroll' }}
+            </h1>
+            <p class="mt-5 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
+              {{ settings.hero_subtitle }}
+            </p>
+            <div class="mt-9 flex flex-wrap items-center gap-3">
+              <a :href="primaryCtaHref" class="inline-flex items-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-accent-dark">
+                {{ settings.hero_cta_text || 'Get Started' }}
+              </a>
+              <a
+                v-if="settings.hero_secondary_cta_text"
+                :href="settings.hero_secondary_cta_link || '#pricing'"
+                class="inline-flex items-center rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
+              >
+                {{ settings.hero_secondary_cta_text }}
+              </a>
+            </div>
+            <div class="mt-10 flex flex-wrap gap-6 text-sm text-white/50">
+              <span class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-gold" /> Role-based access</span>
+              <span class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-gold" /> Multi-level approvals</span>
+              <span class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-gold" /> Employee self-service</span>
+            </div>
+          </div>
+
+          <div class="relative hidden lg:block">
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-soft backdrop-blur">
+              <div class="mb-5 flex items-center justify-between">
+                <p class="text-sm font-semibold text-white/90">Workforce overview</p>
+                <span class="rounded-full bg-accent/20 px-2.5 py-0.5 text-xs font-medium text-accent-muted">Live</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div v-for="stat in stats.slice(0, 4)" :key="stat.id" class="rounded-xl bg-brand-soft/80 p-4 ring-1 ring-white/10">
+                  <p class="text-2xl font-bold text-gold">{{ stat.value }}</p>
+                  <p class="mt-1 text-xs text-white/55">{{ stat.label }}</p>
+                </div>
+              </div>
+              <div class="mt-5 rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
+                <div class="mb-3 flex items-center justify-between text-xs text-white/50">
+                  <span>Payroll readiness</span>
+                  <span class="text-gold">92%</span>
+                </div>
+                <div class="h-2 overflow-hidden rounded-full bg-white/10">
+                  <div class="h-full w-[92%] rounded-full bg-accent-gradient" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Stats -->
-      <section v-if="stats.length" class="relative z-10 -mt-10 pb-4">
-        <div class="mx-auto grid max-w-6xl grid-cols-2 gap-3 px-4 sm:gap-4 sm:px-6 md:grid-cols-4 lg:px-8">
-          <div
-            v-for="stat in stats"
-            :key="stat.id"
-            class="rounded-xl border border-surface-border bg-surface-card p-5 shadow-card"
-          >
-            <p class="text-2xl font-bold text-ink sm:text-3xl">{{ stat.value }}</p>
-            <p class="mt-1 text-sm font-medium text-ink-muted">{{ stat.label }}</p>
+      <!-- Stats strip (mobile / fallback) -->
+      <section v-if="stats.length" class="relative z-10 -mt-8 lg:hidden">
+        <div class="mx-auto grid max-w-6xl grid-cols-2 gap-3 px-4 sm:grid-cols-4 sm:px-6">
+          <div v-for="stat in stats" :key="'m-' + stat.id" class="rounded-xl border border-surface-border bg-surface-card p-4 shadow-card">
+            <p class="text-xl font-bold text-ink">{{ stat.value }}</p>
+            <p class="mt-1 text-xs font-medium text-ink-muted">{{ stat.label }}</p>
           </div>
         </div>
       </section>
 
       <!-- Features -->
-      <section id="features" class="scroll-mt-20 py-16 sm:py-20">
+      <section id="features" class="scroll-mt-24 py-20 sm:py-24">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div class="max-w-2xl">
-            <h2 class="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-              {{ settings.features_title || 'Features' }}
+          <div class="mx-auto max-w-2xl text-center">
+            <p class="text-sm font-semibold uppercase tracking-wider text-accent">Capabilities</p>
+            <h2 class="mt-2 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+              {{ settings.features_title || 'Everything you need' }}
             </h2>
-            <p class="mt-3 text-base text-ink-muted">
-              {{ settings.features_subtitle || 'Powerful modules that work together out of the box.' }}
-            </p>
+            <p class="mt-3 text-base text-ink-muted">{{ settings.features_subtitle }}</p>
           </div>
-
-          <div v-if="features.length" class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <article
               v-for="feature in features"
               :key="feature.id"
-              class="rounded-xl border border-surface-border bg-surface-card p-6 shadow-card transition hover:shadow-soft"
+              class="group rounded-2xl border border-surface-border bg-surface-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
             >
-              <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-gold">
+              <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-accent-soft text-accent transition group-hover:bg-accent group-hover:text-white">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" :d="iconPath(feature.icon)" />
                 </svg>
               </div>
-              <h3 class="text-lg font-bold text-ink">{{ feature.title }}</h3>
-              <p class="mt-2 text-sm leading-relaxed text-ink-muted">
-                {{ feature.description || '—' }}
-              </p>
+              <h3 class="text-base font-bold text-ink">{{ feature.title }}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-ink-muted">{{ feature.description }}</p>
             </article>
           </div>
-          <p v-else class="mt-10 text-sm text-ink-muted">Features will appear here once published.</p>
         </div>
       </section>
 
-      <!-- About -->
-      <section class="border-y border-surface-border bg-surface-card py-16 sm:py-20">
-        <div class="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
-          <div>
-            <h2 class="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-              {{ settings.about_title || 'About us' }}
+      <!-- How it works -->
+      <section id="how-it-works" class="scroll-mt-24 border-y border-surface-border bg-surface-muted/60 py-20 sm:py-24">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div class="mx-auto max-w-2xl text-center">
+            <p class="text-sm font-semibold uppercase tracking-wider text-accent">Onboarding</p>
+            <h2 class="mt-2 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+              {{ settings.how_it_works_title || 'How it works' }}
             </h2>
-            <p class="mt-5 text-base leading-relaxed text-ink-soft whitespace-pre-line">
-              {{ settings.about_body || 'Our HRMS helps teams automate payroll, track attendance, manage leave, and keep every employee record in sync.' }}
-            </p>
+            <p class="mt-3 text-base text-ink-muted">{{ settings.how_it_works_subtitle }}</p>
           </div>
-          <div class="relative overflow-hidden rounded-xl bg-brand p-8 text-white shadow-soft sm:p-10">
-            <div class="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/30 blur-2xl" />
-            <p class="relative text-sm font-semibold uppercase tracking-[0.18em] text-gold">Why teams choose us</p>
-            <ul class="relative mt-6 space-y-4 text-sm text-white/80">
-              <li class="flex gap-3">
-                <span class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-accent" />
-                Unified payroll, attendance, and leave workflows
-              </li>
-              <li class="flex gap-3">
-                <span class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-accent" />
-                Clear approvals for managers and HR
-              </li>
-              <li class="flex gap-3">
-                <span class="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-accent" />
-                Employee self-service without spreadsheet chaos
-              </li>
-            </ul>
+          <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div v-for="(step, index) in steps" :key="step.id" class="relative rounded-2xl border border-surface-border bg-surface-card p-6 shadow-card">
+              <span class="mb-4 inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-bold text-gold">
+                {{ String(index + 1).padStart(2, '0') }}
+              </span>
+              <h3 class="text-base font-bold text-ink">{{ step.title }}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-ink-muted">{{ step.description }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- About / Security band -->
+      <section id="about" class="scroll-mt-24 py-20 sm:py-24">
+        <div class="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-wider text-accent">About</p>
+            <h2 class="mt-2 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+              {{ settings.about_title || 'People operations, simplified' }}
+            </h2>
+            <p class="mt-4 whitespace-pre-line text-base leading-relaxed text-ink-soft">
+              {{ settings.about_body }}
+            </p>
+            <router-link to="/pages/about" class="mt-6 inline-flex text-sm font-semibold text-accent hover:text-accent-dark">
+              Learn more about us →
+            </router-link>
+          </div>
+          <div class="rounded-2xl border border-surface-border bg-brand p-8 text-white shadow-soft">
+            <p class="text-sm font-semibold uppercase tracking-wider text-gold">
+              {{ settings.security_title || 'Security' }}
+            </p>
+            <p class="mt-4 text-base leading-relaxed text-white/75 whitespace-pre-line">
+              {{ settings.security_body }}
+            </p>
+            <router-link to="/pages/security" class="mt-6 inline-flex text-sm font-semibold text-gold hover:text-white">
+              Read security overview →
+            </router-link>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pricing -->
+      <section id="pricing" class="scroll-mt-24 border-y border-surface-border bg-surface-muted/60 py-20 sm:py-24">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div class="mx-auto max-w-2xl text-center">
+            <p class="text-sm font-semibold uppercase tracking-wider text-accent">Pricing</p>
+            <h2 class="mt-2 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+              {{ settings.pricing_title || 'Simple, transparent pricing' }}
+            </h2>
+            <p class="mt-3 text-base text-ink-muted">{{ settings.pricing_subtitle }}</p>
+          </div>
+
+          <div class="mt-12 grid gap-6 lg:grid-cols-3">
+            <article
+              v-for="plan in plans"
+              :key="plan.id"
+              class="relative flex flex-col rounded-2xl border p-7 shadow-card transition"
+              :class="plan.is_featured
+                ? 'border-accent bg-surface-card ring-2 ring-accent/30 scale-[1.02]'
+                : 'border-surface-border bg-surface-card'"
+            >
+              <span
+                v-if="plan.badge || plan.is_featured"
+                class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-xs font-bold text-white"
+              >
+                {{ plan.badge || 'Popular' }}
+              </span>
+              <h3 class="text-xl font-bold text-ink">{{ plan.name }}</h3>
+              <p class="mt-2 text-sm text-ink-muted">{{ plan.description }}</p>
+              <div class="mt-6 flex items-baseline gap-1">
+                <span class="text-4xl font-bold tracking-tight text-ink">{{ plan.price || 'Custom' }}</span>
+                <span v-if="plan.price_period" class="text-sm text-ink-muted">{{ plan.price_period }}</span>
+              </div>
+              <ul class="mt-6 flex-1 space-y-3">
+                <li v-for="(item, i) in (plan.features || [])" :key="i" class="flex gap-2 text-sm text-ink-soft">
+                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  {{ item }}
+                </li>
+              </ul>
+              <a
+                :href="plan.cta_link || '/login'"
+                class="mt-8 inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition"
+                :class="plan.is_featured
+                  ? 'bg-accent text-white hover:bg-accent-dark'
+                  : 'border border-surface-border bg-surface-muted text-ink hover:bg-surface-card'"
+              >
+                {{ plan.cta_text || 'Get started' }}
+              </a>
+            </article>
           </div>
         </div>
       </section>
 
       <!-- Testimonials -->
-      <section class="py-16 sm:py-20">
+      <section v-if="testimonials.length" class="py-20 sm:py-24">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <h2 class="max-w-2xl text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-            {{ settings.testimonials_title || 'What teams say' }}
-          </h2>
-
-          <div v-if="testimonials.length" class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div class="mx-auto max-w-2xl text-center">
+            <p class="text-sm font-semibold uppercase tracking-wider text-accent">Customers</p>
+            <h2 class="mt-2 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+              {{ settings.testimonials_title || 'What teams say' }}
+            </h2>
+          </div>
+          <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <blockquote
               v-for="item in testimonials"
               :key="item.id"
-              class="flex flex-col rounded-xl border border-surface-border bg-surface-card p-6 shadow-card"
+              class="flex flex-col rounded-2xl border border-surface-border bg-surface-card p-6 shadow-card"
             >
               <p class="flex-1 text-sm leading-relaxed text-ink-soft">“{{ item.quote }}”</p>
-              <footer class="mt-6 flex items-center gap-3 border-t border-surface-border pt-4">
-                <div
-                  v-if="item.avatar_url"
-                  class="h-10 w-10 overflow-hidden rounded-full bg-surface"
-                >
-                  <img :src="item.avatar_url" :alt="item.name" class="h-full w-full object-cover" />
-                </div>
-                <div
-                  v-else
-                  class="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-sm font-bold text-gold"
-                >
+              <footer class="mt-5 flex items-center gap-3 border-t border-surface-border pt-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">
                   {{ initials(item.name) }}
                 </div>
                 <div>
                   <p class="text-sm font-semibold text-ink">{{ item.name }}</p>
                   <p class="text-xs text-ink-muted">
-                    {{ [item.role, item.company].filter(Boolean).join(' · ') || 'Customer' }}
+                    {{ [item.role, item.company].filter(Boolean).join(' · ') }}
                   </p>
                 </div>
               </footer>
             </blockquote>
           </div>
-          <p v-else class="mt-10 text-sm text-ink-muted">Testimonials coming soon.</p>
         </div>
       </section>
 
-      <!-- CTA band -->
-      <section class="bg-brand py-16 text-white sm:py-20">
-        <div class="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:px-8">
-          <div class="max-w-xl">
-            <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">
-              {{ settings.cta_title || 'Ready to simplify HR?' }}
+      <!-- FAQ -->
+      <section id="faq" class="scroll-mt-24 border-y border-surface-border bg-surface-muted/60 py-20 sm:py-24">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <div class="text-center">
+            <p class="text-sm font-semibold uppercase tracking-wider text-accent">FAQ</p>
+            <h2 class="mt-2 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+              {{ settings.faq_title || 'Frequently asked questions' }}
             </h2>
-            <p class="mt-3 text-base text-white/70">
-              {{ settings.cta_body || 'Sign in to manage payroll, attendance, and your workforce in one place.' }}
-            </p>
+            <p class="mt-3 text-base text-ink-muted">{{ settings.faq_subtitle }}</p>
           </div>
-          <a
-            :href="ctaButtonHref"
-            class="inline-flex flex-shrink-0 items-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-accent-dark"
-          >
-            {{ settings.cta_button_text || 'Go to Login' }}
-          </a>
+          <div class="mt-10 space-y-3">
+            <details
+              v-for="faq in faqs"
+              :key="faq.id"
+              class="group rounded-2xl border border-surface-border bg-surface-card shadow-card open:shadow-soft"
+            >
+              <summary class="cursor-pointer list-none px-5 py-4 font-semibold text-ink marker:content-none flex items-center justify-between gap-3">
+                <span>{{ faq.question }}</span>
+                <svg class="h-5 w-5 shrink-0 text-ink-muted transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="border-t border-surface-border px-5 py-4 text-sm leading-relaxed text-ink-soft whitespace-pre-line">
+                {{ faq.answer }}
+              </div>
+            </details>
+          </div>
         </div>
       </section>
 
-      <!-- Footer -->
-      <footer class="border-t border-surface-border bg-surface-card py-10">
-        <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 sm:flex-row sm:items-start sm:justify-between sm:px-6 lg:px-8">
-          <div>
-            <p class="text-base font-bold text-gold">{{ brandName }}</p>
-            <p class="mt-2 max-w-sm text-sm text-ink-muted">
-              {{ settings.footer_text || `© ${new Date().getFullYear()} ${brandName}. All rights reserved.` }}
-            </p>
-          </div>
-          <div class="space-y-1 text-sm text-ink-muted">
-            <p v-if="settings.contact_email">
-              <a :href="`mailto:${settings.contact_email}`" class="hover:text-accent">{{ settings.contact_email }}</a>
-            </p>
-            <p v-if="settings.contact_phone">{{ settings.contact_phone }}</p>
-            <p v-if="settings.contact_address">{{ settings.contact_address }}</p>
+      <!-- Contact -->
+      <section id="contact" class="scroll-mt-24 py-20 sm:py-24">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div class="overflow-hidden rounded-3xl border border-surface-border bg-surface-card shadow-soft lg:grid lg:grid-cols-2">
+            <div class="bg-brand p-8 text-white sm:p-10">
+              <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">
+                {{ settings.contact_title || 'Talk to our team' }}
+              </h2>
+              <p class="mt-3 text-white/70 whitespace-pre-line">{{ settings.contact_body }}</p>
+              <ul class="mt-8 space-y-4 text-sm text-white/80">
+                <li v-if="settings.contact_email" class="flex gap-3">
+                  <span class="text-gold">Email</span>
+                  <a :href="`mailto:${settings.contact_email}`" class="hover:text-white">{{ settings.contact_email }}</a>
+                </li>
+                <li v-if="settings.contact_phone" class="flex gap-3">
+                  <span class="text-gold">Phone</span>
+                  <span>{{ settings.contact_phone }}</span>
+                </li>
+                <li v-if="settings.contact_address" class="flex gap-3">
+                  <span class="text-gold">Office</span>
+                  <span>{{ settings.contact_address }}</span>
+                </li>
+              </ul>
+            </div>
+            <div class="flex flex-col justify-center p-8 sm:p-10">
+              <h3 class="text-xl font-bold text-ink">{{ settings.cta_title || 'Ready to get started?' }}</h3>
+              <p class="mt-2 text-sm text-ink-muted">{{ settings.cta_body }}</p>
+              <div class="mt-6 flex flex-wrap gap-3">
+                <a
+                  :href="ctaButtonHref"
+                  class="inline-flex items-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-dark"
+                >
+                  {{ settings.cta_button_text || 'Sign In' }}
+                </a>
+                <router-link
+                  to="/pages/terms"
+                  class="inline-flex items-center rounded-xl border border-surface-border px-5 py-3 text-sm font-semibold text-ink hover:bg-surface-muted"
+                >
+                  Terms of Service
+                </router-link>
+              </div>
+            </div>
           </div>
         </div>
-      </footer>
-    </template>
+      </section>
+    </LandingShell>
   </div>
 </template>
 
@@ -242,7 +330,7 @@
 import { computed, onMounted, ref } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
-import ThemeToggle from '@/components/ThemeToggle.vue';
+import LandingShell from '@/components/LandingShell.vue';
 
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
@@ -252,8 +340,10 @@ const settings = ref({});
 const features = ref([]);
 const stats = ref([]);
 const testimonials = ref([]);
-
-const brandName = computed(() => settings.value.brand_name || 'Payroll Digital');
+const plans = ref([]);
+const faqs = ref([]);
+const steps = ref([]);
+const pages = ref([]);
 
 const primaryCtaHref = computed(() => {
   if (isAuthenticated.value) return '/dashboard';
@@ -272,17 +362,12 @@ const ICON_PATHS = {
   employees: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
   shifts: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
   recruitment: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-  modules: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
-  workflows: 'M13 10V3L4 14h7v7l9-11h-7z',
-  users: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
-  approvals: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+  helpdesk: 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z',
+  travel: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8',
 };
 
-const DEFAULT_ICON = 'M13 10V3L4 14h7v7l9-11h-7z';
-
 function iconPath(key) {
-  if (!key) return DEFAULT_ICON;
-  return ICON_PATHS[key] || DEFAULT_ICON;
+  return ICON_PATHS[key] || ICON_PATHS.payroll;
 }
 
 function initials(name) {
@@ -302,8 +387,12 @@ async function loadLanding() {
     features.value = data.features || [];
     stats.value = data.stats || [];
     testimonials.value = data.testimonials || [];
+    plans.value = data.plans || [];
+    faqs.value = data.faqs || [];
+    steps.value = data.steps || [];
+    pages.value = data.pages || data.footer_pages || [];
   } catch (err) {
-    console.error('Failed to load landing page', err);
+    console.error(err);
     settings.value = {
       brand_name: 'Payroll Digital',
       hero_title: 'Modern HR & Payroll',
@@ -311,9 +400,6 @@ async function loadLanding() {
       hero_cta_text: 'Sign In',
       hero_cta_link: '/login',
     };
-    features.value = [];
-    stats.value = [];
-    testimonials.value = [];
   } finally {
     loading.value = false;
   }

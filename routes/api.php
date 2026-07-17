@@ -35,14 +35,53 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\UserRoleController;
 use App\Http\Controllers\Api\LandingPageController;
+use App\Http\Controllers\Api\Cms\CmsAuthController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/landing', [LandingPageController::class, 'public']);
+Route::get('/landing/pages', [LandingPageController::class, 'publicPages']);
+Route::get('/landing/pages/{slug}', [LandingPageController::class, 'publicPage']);
 
-// Protected routes
-Route::middleware('auth:sanctum')->group(function () {
+// CMS auth + content admin (separate from HRMS)
+Route::prefix('cms')->group(function () {
+    Route::post('/login', [CmsAuthController::class, 'login']);
+
+    Route::middleware(['auth:sanctum', 'cms'])->group(function () {
+        Route::post('/logout', [CmsAuthController::class, 'logout']);
+        Route::get('/me', [CmsAuthController::class, 'me']);
+
+        Route::prefix('landing')->group(function () {
+            Route::get('/', [LandingPageController::class, 'show']);
+            Route::put('/settings', [LandingPageController::class, 'updateSettings']);
+            Route::post('/features', [LandingPageController::class, 'storeFeature']);
+            Route::put('/features/{feature}', [LandingPageController::class, 'updateFeature']);
+            Route::delete('/features/{feature}', [LandingPageController::class, 'destroyFeature']);
+            Route::post('/stats', [LandingPageController::class, 'storeStat']);
+            Route::put('/stats/{stat}', [LandingPageController::class, 'updateStat']);
+            Route::delete('/stats/{stat}', [LandingPageController::class, 'destroyStat']);
+            Route::post('/testimonials', [LandingPageController::class, 'storeTestimonial']);
+            Route::put('/testimonials/{testimonial}', [LandingPageController::class, 'updateTestimonial']);
+            Route::delete('/testimonials/{testimonial}', [LandingPageController::class, 'destroyTestimonial']);
+            Route::post('/plans', [LandingPageController::class, 'storePlan']);
+            Route::put('/plans/{plan}', [LandingPageController::class, 'updatePlan']);
+            Route::delete('/plans/{plan}', [LandingPageController::class, 'destroyPlan']);
+            Route::post('/faqs', [LandingPageController::class, 'storeFaq']);
+            Route::put('/faqs/{faq}', [LandingPageController::class, 'updateFaq']);
+            Route::delete('/faqs/{faq}', [LandingPageController::class, 'destroyFaq']);
+            Route::post('/steps', [LandingPageController::class, 'storeStep']);
+            Route::put('/steps/{step}', [LandingPageController::class, 'updateStep']);
+            Route::delete('/steps/{step}', [LandingPageController::class, 'destroyStep']);
+            Route::post('/pages', [LandingPageController::class, 'storePage']);
+            Route::put('/pages/{page}', [LandingPageController::class, 'updatePage']);
+            Route::delete('/pages/{page}', [LandingPageController::class, 'destroyPage']);
+        });
+    });
+});
+
+// Protected HRMS routes
+Route::middleware(['auth:sanctum', 'hrms'])->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -555,19 +594,4 @@ Route::middleware('auth:sanctum')->group(function () {
     // Current User's Permissions (Any authenticated user)
     Route::get('/my-permissions', [UserRoleController::class, 'myPermissions']);
     Route::post('/check-permission', [UserRoleController::class, 'checkPermission']);
-
-    // Landing page CMS (admin)
-    Route::prefix('cms/landing')->group(function () {
-        Route::get('/', [LandingPageController::class, 'show'])->middleware('permission:cms.view');
-        Route::put('/settings', [LandingPageController::class, 'updateSettings'])->middleware('permission:cms.update');
-        Route::post('/features', [LandingPageController::class, 'storeFeature'])->middleware('permission:cms.update');
-        Route::put('/features/{feature}', [LandingPageController::class, 'updateFeature'])->middleware('permission:cms.update');
-        Route::delete('/features/{feature}', [LandingPageController::class, 'destroyFeature'])->middleware('permission:cms.update');
-        Route::post('/stats', [LandingPageController::class, 'storeStat'])->middleware('permission:cms.update');
-        Route::put('/stats/{stat}', [LandingPageController::class, 'updateStat'])->middleware('permission:cms.update');
-        Route::delete('/stats/{stat}', [LandingPageController::class, 'destroyStat'])->middleware('permission:cms.update');
-        Route::post('/testimonials', [LandingPageController::class, 'storeTestimonial'])->middleware('permission:cms.update');
-        Route::put('/testimonials/{testimonial}', [LandingPageController::class, 'updateTestimonial'])->middleware('permission:cms.update');
-        Route::delete('/testimonials/{testimonial}', [LandingPageController::class, 'destroyTestimonial'])->middleware('permission:cms.update');
-    });
 });

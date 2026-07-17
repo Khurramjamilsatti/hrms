@@ -1,12 +1,49 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { usePermissionStore } from '@/stores/permission';
+import { useCmsAuthStore } from '@/stores/cmsAuth';
 
 const routes = [
   {
     path: '/',
     name: 'Landing',
     component: () => import('@/views/landing/LandingPage.vue'),
+  },
+  {
+    path: '/pages/:slug',
+    name: 'LandingContent',
+    component: () => import('@/views/landing/ContentPage.vue'),
+  },
+  {
+    path: '/privacy',
+    redirect: '/pages/privacy',
+  },
+  {
+    path: '/terms',
+    redirect: '/pages/terms',
+  },
+  {
+    path: '/cookies',
+    redirect: '/pages/cookies',
+  },
+  {
+    path: '/cms/login',
+    name: 'CmsLogin',
+    component: () => import('@/views/cms/CmsLogin.vue'),
+    meta: { cmsGuest: true },
+  },
+  {
+    path: '/cms',
+    component: () => import('@/layouts/CmsLayout.vue'),
+    meta: { cmsAuth: true },
+    children: [
+      { path: '', redirect: '/cms/content' },
+      {
+        path: 'content',
+        name: 'CmsContent',
+        component: () => import('@/views/cms/LandingCms.vue'),
+      },
+    ],
   },
   {
     path: '/login',
@@ -299,12 +336,6 @@ const routes = [
         component: () => import('@/views/admin/roles/UserRoleManagement.vue'),
         meta: { module: 'users' }
       },
-      {
-        path: 'admin/landing',
-        name: 'LandingCms',
-        component: () => import('@/views/admin/LandingCms.vue'),
-        meta: { module: 'cms' }
-      },
     ]
   },
 ];
@@ -317,7 +348,25 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const permissionStore = usePermissionStore();
+  const cmsAuthStore = useCmsAuthStore();
   const isAuthenticated = authStore.isAuthenticated;
+  const isCmsAuthenticated = cmsAuthStore.isAuthenticated;
+
+  // CMS login page
+  if (to.meta.cmsGuest) {
+    if (isCmsAuthenticated) {
+      return next('/cms/content');
+    }
+    return next();
+  }
+
+  // CMS protected shell
+  if (to.matched.some((record) => record.meta.cmsAuth)) {
+    if (!isCmsAuthenticated) {
+      return next('/cms/login');
+    }
+    return next();
+  }
 
   // Handle guest routes (like login)
   if (to.meta.guest && isAuthenticated) {

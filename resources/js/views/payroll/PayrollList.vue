@@ -569,7 +569,7 @@ const printPayslip = async (payroll) => {
       @media print{body{padding:16px} button{display:none}}
     </style></head><body>
     <h1>Payslip</h1>
-    <h2>HRMS · Salary Statement</h2>
+    <h2>Payroll Digital · Salary Statement</h2>
     <div class="meta">
       <div><strong>${emp}</strong><br>Code: ${payroll.employee?.employee_code || '—'}<br>Department: ${payroll.employee?.department?.name || '—'}</div>
       <div style="text-align:right">Period: <strong>${period}</strong><br>Status: ${capitalise(payroll.status)}<br>Working Days: ${payroll.working_days || 0} · Present: ${payroll.present_days || 0}</div>

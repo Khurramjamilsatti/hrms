@@ -21,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
             'super_admin' => \App\Http\Middleware\SuperAdminOnly::class,
+            'cms' => \App\Http\Middleware\EnsureCmsUser::class,
+            'hrms' => \App\Http\Middleware\EnsureHrmsUser::class,
         ]);
 
         //

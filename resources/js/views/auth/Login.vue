@@ -17,17 +17,7 @@
       </div>
 
       <div class="relative z-10">
-        <div class="flex items-center gap-3">
-          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 ring-1 ring-white/10">
-            <svg class="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold tracking-tight text-gold">HRMS</h1>
-            <p class="text-sm text-white/50 font-medium">Payroll Digital</p>
-          </div>
-        </div>
+        <AppLogo theme="brand" size="lg" tagline="HR & Payroll Platform" />
       </div>
 
       <div class="relative z-10 max-w-lg">
@@ -63,17 +53,7 @@
     <div class="flex-1 flex flex-col min-h-screen bg-surface">
       <!-- Mobile header -->
       <div class="lg:hidden bg-brand px-6 py-8 text-white">
-        <div class="flex items-center gap-3">
-          <div class="bg-white/10 rounded-lg p-2">
-            <svg class="w-6 h-6 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h1 class="text-lg font-bold text-gold">HRMS</h1>
-            <p class="text-xs text-white/50">Payroll Digital</p>
-          </div>
-        </div>
+        <AppLogo theme="brand" size="md" tagline="HR & Payroll Platform" />
       </div>
 
       <div class="flex-1 flex items-center justify-center px-6 py-10 sm:px-10 relative">
@@ -190,6 +170,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import AppLogo from '@/components/AppLogo.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();

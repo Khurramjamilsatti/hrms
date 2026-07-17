@@ -3,18 +3,8 @@
     <!-- Sidebar -->
     <aside class="w-64 bg-brand flex flex-col shadow-soft">
       <!-- Logo -->
-      <div class="p-6 border-b border-white/10">
-        <div class="flex items-center space-x-3">
-          <div class="bg-accent rounded-xl p-2.5 shadow-sm">
-            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h1 class="text-xl font-bold text-gold tracking-tight">HRMS</h1>
-            <p class="text-xs text-white/50 font-medium">Payroll Digital</p>
-          </div>
-        </div>
+      <div class="p-5 border-b border-white/10">
+        <AppLogo theme="brand" size="md" tagline="HR & Payroll Platform" link-to="/dashboard" />
       </div>
       
       <!-- Navigation -->
@@ -273,6 +263,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { usePermissionStore } from '@/stores/permission';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import AppLogo from '@/components/AppLogo.vue';
 import axios from 'axios';
 
 const router = useRouter();
@@ -331,7 +322,6 @@ const pageTitle = computed(() => {
     '/calendar': 'Calendar',
     '/organization': 'Organization',
     '/profile': 'My Profile',
-    '/admin/landing': 'Landing Page CMS',
     '/admin/roles': 'Roles & Permissions',
     '/admin/user-roles': 'User Role Management',
   };
@@ -341,7 +331,7 @@ const pageTitle = computed(() => {
   const match = Object.entries(titles)
     .filter(([key]) => key !== '/' && (path === key || path.startsWith(key + '/')))
     .sort((a, b) => b[0].length - a[0].length)[0];
-  return match ? match[1] : 'HRMS';
+  return match ? match[1] : 'Payroll Digital';
 });
 
   const menuItems = computed(() => {
@@ -374,7 +364,6 @@ const pageTitle = computed(() => {
     { name: 'calendar', path: '/calendar', label: 'Calendar', icon: '📆', module: 'calendar' },
     { name: 'organization', path: '/organization', label: 'Organization', icon: '🏛️', module: 'organization' },
     { name: 'profile', path: '/profile', label: 'My Profile', icon: '👤', module: 'employees' },
-    { name: 'landing-cms', path: '/admin/landing', label: 'Landing Page', icon: '🌐', module: 'cms' },
     { name: 'roles', path: '/admin/roles', label: 'Roles & Permissions', icon: '🔐', module: 'roles' },
     { name: 'user-roles', path: '/admin/user-roles', label: 'User Role Management', icon: '👥', module: 'users' },
   ];
@@ -444,7 +433,7 @@ const menuSections = computed(() => {
     },
     {
       title: 'Administration',
-      items: allItems.filter(item => ['landing-cms', 'roles', 'user-roles'].includes(item.name))
+      items: allItems.filter(item => ['roles', 'user-roles'].includes(item.name))
     }
   ];
   

@@ -391,8 +391,10 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useNotification } from '@/composables/useNotification';
 import { useDialog } from '@/composables/useDialog';
+import { usePermissions } from '@/composables/usePermissions';
 
 const authStore = useAuthStore();
+const { can } = usePermissions();
 const { success, error: showError } = useNotification();
 const { confirm } = useDialog();
 
@@ -448,7 +450,7 @@ const eventForm = reactive({
 });
 
 const canManage = computed(() =>
-  ['admin', 'super_admin', 'hr_admin', 'manager', 'section_head'].includes(authStore.user?.role)
+  can('calendar.create') || can('calendar.update') || can('calendar.delete')
 );
 
 const statCards = computed(() => [

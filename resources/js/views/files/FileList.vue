@@ -6,7 +6,9 @@
                 <h1 class="text-3xl font-bold text-gray-900">File Management</h1>
                 <p class="text-gray-600 mt-1">Manage and organize company documents</p>
             </div>
-            <button @click="openUploadModal"
+            <button
+                v-if="can('files.create') || can('files.upload')"
+                @click="openUploadModal"
                 class="flex items-center space-x-2 px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -225,12 +227,12 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                     </svg>
                                 </button>
-                                <button @click="editFile(file)" class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Edit">
+                                <button v-if="can('files.update')" @click="editFile(file)" class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </button>
-                                <button @click="confirmDelete(file)" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                <button v-if="can('files.delete')" @click="confirmDelete(file)" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
@@ -476,7 +478,7 @@
                             </svg>
                             Download
                         </button>
-                        <button @click="editFile(selectedFileView)"
+                        <button v-if="can('files.update')" @click="editFile(selectedFileView)"
                             class="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
                             Edit
                         </button>
@@ -525,8 +527,10 @@
 import { ref, onMounted, reactive, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
+import { usePermissions } from '@/composables/usePermissions';
 
 const authStore = useAuthStore();
+const { can } = usePermissions();
 const files = ref([]);
 const categories = ref([]);
 const showUploadModal = ref(false);

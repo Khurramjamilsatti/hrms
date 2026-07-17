@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\Employee;
@@ -13,27 +14,13 @@ use Illuminate\Support\Facades\Hash;
 
 class EmployeeController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     public function index(Request $request)
     {
-        $user = $request->user();
         $query = Employee::with(['user', 'department', 'designation', 'manager']);
 
-        // Permission middleware already validated access
-        // Apply data scope filters based on user context
-        if ($user->hasRole('manager')) {
-            // Managers see only their team
-            $query->where('manager_id', $user->id);
-        } elseif ($user->hasRole('section_head')) {
-            // Section heads see only their department
-            $sectionHeadEmployee = $user->employee;
-            if ($sectionHeadEmployee && $sectionHeadEmployee->department_id) {
-                $query->where('department_id', $sectionHeadEmployee->department_id);
-            } else {
-                // If section head has no department, show none
-                $query->whereRaw('1 = 0');
-            }
-        }
-        // hr_admin, super_admin, admin, and users with employees.view permission see all employees
+        $this->scopeAccessibleEmployeesList($query, $request);
 
         if ($request->has('department_id')) {
             $query->where('department_id', $request->department_id);
@@ -67,6 +54,8 @@ class EmployeeController extends Controller
             ->orderBy('first_name')
             ->orderBy('last_name');
 
+        $this->scopeAccessibleEmployeesList($query, $request);
+
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -82,26 +71,12 @@ class EmployeeController extends Controller
 
     public function getAllEmployeesForDropdown(Request $request)
     {
-        $user = $request->user();
         $query = Employee::with(['user', 'department', 'designation'])
             ->where('employment_status', 'active')
             ->orderBy('first_name')
             ->orderBy('last_name');
 
-        // Permission middleware already validated access
-        // Apply data scope filters based on user context  
-        if ($user->hasRole('manager')) {
-            $query->where('manager_id', $user->id);
-        } elseif ($user->hasRole('section_head')) {
-            $sectionHeadEmployee = $user->employee;
-            if ($sectionHeadEmployee && $sectionHeadEmployee->department_id) {
-                $query->where('department_id', $sectionHeadEmployee->department_id);
-            }
-        } elseif ($user->hasRole('employee')) {
-            // Employees see only themselves
-            $query->where('id', $user->employee->id);
-        }
-        // hr_admin, super_admin, and admin see all
+        $this->scopeAccessibleEmployeesList($query, $request);
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -254,8 +229,9 @@ class EmployeeController extends Controller
                 return response()->json(['message' => 'You can only view your own profile'], 403);
             }
         } elseif ($user->hasRole('manager')) {
-            // Managers can only view their team members
-            if ($employee->manager_id !== $user->id) {
+            // Managers can view themselves and their direct reports
+            $isSelf = $user->employee && (int) $user->employee->id === (int) $employee->id;
+            if (! $isSelf && (int) $employee->manager_id !== (int) $user->id) {
                 return response()->json(['message' => 'You can only view your team members'], 403);
             }
         } elseif ($user->hasRole('section_head')) {

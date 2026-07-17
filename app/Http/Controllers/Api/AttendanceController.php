@@ -157,6 +157,8 @@ class AttendanceController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
+        $this->assertCanAccessEmployeeRecord($request, (int) $validated['employee_id'], 'attendance');
+
         if ($validated['check_in'] && $validated['check_out']) {
             $checkIn = Carbon::parse($validated['check_in']);
             $checkOut = Carbon::parse($validated['check_out']);
@@ -188,6 +190,8 @@ class AttendanceController extends Controller
         if ($user->hasRole('employee') && (int) $employeeId !== (int) $user->employee->id) {
             return response()->json(['message' => 'You can only check in for yourself'], 403);
         }
+
+        $this->assertCanAccessEmployeeRecord($request, (int) $employeeId, 'attendance');
 
         $today = Carbon::today();
 
@@ -242,6 +246,8 @@ class AttendanceController extends Controller
         if ($user->hasRole('employee') && (int) $employeeId !== (int) $user->employee->id) {
             return response()->json(['message' => 'You can only check out for yourself'], 403);
         }
+
+        $this->assertCanAccessEmployeeRecord($request, (int) $employeeId, 'attendance');
 
         $today = Carbon::today();
 
@@ -310,6 +316,8 @@ class AttendanceController extends Controller
             'month' => 'required|integer|min:1|max:12',
             'year' => 'required|integer',
         ]);
+
+        $this->assertCanAccessEmployeeRecord($request, (int) $request->employee_id, 'attendance');
 
         $attendances = Attendance::where('employee_id', $request->employee_id)
             ->whereMonth('date', $request->month)

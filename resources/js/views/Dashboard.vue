@@ -12,8 +12,8 @@
     </div>
 
     <div v-else>
-      <!-- Admin / Manager / HR -->
-      <div v-if="isAdmin || isManager" class="space-y-6">
+      <!-- Admin / HR / Super Admin -->
+      <div v-if="isAdmin" class="space-y-6">
         <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
             <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ todayLabel }}</p>
@@ -261,6 +261,146 @@
               <p class="text-sm font-semibold text-gray-900">{{ item.title }}</p>
               <p class="text-xs text-gray-600 mt-1 line-clamp-2">{{ item.content }}</p>
               <p class="text-xs text-gray-400 mt-2">{{ formatDate(item.created_at) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manager / Section Head — team overview only (no org admin actions) -->
+      <div v-else-if="isManager" class="space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ todayLabel }}</p>
+            <h1 class="text-3xl font-bold text-gray-900 mt-1">{{ greeting }}, {{ displayName }}</h1>
+            <p class="text-sm text-gray-500 mt-1">Your team overview and today’s status</p>
+          </div>
+          <button
+            @click="refreshDashboard"
+            :disabled="loading"
+            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+          >
+            Refresh
+          </button>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h2 class="text-base font-semibold text-gray-900">My Attendance</h2>
+              <p v-if="hasEmployeeProfile" class="text-sm text-gray-500 mt-0.5">
+                <template v-if="stats?.my_attendance_today">
+                  Checked in at <span class="font-medium text-gray-900">{{ stats.my_attendance_today.check_in }}</span>
+                  · Session {{ calculateDuration(stats.my_attendance_today.check_in) }}
+                </template>
+                <template v-else>You are not checked in yet today.</template>
+              </p>
+              <p v-else class="text-sm text-amber-700 mt-0.5">No employee profile is linked to this account.</p>
+            </div>
+            <div v-if="hasEmployeeProfile" class="flex items-center gap-3">
+              <button
+                v-if="stats?.my_attendance_today"
+                @click="handleCheckOut"
+                :disabled="processingAttendance"
+                class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+              >
+                {{ processingAttendance ? 'Processing...' : 'Check Out' }}
+              </button>
+              <button
+                v-else
+                @click="handleCheckIn"
+                :disabled="processingAttendance"
+                class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+              >
+                {{ processingAttendance ? 'Processing...' : 'Check In' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Team Members</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ formatNumber(stats?.total_team_members || stats?.total_employees || 0) }}</p>
+          </div>
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Present Today</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ formatNumber(stats?.present_today || 0) }}</p>
+          </div>
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Absent Today</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ formatNumber(stats?.absent_today || 0) }}</p>
+          </div>
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">On Leave</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ formatNumber(stats?.on_leave_today || 0) }}</p>
+            <p class="text-xs text-gray-500 mt-2">{{ stats?.pending_leave_requests || 0 }} pending requests</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div class="xl:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h3 class="text-base font-semibold text-gray-900 mb-5">Team Attendance · Last 7 Days</h3>
+            <div class="space-y-3">
+              <div v-for="(day, index) in stats?.attendance_trend" :key="index" class="flex items-center gap-3">
+                <div class="w-10 text-xs font-medium text-gray-600">{{ day.day }}</div>
+                <div class="flex-1 h-8 bg-gray-100 rounded-md overflow-hidden flex">
+                  <div v-if="day.present > 0" class="bg-emerald-500 text-white text-[10px] font-medium flex items-center justify-center" :style="{ width: barWidth(day.present, day.total) }">{{ day.present }}</div>
+                  <div v-if="day.absent > 0" class="bg-rose-500 text-white text-[10px] font-medium flex items-center justify-center" :style="{ width: barWidth(day.absent, day.total) }">{{ day.absent }}</div>
+                  <div v-if="day.on_leave > 0" class="bg-amber-500 text-white text-[10px] font-medium flex items-center justify-center" :style="{ width: barWidth(day.on_leave, day.total) }">{{ day.on_leave }}</div>
+                </div>
+                <div class="w-10 text-right text-xs font-semibold text-gray-700">{{ day.total }}</div>
+              </div>
+              <p v-if="!stats?.attendance_trend?.length" class="text-sm text-gray-500 py-8 text-center">No attendance data</p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div class="grid grid-cols-1 gap-2">
+              <router-link to="/attendance" class="px-4 py-2.5 text-sm font-medium text-gray-800 border border-gray-200 rounded-lg hover:bg-gray-50">Team Attendance</router-link>
+              <router-link to="/leaves" class="px-4 py-2.5 text-sm font-medium text-gray-800 border border-gray-200 rounded-lg hover:bg-gray-50">Leave Approvals</router-link>
+              <router-link to="/employees" class="px-4 py-2.5 text-sm font-medium text-gray-800 border border-gray-200 rounded-lg hover:bg-gray-50">My Team</router-link>
+              <router-link to="/files" class="px-4 py-2.5 text-sm font-medium text-gray-800 border border-gray-200 rounded-lg hover:bg-gray-50">My Files</router-link>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-5">
+              <h3 class="text-base font-semibold text-gray-900">Pending Leave Approvals</h3>
+              <router-link to="/leaves" class="text-sm font-medium text-gray-700 hover:text-gray-900">View all</router-link>
+            </div>
+            <div class="space-y-3">
+              <div v-for="leave in stats?.recent_leaves" :key="leave.id" class="flex items-start justify-between gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50">
+                <div>
+                  <p class="text-sm font-semibold text-gray-900">{{ leave.employee?.first_name }} {{ leave.employee?.last_name }}</p>
+                  <p class="text-xs text-gray-500 mt-0.5">{{ leave.leave_type?.name }} · {{ leave.total_days }} day(s)</p>
+                </div>
+                <span class="shrink-0 px-2 py-1 text-[11px] font-medium rounded bg-amber-100 text-amber-800">Pending</span>
+              </div>
+              <p v-if="!stats?.recent_leaves?.length" class="text-sm text-gray-500 text-center py-8">No pending leave requests</p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Team Members</h3>
+            <div class="space-y-3 max-h-72 overflow-y-auto">
+              <div v-for="emp in stats?.team_members" :key="emp.id" class="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-gray-50">
+                <span class="font-medium text-gray-900">{{ emp.first_name }} {{ emp.last_name }}</span>
+                <span class="text-gray-500">{{ emp.designation?.title || emp.department?.name || '—' }}</span>
+              </div>
+              <p v-if="!stats?.team_members?.length" class="text-sm text-gray-500 text-center py-8">No team members assigned</p>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="stats?.announcements?.length" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <h3 class="text-base font-semibold text-gray-900 mb-4">Announcements</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div v-for="item in stats.announcements" :key="item.id" class="p-4 border border-gray-100 rounded-lg bg-gray-50">
+              <p class="text-sm font-semibold text-gray-900">{{ item.title }}</p>
+              <p class="text-xs text-gray-600 mt-1 line-clamp-2">{{ item.content }}</p>
             </div>
           </div>
         </div>

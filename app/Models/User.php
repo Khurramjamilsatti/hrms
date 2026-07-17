@@ -93,6 +93,31 @@ class User extends Authenticatable
     }
 
     /**
+     * Resolve the RBAC role for this user.
+     * Falls back to users.role slug when role_id is missing/stale.
+     */
+    public function resolveAssignedRole(): ?Role
+    {
+        $this->loadMissing('assignedRole');
+
+        if ($this->assignedRole) {
+            return $this->assignedRole;
+        }
+
+        if (! $this->role) {
+            return null;
+        }
+
+        $role = Role::where('slug', $this->role)->first();
+        if ($role && (int) $this->role_id !== (int) $role->id) {
+            $this->forceFill(['role_id' => $role->id])->saveQuietly();
+            $this->setRelation('assignedRole', $role);
+        }
+
+        return $role;
+    }
+
+    /**
      * Exact slug match against direct overrides and role permissions.
      */
     protected function hasExactPermission(string $permissionSlug): bool
@@ -105,8 +130,9 @@ class User extends Authenticatable
             return (bool) $directPermission->pivot->is_granted;
         }
 
-        if ($this->role_id && $this->assignedRole) {
-            return $this->assignedRole->hasPermission($permissionSlug);
+        $role = $this->resolveAssignedRole();
+        if ($role) {
+            return $role->hasPermission($permissionSlug);
         }
 
         return false;
@@ -225,9 +251,9 @@ class User extends Authenticatable
     {
         $permissions = collect();
 
-        // Get permissions from role
-        if ($this->role_id && $this->assignedRole) {
-            $permissions = $this->assignedRole->permissions;
+        $role = $this->resolveAssignedRole();
+        if ($role) {
+            $permissions = $role->permissions()->get();
         }
 
         // Get direct permissions

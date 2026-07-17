@@ -82,11 +82,27 @@ class FileManagementController extends Controller
             'expiry_date' => 'nullable|date',
         ]);
 
+        $user = $request->user()->loadMissing('employee');
+
+        // Managers can only upload files for themselves
+        if ($user->hasRole('manager')) {
+            if (! $user->employee) {
+                return response()->json(['message' => 'No employee profile is linked to your account.'], 422);
+            }
+            $validated['employee_id'] = $user->employee->id;
+        } else {
+            $validated['employee_id'] = $this->resolveStoredEmployeeId(
+                $request,
+                isset($validated['employee_id']) ? (int) $validated['employee_id'] : null,
+                'files'
+            );
+        }
+
         $file = $request->file('file');
         $path = $file->store('employee_files', 'public');
 
         $employeeFile = EmployeeFile::create([
-            'employee_id' => $validated['employee_id'] ?? null,
+            'employee_id' => $validated['employee_id'],
             'category_id' => $validated['category_id'],
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
@@ -94,7 +110,7 @@ class FileManagementController extends Controller
             'file_path' => $path,
             'file_type' => $file->getClientMimeType(),
             'file_size' => $file->getSize(),
-            'uploaded_by' => $request->user()->id,
+            'uploaded_by' => $user->id,
             'is_confidential' => $validated['is_confidential'] ?? false,
             'expiry_date' => $validated['expiry_date'] ?? null,
             'version' => 1,

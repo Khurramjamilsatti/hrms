@@ -43,7 +43,7 @@ trait AuthorizesEmployeeResource
                 'view_all' => [],
             ],
             'attendance' => [
-                'manage' => ['attendance.manage', 'attendance.reports'],
+                'manage' => ['attendance.manage'],
                 'approve' => [],
                 'view_all' => [],
             ],
@@ -71,6 +71,42 @@ trait AuthorizesEmployeeResource
     }
 
     /**
+     * Restrict an employees query to records the current user may see.
+     */
+    protected function scopeAccessibleEmployeesList(Builder $query, Request $request): void
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        if (in_array($user->role, ['super_admin', 'hr_admin', 'admin'], true)) {
+            return;
+        }
+
+        if ($user->hasRole('manager') || $user->hasRole('section_head')) {
+            $ids = $this->accessibleEmployeeIds($user);
+            if (empty($ids)) {
+                $query->whereRaw('1 = 0');
+
+                return;
+            }
+            $query->whereIn('id', $ids);
+
+            return;
+        }
+
+        if ($user->employee) {
+            $query->where('id', $user->employee->id);
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+    }
+
+    /**
      * Restrict a query to employee-linked records the user may view.
      */
     protected function scopeToAccessibleEmployees(
@@ -83,6 +119,17 @@ trait AuthorizesEmployeeResource
 
         if (!$user) {
             $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        // Managers may only access their own files (upload/view/delete own)
+        if ($module === 'files' && $user->hasRole('manager')) {
+            if ($user->employee) {
+                $query->where($employeeColumn, $user->employee->id);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
 
             return;
         }
@@ -114,6 +161,11 @@ trait AuthorizesEmployeeResource
 
     protected function canViewAllEmployeeRecords(User $user, string $module, array $config): bool
     {
+        // Managers / section heads are always limited to their team / section
+        if ($user->hasRole('manager') || $user->hasRole('section_head')) {
+            return false;
+        }
+
         if ($user->isSuperAdmin() && $user->role === 'super_admin') {
             return true;
         }
@@ -138,6 +190,10 @@ trait AuthorizesEmployeeResource
 
     protected function canViewTeamEmployeeRecords(User $user, array $config): bool
     {
+        if ($user->hasRole('manager') || $user->hasRole('section_head')) {
+            return true;
+        }
+
         foreach ($config['approve'] as $permission) {
             if ($permission && $user->hasPermission($permission)) {
                 return true;
@@ -197,6 +253,14 @@ trait AuthorizesEmployeeResource
 
         if ($module) {
             $config = $this->modulePermissionConfig($module);
+
+            // Managers may only access their own files
+            if ($module === 'files' && $user->hasRole('manager')) {
+                if ($employeeId && $user->employee && (int) $user->employee->id === (int) $employeeId) {
+                    return;
+                }
+                abort(403, 'You can only access your own files.');
+            }
 
             if ($this->canViewAllEmployeeRecords($user, $module, $config)) {
                 return;

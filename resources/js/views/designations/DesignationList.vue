@@ -2,7 +2,7 @@
   <div class="p-6">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900">Designations</h1>
-      <button @click="openCreateModal" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
+      <button v-if="can('departments.create')" @click="openCreateModal" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         Add Designation
       </button>
@@ -45,7 +45,7 @@
             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Level</th>
             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Department</th>
             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Description</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+            <th v-if="can('departments.update') || can('departments.delete')" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -54,9 +54,9 @@
             <td class="px-6 py-4 text-sm text-gray-700">{{ desig.level ?? '—' }}</td>
             <td class="px-6 py-4 text-sm text-gray-700">{{ desig.department?.name || '—' }}</td>
             <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">{{ desig.description || '—' }}</td>
-            <td class="px-6 py-4 text-sm space-x-2">
-              <button @click="openEditModal(desig)" class="text-gray-700 hover:text-gray-900 font-medium">Edit</button>
-              <button @click="openDeleteModal(desig)" class="text-red-600 hover:text-red-700 font-medium">Delete</button>
+            <td v-if="can('departments.update') || can('departments.delete')" class="px-6 py-4 text-sm space-x-2">
+              <button v-if="can('departments.update')" @click="openEditModal(desig)" class="text-gray-700 hover:text-gray-900 font-medium">Edit</button>
+              <button v-if="can('departments.delete')" @click="openDeleteModal(desig)" class="text-red-600 hover:text-red-700 font-medium">Delete</button>
             </td>
           </tr>
         </tbody>
@@ -122,7 +122,9 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useDialog } from '@/composables/useDialog';
+import { usePermissions } from '@/composables/usePermissions';
 
+const { can } = usePermissions();
 const { alert } = useDialog();
 const designations = ref([]);
 const departments = ref([]);

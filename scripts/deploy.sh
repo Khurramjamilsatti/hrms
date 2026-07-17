@@ -18,6 +18,9 @@ git reset --hard "origin/$BRANCH"
 echo "==> Running migrations"
 php artisan migrate --force --no-interaction
 
+echo "==> Syncing roles & permissions"
+php artisan db:seed --class=RolesAndPermissionsSeeder --force --no-interaction
+
 echo "==> Clearing caches"
 php artisan optimize:clear
 

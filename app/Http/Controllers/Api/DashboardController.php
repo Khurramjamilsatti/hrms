@@ -309,13 +309,15 @@ class DashboardController extends Controller
 
     private function getManagerDashboard($user, $today, $currentMonth, $currentYear)
     {
+        $user->loadMissing('employee');
+
         // Team members
         $teamEmployees = Employee::where('manager_id', $user->id)
             ->where('employment_status', 'active')
             ->get();
         $teamEmployeeIds = $teamEmployees->pluck('id');
 
-        // Announcements
+        // Announcements (read-only)
         $announcements = Announcement::where('is_published', true)
             ->where(function($query) {
                 $query->whereNull('end_date')
@@ -325,9 +327,47 @@ class DashboardController extends Controller
             ->limit(3)
             ->get();
 
+        $myAttendanceToday = null;
+        if ($user->employee) {
+            $myAttendanceToday = Attendance::where('employee_id', $user->employee->id)
+                ->whereDate('date', $today)
+                ->whereNotNull('check_in')
+                ->whereNull('check_out')
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        $attendanceTrend = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $dateStr = $date->format('Y-m-d');
+            $present = Attendance::whereIn('employee_id', $teamEmployeeIds)
+                ->whereDate('date', $dateStr)
+                ->whereIn('status', ['present', 'late'])
+                ->count();
+            $absent = Attendance::whereIn('employee_id', $teamEmployeeIds)
+                ->whereDate('date', $dateStr)
+                ->where('status', 'absent')
+                ->count();
+            $onLeave = Attendance::whereIn('employee_id', $teamEmployeeIds)
+                ->whereDate('date', $dateStr)
+                ->where('status', 'on_leave')
+                ->count();
+            $attendanceTrend[] = [
+                'day' => $date->format('D'),
+                'present' => $present,
+                'absent' => $absent,
+                'on_leave' => $onLeave,
+                'total' => $present + $absent + $onLeave,
+            ];
+        }
+
         return response()->json([
             'role' => 'manager',
+            'has_employee_profile' => (bool) $user->employee,
+            'my_attendance_today' => $myAttendanceToday,
             'total_team_members' => $teamEmployees->count(),
+            'total_employees' => $teamEmployees->count(),
             'present_today' => Attendance::whereIn('employee_id', $teamEmployeeIds)
                 ->where('date', $today->format('Y-m-d'))
                 ->whereIn('status', ['present', 'late'])->count(),
@@ -339,7 +379,8 @@ class DashboardController extends Controller
                 ->where('status', 'on_leave')->count(),
             'pending_leave_requests' => LeaveApplication::whereIn('employee_id', $teamEmployeeIds)
                 ->where('status', 'pending')->count(),
-            'team_members' => $teamEmployees,
+            'attendance_trend' => $attendanceTrend,
+            'team_members' => $teamEmployees->load(['department', 'designation']),
             'recent_leaves' => LeaveApplication::with(['employee.user', 'leaveType'])
                 ->whereIn('employee_id', $teamEmployeeIds)
                 ->where('status', 'pending')

@@ -2,7 +2,7 @@
   <div class="p-6">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900">Training Courses</h1>
-      <button @click="openCreateModal" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
+      <button v-if="can('training.create')" @click="openCreateModal" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         Create Course
       </button>
@@ -30,7 +30,7 @@
           <div><span class="font-medium text-gray-700">Cost:</span> {{ formatCurrency(course.cost) }}</div>
         </div>
         <div class="flex space-x-2 pt-3 border-t border-gray-100">
-          <button @click="editCourse(course)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg">Edit</button>
+          <button v-if="can('training.update')" @click="editCourse(course)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg">Edit</button>
           <button @click="openSessions(course)" class="px-3 py-1.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg">Sessions</button>
         </div>
       </div>
@@ -104,7 +104,7 @@
           <button @click="closeSessions" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
         </div>
         <div class="px-6 py-4 border-b border-gray-100 flex justify-end">
-          <button @click="openSessionForm()" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg">
+          <button v-if="can('training.create')" @click="openSessionForm()" class="inline-flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg">
             Add Session
           </button>
         </div>
@@ -122,7 +122,7 @@
               </div>
               <div class="flex items-center space-x-2">
                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold capitalize" :class="sessionStatusClass(session.status)">{{ session.status }}</span>
-                <button @click="openSessionForm(session)" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md">
+                <button v-if="can('training.update')" @click="openSessionForm(session)" class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md">
                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
                 </button>
               </div>
@@ -203,7 +203,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import axios from 'axios';
+import { usePermissions } from '@/composables/usePermissions';
 
+const { can } = usePermissions();
 const courses = ref([]);
 const loading = ref(false);
 const showForm = ref(false);

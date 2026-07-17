@@ -278,57 +278,131 @@
       </section>
 
       <!-- Pricing -->
-      <section id="pricing" class="scroll-mt-24 border-y border-surface-border bg-surface-muted/60 py-20 sm:py-24">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <section id="pricing" class="scroll-mt-24 relative overflow-hidden py-20 sm:py-24">
+        <div class="pointer-events-none absolute inset-0 bg-brand">
+          <div class="absolute -left-24 top-0 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
+          <div class="absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-gold/15 blur-3xl" />
+          <div class="absolute inset-0 opacity-[0.04]" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 24px 24px;" />
+        </div>
+
+        <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div class="mx-auto max-w-2xl text-center">
-            <p class="text-sm font-semibold uppercase tracking-wider text-accent">Pricing</p>
-            <h2 class="mt-2 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+            <p class="text-sm font-semibold uppercase tracking-wider text-gold">Pricing</p>
+            <h2 class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
               {{ settings.pricing_title || 'Simple, transparent pricing' }}
             </h2>
-            <p class="mt-3 text-base text-ink-muted">{{ settings.pricing_subtitle }}</p>
-            <p v-if="pricingLocale.currency" class="mt-2 text-xs font-medium text-ink-muted">
+            <p class="mt-3 text-base text-white/65">{{ settings.pricing_subtitle }}</p>
+            <p v-if="pricingLocale.currency" class="mt-2 text-xs font-medium text-white/45">
               Prices shown in {{ pricingLocale.currency }} based on your region.
             </p>
           </div>
 
-          <div class="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <div class="mt-14 grid gap-5 md:grid-cols-2 xl:grid-cols-4 xl:items-stretch">
             <article
               v-for="plan in plans"
               :key="plan.id"
-              class="relative flex flex-col rounded-2xl border p-7 shadow-card transition"
+              class="group relative flex flex-col overflow-hidden rounded-2xl transition duration-300 hover:-translate-y-1"
               :class="plan.is_featured
-                ? 'border-accent bg-surface-card ring-2 ring-accent/30 scale-[1.02]'
-                : 'border-surface-border bg-surface-card'"
+                ? 'bg-accent shadow-[0_20px_50px_-12px_rgba(255,91,96,0.55)] ring-2 ring-gold/40 xl:-mt-3 xl:mb-[-0.75rem]'
+                : 'bg-white/95 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.35)] ring-1 ring-white/20'"
             >
-              <span
-                v-if="plan.badge || plan.is_featured"
-                class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-xs font-bold text-white"
-              >
-                {{ plan.badge || 'Popular' }}
-              </span>
-              <h3 class="text-xl font-bold text-ink">{{ plan.name }}</h3>
-              <p class="mt-2 text-sm text-ink-muted">{{ plan.description }}</p>
-              <div class="mt-6 flex items-baseline gap-1">
-                <span class="text-4xl font-bold tracking-tight text-ink">{{ formatPlanPrice(plan) }}</span>
-                <span v-if="plan.price_period" class="text-sm text-ink-muted">{{ plan.price_period }}</span>
+              <div
+                class="h-1.5 w-full"
+                :class="plan.is_featured ? 'bg-gold' : 'bg-gradient-to-r from-brand via-accent to-gold'"
+              />
+
+              <div class="flex flex-1 flex-col p-6 sm:p-7">
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <p
+                      class="text-[11px] font-bold uppercase tracking-[0.16em]"
+                      :class="plan.is_featured ? 'text-white/80' : 'text-accent'"
+                    >
+                      {{ plan.name }}
+                    </p>
+                    <span
+                      v-if="plan.badge || plan.is_featured"
+                      class="mt-2 inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                      :class="plan.is_featured
+                        ? 'bg-gold text-brand'
+                        : 'bg-accent-soft text-accent-dark'"
+                    >
+                      {{ plan.badge || 'Popular' }}
+                    </span>
+                  </div>
+                  <span
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold"
+                    :class="plan.is_featured
+                      ? 'bg-white/20 text-white'
+                      : 'bg-brand text-gold'"
+                  >
+                    {{ planInitial(plan.name) }}
+                  </span>
+                </div>
+
+                <p
+                  class="mt-3 text-sm leading-relaxed"
+                  :class="plan.is_featured ? 'text-white/85' : 'text-ink-muted'"
+                >
+                  {{ plan.description }}
+                </p>
+
+                <div class="mt-6 border-y py-5"
+                  :class="plan.is_featured ? 'border-white/20' : 'border-surface-border'"
+                >
+                  <div class="flex flex-wrap items-end gap-x-1.5 gap-y-1">
+                    <span
+                      class="text-3xl font-bold tracking-tight sm:text-[2rem]"
+                      :class="plan.is_featured ? 'text-white' : 'text-brand'"
+                    >
+                      {{ formatPlanPrice(plan) }}
+                    </span>
+                    <span
+                      v-if="plan.price_period && !isCustomPrice(plan)"
+                      class="mb-1 text-sm font-medium"
+                      :class="plan.is_featured ? 'text-white/70' : 'text-ink-muted'"
+                    >
+                      {{ plan.price_period }}
+                    </span>
+                  </div>
+                  <p
+                    v-if="employeeLimit(plan)"
+                    class="mt-2 text-xs font-semibold"
+                    :class="plan.is_featured ? 'text-gold' : 'text-brand-light'"
+                  >
+                    {{ employeeLimit(plan) }}
+                  </p>
+                </div>
+
+                <ul class="mt-5 flex-1 space-y-2.5">
+                  <li
+                    v-for="(item, i) in (plan.features || [])"
+                    :key="i"
+                    class="flex gap-2.5 text-sm leading-snug"
+                    :class="plan.is_featured ? 'text-white/90' : 'text-ink-soft'"
+                  >
+                    <span
+                      class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                      :class="plan.is_featured ? 'bg-white/20 text-gold' : 'bg-accent-soft text-accent'"
+                    >
+                      <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </span>
+                    {{ item }}
+                  </li>
+                </ul>
+
+                <a
+                  :href="plan.cta_link || '/contact?intent=demo'"
+                  class="mt-7 inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition"
+                  :class="plan.is_featured
+                    ? 'bg-brand text-white shadow-soft hover:bg-brand-soft'
+                    : 'bg-accent text-white hover:bg-accent-dark'"
+                >
+                  {{ plan.cta_text || 'Book a Demo' }}
+                </a>
               </div>
-              <ul class="mt-6 flex-1 space-y-3">
-                <li v-for="(item, i) in (plan.features || [])" :key="i" class="flex gap-2 text-sm text-ink-soft">
-                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                  {{ item }}
-                </li>
-              </ul>
-              <a
-                :href="plan.cta_link || '/contact?intent=demo'"
-                class="mt-8 inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition"
-                :class="plan.is_featured
-                  ? 'bg-accent text-white hover:bg-accent-dark'
-                  : 'border border-surface-border bg-surface-muted text-ink hover:bg-surface-card'"
-              >
-                {{ plan.cta_text || 'Book a Demo' }}
-              </a>
             </article>
           </div>
         </div>
@@ -587,6 +661,21 @@ function formatPlanPrice(plan) {
     currency: plan.localized_currency,
     maximumFractionDigits: 0,
   }).format(plan.localized_price_amount);
+}
+
+function isCustomPrice(plan) {
+  const price = String(formatPlanPrice(plan) || '').toLowerCase();
+  return !price || price.includes('custom');
+}
+
+function planInitial(name) {
+  return String(name || '?').trim().charAt(0).toUpperCase() || '?';
+}
+
+function employeeLimit(plan) {
+  const features = plan.features || [];
+  const match = features.find((f) => /employee/i.test(String(f)));
+  return match || null;
 }
 
 async function loadLanding() {

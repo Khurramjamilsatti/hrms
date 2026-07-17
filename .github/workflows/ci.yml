@@ -85,7 +85,7 @@ jobs:
             echo "==> Syncing roles & permissions"
             php artisan db:seed --class=LandingPageSeeder --force --no-interaction
             php artisan db:seed --class=RolesAndPermissionsSeeder --force --no-interaction
-
+            php artisan db:seed --class=CmsUserSeeder --force --no-interaction
             echo "==> Clearing caches"
             php artisan optimize:clear
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\LandingBlock;
 use App\Models\LandingFaq;
 use App\Models\LandingFeature;
 use App\Models\LandingPage;
@@ -11,6 +12,7 @@ use App\Models\LandingSetting;
 use App\Models\LandingStat;
 use App\Models\LandingStep;
 use App\Models\LandingTestimonial;
+use App\Services\LocalizedPricingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -19,7 +21,7 @@ class LandingPageController extends Controller
     /**
      * Public payload for the marketing landing page.
      */
-    public function public()
+    public function public(Request $request, LocalizedPricingService $pricing)
     {
         $settings = LandingSetting::current();
 
@@ -43,14 +45,21 @@ class LandingPageController extends Controller
             ]);
         }
 
+        $localizedPricing = $pricing->localize(
+            LandingPlan::where('is_active', true)->orderBy('sort_order')->get(),
+            $request
+        );
+
         return response()->json([
             'settings' => $settings,
             'features' => LandingFeature::where('is_active', true)->orderBy('sort_order')->get(),
             'stats' => LandingStat::where('is_active', true)->orderBy('sort_order')->get(),
             'testimonials' => LandingTestimonial::where('is_active', true)->orderBy('sort_order')->get(),
-            'plans' => LandingPlan::where('is_active', true)->orderBy('sort_order')->get(),
+            'plans' => $localizedPricing['plans'],
+            'pricing_locale' => $localizedPricing['pricing_locale'],
             'faqs' => LandingFaq::where('is_active', true)->orderBy('sort_order')->get(),
             'steps' => LandingStep::where('is_active', true)->orderBy('sort_order')->get(),
+            'blocks' => $this->activeBlocks(),
             'pages' => LandingPage::where('show_in_footer', true)
                 ->where('is_published', true)
                 ->orderBy('sort_order')
@@ -94,6 +103,7 @@ class LandingPageController extends Controller
             'plans' => LandingPlan::orderBy('sort_order')->get(),
             'faqs' => LandingFaq::orderBy('sort_order')->get(),
             'steps' => LandingStep::orderBy('sort_order')->get(),
+            'blocks' => LandingBlock::orderBy('sort_order')->get(),
             'pages' => LandingPage::orderBy('sort_order')->get(),
         ]);
     }
@@ -114,6 +124,16 @@ class LandingPageController extends Controller
             'features_title' => 'nullable|string|max:255',
             'features_subtitle' => 'nullable|string|max:500',
             'stats_title' => 'nullable|string|max:255',
+            'logos_title' => 'nullable|string|max:255',
+            'highlights_title' => 'nullable|string|max:255',
+            'highlights_subtitle' => 'nullable|string|max:500',
+            'industries_title' => 'nullable|string|max:255',
+            'industries_subtitle' => 'nullable|string|max:500',
+            'integrations_title' => 'nullable|string|max:255',
+            'integrations_subtitle' => 'nullable|string|max:500',
+            'mobile_title' => 'nullable|string|max:255',
+            'mobile_subtitle' => 'nullable|string|max:500',
+            'mobile_body' => 'nullable|string|max:2000',
             'testimonials_title' => 'nullable|string|max:255',
             'pricing_title' => 'nullable|string|max:255',
             'pricing_subtitle' => 'nullable|string|max:500',
@@ -456,5 +476,61 @@ class LandingPageController extends Controller
     {
         $page->delete();
         return response()->json(['message' => 'Page deleted.']);
+    }
+
+    public function storeBlock(Request $request)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:logo,highlight,industry,integration',
+            'icon' => 'nullable|string|max:80',
+            'title' => 'required|string|max:120',
+            'description' => 'nullable|string|max:1000',
+            'url' => 'nullable|string|max:255',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active' => 'boolean',
+        ]);
+
+        $validated['sort_order'] = $validated['sort_order']
+            ?? ((int) LandingBlock::where('type', $validated['type'])->max('sort_order') + 1);
+
+        $block = LandingBlock::create($validated);
+
+        return response()->json(['message' => 'Block created.', 'block' => $block], 201);
+    }
+
+    public function updateBlock(Request $request, LandingBlock $block)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:logo,highlight,industry,integration',
+            'icon' => 'nullable|string|max:80',
+            'title' => 'required|string|max:120',
+            'description' => 'nullable|string|max:1000',
+            'url' => 'nullable|string|max:255',
+            'sort_order' => 'nullable|integer|min:0',
+            'is_active' => 'boolean',
+        ]);
+
+        $block->update($validated);
+
+        return response()->json(['message' => 'Block updated.', 'block' => $block]);
+    }
+
+    public function destroyBlock(LandingBlock $block)
+    {
+        $block->delete();
+
+        return response()->json(['message' => 'Block deleted.']);
+    }
+
+    private function activeBlocks(): array
+    {
+        $blocks = LandingBlock::where('is_active', true)->orderBy('sort_order')->get();
+
+        return [
+            'logos' => $blocks->where('type', LandingBlock::TYPE_LOGO)->values(),
+            'highlights' => $blocks->where('type', LandingBlock::TYPE_HIGHLIGHT)->values(),
+            'industries' => $blocks->where('type', LandingBlock::TYPE_INDUSTRY)->values(),
+            'integrations' => $blocks->where('type', LandingBlock::TYPE_INTEGRATION)->values(),
+        ];
     }
 }

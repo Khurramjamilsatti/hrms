@@ -9,6 +9,8 @@
           <a href="/#pricing" class="nav-link">Pricing</a>
           <a href="/#faq" class="nav-link">FAQ</a>
           <router-link to="/pages/about" class="nav-link">About</router-link>
+          <a href="/#integrations" class="nav-link">Integrations</a>
+          <a href="/#mobile" class="nav-link">Mobile</a>
           <router-link to="/contact" class="nav-link">Contact</router-link>
         </nav>
 

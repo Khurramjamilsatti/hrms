@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\LandingBlock;
 use App\Models\LandingFaq;
 use App\Models\LandingFeature;
 use App\Models\LandingPage;
@@ -30,6 +31,16 @@ class LandingPageSeeder extends Seeder
             'features_title' => 'Everything you need to run HR',
             'features_subtitle' => 'Powerful modules that work together out of the box.',
             'stats_title' => 'Built for real workplaces',
+            'logos_title' => 'Trusted by growing teams',
+            'highlights_title' => 'Why teams choose Payroll Digital',
+            'highlights_subtitle' => 'Purpose-built for HR, finance, and people managers who need clarity—not another spreadsheet.',
+            'industries_title' => 'Built for every industry',
+            'industries_subtitle' => 'From retail floors to software labs, Payroll Digital adapts to how your workforce actually operates.',
+            'integrations_title' => 'Connects with your stack',
+            'integrations_subtitle' => 'Export payroll, sync attendance, and plug into the tools your finance and IT teams already use.',
+            'mobile_title' => 'HR in your pocket',
+            'mobile_subtitle' => 'iOS & Android apps for employees and managers',
+            'mobile_body' => "Check in, apply for leave, approve requests, and view payslips from anywhere. Push notifications keep everyone in sync—no extra logins, no clunky mobile sites.",
             'testimonials_title' => 'Loved by HR & finance teams',
             'pricing_title' => 'Simple, transparent pricing',
             'pricing_subtitle' => 'Pick the plan that matches your headcount today. Every plan scales with you as your team grows — upgrade or downgrade anytime.',
@@ -138,12 +149,12 @@ class LandingPageSeeder extends Seeder
             [
                 'name' => 'Starter',
                 'slug' => 'starter',
-                'price' => 'Rs. 2,999',
+                'price' => 'PKR 10,000',
                 'price_period' => '/month',
                 'badge' => null,
-                'description' => 'For small teams getting off spreadsheets and into a real HR system.',
+                'description' => 'For small organizations moving from spreadsheets to a complete HR system.',
                 'features' => [
-                    'Up to 25 employees',
+                    'Up to 100 employees',
                     'Payroll processing',
                     'Attendance & leave management',
                     'Employee self-service portal',
@@ -156,15 +167,36 @@ class LandingPageSeeder extends Seeder
                 'sort_order' => 1,
             ],
             [
+                'name' => 'Basic',
+                'slug' => 'basic',
+                'price' => 'PKR 25,000',
+                'price_period' => '/month',
+                'badge' => null,
+                'description' => 'For growing teams that need stronger workflows, scheduling, and support.',
+                'features' => [
+                    'Up to 125 employees',
+                    'Everything in Starter',
+                    'Shift scheduling & rosters',
+                    'Multi-level approval workflows',
+                    'Recruitment & CV bank',
+                    'Priority email support',
+                ],
+                'cta_text' => 'Book a Demo',
+                'cta_link' => '/contact?intent=demo',
+                'is_featured' => false,
+                'is_active' => true,
+                'sort_order' => 2,
+            ],
+            [
                 'name' => 'Professional',
                 'slug' => 'professional',
-                'price' => 'Rs. 7,999',
+                'price' => 'PKR 40,000',
                 'price_period' => '/month',
                 'badge' => 'Most Popular',
-                'description' => 'For growing organizations that need approvals, scheduling, and recruitment.',
+                'description' => 'For established organizations that need complete people operations.',
                 'features' => [
                     'Up to 150 employees',
-                    'Everything in Starter',
+                    'Everything in Basic',
                     'Shift scheduling & rosters',
                     'Multi-level approval workflows',
                     'Recruitment & CV bank',
@@ -175,7 +207,7 @@ class LandingPageSeeder extends Seeder
                 'cta_link' => '/contact?intent=demo',
                 'is_featured' => true,
                 'is_active' => true,
-                'sort_order' => 2,
+                'sort_order' => 3,
             ],
             [
                 'name' => 'Enterprise',
@@ -196,7 +228,7 @@ class LandingPageSeeder extends Seeder
                 'cta_link' => '/contact?intent=demo',
                 'is_featured' => false,
                 'is_active' => true,
-                'sort_order' => 3,
+                'sort_order' => 4,
             ],
         ];
 
@@ -296,7 +328,76 @@ class LandingPageSeeder extends Seeder
             LandingStep::updateOrCreate(['title' => $step['title']], $step + ['is_active' => true]);
         }
 
+        $this->seedBlocks();
+
         $this->seedPages();
+    }
+
+    protected function seedBlocks(): void
+    {
+        $logos = [
+            ['title' => 'Northwind Retail', 'sort_order' => 1],
+            ['title' => 'Brightpath Labs', 'sort_order' => 2],
+            ['title' => 'Cascade Soft', 'sort_order' => 3],
+            ['title' => 'Vertex Mfg', 'sort_order' => 4],
+            ['title' => 'Summit Logistics', 'sort_order' => 5],
+            ['title' => 'Horizon Health', 'sort_order' => 6],
+        ];
+
+        foreach ($logos as $logo) {
+            LandingBlock::updateOrCreate(
+                ['type' => 'logo', 'title' => $logo['title']],
+                $logo + ['type' => 'logo', 'is_active' => true]
+            );
+        }
+
+        $highlights = [
+            ['icon' => 'speed', 'title' => 'Faster payroll cycles', 'description' => 'Run payroll in hours, not days—with review steps and audit trails built in.', 'sort_order' => 1],
+            ['icon' => 'shield', 'title' => 'Role-based security', 'description' => 'Granular permissions so employees, managers, and admins only see what they should.', 'sort_order' => 2],
+            ['icon' => 'workflow', 'title' => 'Approval workflows', 'description' => 'Multi-level leave, advance, and expense approvals without email chains.', 'sort_order' => 3],
+            ['icon' => 'mobile', 'title' => 'Mobile-first ESS', 'description' => 'Employees check attendance, apply leave, and view payslips from any phone.', 'sort_order' => 4],
+            ['icon' => 'report', 'title' => 'Finance-ready reports', 'description' => 'Export payroll summaries and compliance-friendly reports for your auditors.', 'sort_order' => 5],
+            ['icon' => 'support', 'title' => 'Hands-on onboarding', 'description' => 'Guided rollout gets your org live in days—with support through the first payroll.', 'sort_order' => 6],
+        ];
+
+        foreach ($highlights as $item) {
+            LandingBlock::updateOrCreate(
+                ['type' => 'highlight', 'title' => $item['title']],
+                $item + ['type' => 'highlight', 'is_active' => true]
+            );
+        }
+
+        $industries = [
+            ['icon' => 'retail', 'title' => 'Retail & hospitality', 'description' => 'Shift rosters, attendance, and variable pay for frontline teams.', 'sort_order' => 1],
+            ['icon' => 'manufacturing', 'title' => 'Manufacturing', 'description' => 'Track shifts, overtime, and shop-floor attendance at scale.', 'sort_order' => 2],
+            ['icon' => 'tech', 'title' => 'Technology & services', 'description' => 'Flexible leave policies, remote attendance, and project-based teams.', 'sort_order' => 3],
+            ['icon' => 'healthcare', 'title' => 'Healthcare', 'description' => 'Roster-heavy schedules with compliant leave and payroll records.', 'sort_order' => 4],
+            ['icon' => 'logistics', 'title' => 'Logistics & field ops', 'description' => 'Mobile check-in, deployment tracking, and expense reimbursements.', 'sort_order' => 5],
+            ['icon' => 'finance', 'title' => 'Finance & professional', 'description' => 'Structured approvals, loans, advances, and audit-friendly payroll.', 'sort_order' => 6],
+        ];
+
+        foreach ($industries as $item) {
+            LandingBlock::updateOrCreate(
+                ['type' => 'industry', 'title' => $item['title']],
+                $item + ['type' => 'industry', 'is_active' => true]
+            );
+        }
+
+        $integrations = [
+            ['icon' => 'excel', 'title' => 'Excel & CSV export', 'description' => 'Export payroll, attendance, and employee data for finance workflows.', 'sort_order' => 1],
+            ['icon' => 'email', 'title' => 'Email notifications', 'description' => 'Automated alerts for approvals, payroll runs, and leave decisions.', 'sort_order' => 2],
+            ['icon' => 'calendar', 'title' => 'Calendar sync', 'description' => 'Leave and shift views that align with team calendars.', 'sort_order' => 3],
+            ['icon' => 'api', 'title' => 'REST API', 'description' => 'Enterprise plans include API access for custom integrations.', 'sort_order' => 4],
+            ['icon' => 'sso', 'title' => 'SSO ready', 'description' => 'Connect with your identity provider for centralized login.', 'sort_order' => 5],
+            ['icon' => 'storage', 'title' => 'Document storage', 'description' => 'Employee files, contracts, and CVs stored securely in one place.', 'sort_order' => 6],
+        ];
+
+        foreach ($integrations as $item) {
+            LandingBlock::updateOrCreate(
+                ['type' => 'integration', 'title' => $item['title']],
+                $item + ['type' => 'integration', 'is_active' => true]
+            );
+        }
     }
 
     protected function seedPages(): void

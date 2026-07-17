@@ -91,6 +91,9 @@ Route::prefix('cms')->group(function () {
             Route::post('/pages', [LandingPageController::class, 'storePage']);
             Route::put('/pages/{page}', [LandingPageController::class, 'updatePage']);
             Route::delete('/pages/{page}', [LandingPageController::class, 'destroyPage']);
+            Route::post('/blocks', [LandingPageController::class, 'storeBlock']);
+            Route::put('/blocks/{block}', [LandingPageController::class, 'updateBlock']);
+            Route::delete('/blocks/{block}', [LandingPageController::class, 'destroyBlock']);
         });
     });
 });

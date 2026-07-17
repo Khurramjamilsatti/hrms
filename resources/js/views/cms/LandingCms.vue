@@ -167,6 +167,46 @@
                 <label class="mb-1 block text-sm font-semibold text-gray-700">FAQ subtitle</label>
                 <input v-model="settingsForm.faq_subtitle" type="text" class="field" />
               </div>
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Trusted-by title</label>
+                <input v-model="settingsForm.logos_title" type="text" class="field" />
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Highlights title</label>
+                <input v-model="settingsForm.highlights_title" type="text" class="field" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Highlights subtitle</label>
+                <input v-model="settingsForm.highlights_subtitle" type="text" class="field" />
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Industries title</label>
+                <input v-model="settingsForm.industries_title" type="text" class="field" />
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Industries subtitle</label>
+                <input v-model="settingsForm.industries_subtitle" type="text" class="field" />
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Integrations title</label>
+                <input v-model="settingsForm.integrations_title" type="text" class="field" />
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Integrations subtitle</label>
+                <input v-model="settingsForm.integrations_subtitle" type="text" class="field" />
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Mobile section title</label>
+                <input v-model="settingsForm.mobile_title" type="text" class="field" />
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Mobile section subtitle</label>
+                <input v-model="settingsForm.mobile_subtitle" type="text" class="field" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Mobile section body</label>
+                <textarea v-model="settingsForm.mobile_body" rows="3" class="field" />
+              </div>
             </div>
           </div>
 
@@ -339,6 +379,55 @@
               <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
             </button>
             <button type="button" class="icon-btn-danger" title="Delete" @click="confirmDelete('stat', item)">
+              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blocks -->
+    <div v-else-if="activeTab === 'blocks'">
+      <div class="mb-4 flex flex-wrap gap-2">
+        <button
+          v-for="opt in blockTypeOptions"
+          :key="opt.id"
+          type="button"
+          class="rounded-lg px-3 py-1.5 text-sm font-semibold transition"
+          :class="blockTypeFilter === opt.id ? 'bg-accent text-white' : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'"
+          @click="blockTypeFilter = opt.id"
+        >
+          {{ opt.label }}
+        </button>
+      </div>
+      <div v-if="filteredBlocks.length === 0" class="rounded-xl border border-surface-border bg-white p-12 text-center shadow-card">
+        <h3 class="text-lg font-semibold text-gray-900">No blocks yet</h3>
+        <p class="mt-1 text-gray-500">Add {{ blockTypeFilter }} items for the landing page.</p>
+      </div>
+      <div v-else class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          v-for="item in filteredBlocks"
+          :key="item.id"
+          class="overflow-hidden rounded-xl border border-surface-border bg-white shadow-card"
+        >
+          <div class="p-5">
+            <div class="mb-2 flex items-start justify-between gap-2">
+              <h3 class="font-bold text-gray-900">{{ item.title }}</h3>
+              <span
+                class="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold"
+                :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'"
+              >
+                {{ item.is_active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <p v-if="item.description" class="line-clamp-3 text-sm text-gray-600">{{ item.description }}</p>
+            <p class="mt-2 text-xs text-gray-400">{{ item.type }} · {{ item.icon || '—' }} · Sort {{ item.sort_order ?? 0 }}</p>
+          </div>
+          <div v-if="canEdit" class="flex justify-end gap-2 border-t border-surface-border bg-gray-50 px-5 py-3">
+            <button type="button" class="icon-btn" title="Edit" @click="openEditBlock(item)">
+              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            </button>
+            <button type="button" class="icon-btn-danger" title="Delete" @click="confirmDelete('block', item)">
               <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
             </button>
           </div>
@@ -617,6 +706,46 @@
             </div>
           </template>
 
+          <template v-else-if="activeTab === 'blocks'">
+            <div>
+              <label class="mb-1 block text-sm font-semibold text-gray-700">Block type</label>
+              <select v-model="blockForm.type" class="field" required>
+                <option value="logo">Trusted logo</option>
+                <option value="highlight">Why choose us</option>
+                <option value="industry">Industry</option>
+                <option value="integration">Integration</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-semibold text-gray-700">Title</label>
+              <input v-model="blockForm.title" type="text" required class="field" />
+            </div>
+            <div v-if="blockForm.type !== 'logo'">
+              <label class="mb-1 block text-sm font-semibold text-gray-700">Icon key</label>
+              <input v-model="blockForm.icon" type="text" placeholder="speed, retail, api…" class="field" />
+            </div>
+            <div v-if="blockForm.type !== 'logo'">
+              <label class="mb-1 block text-sm font-semibold text-gray-700">Description</label>
+              <textarea v-model="blockForm.description" rows="3" class="field" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-semibold text-gray-700">URL (optional)</label>
+              <input v-model="blockForm.url" type="text" class="field" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Sort order</label>
+                <input v-model.number="blockForm.sort_order" type="number" min="0" class="field" />
+              </div>
+              <div class="flex items-end pb-2">
+                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <input v-model="blockForm.is_active" type="checkbox" class="rounded border-gray-300 text-accent focus:ring-accent" />
+                  Active
+                </label>
+              </div>
+            </div>
+          </template>
+
           <template v-else-if="activeTab === 'testimonials'">
             <div>
               <label class="mb-1 block text-sm font-semibold text-gray-700">Name</label>
@@ -866,6 +995,7 @@ const tabs = [
   { id: 'settings', label: 'Settings' },
   { id: 'features', label: 'Features' },
   { id: 'stats', label: 'Stats' },
+  { id: 'blocks', label: 'Blocks' },
   { id: 'testimonials', label: 'Testimonials' },
   { id: 'plans', label: 'Plans' },
   { id: 'faqs', label: 'FAQs' },
@@ -883,6 +1013,14 @@ const formError = ref('');
 
 const features = ref([]);
 const stats = ref([]);
+const blocks = ref([]);
+const blockTypeFilter = ref('highlight');
+const blockTypeOptions = [
+  { id: 'logo', label: 'Trusted logos' },
+  { id: 'highlight', label: 'Highlights' },
+  { id: 'industry', label: 'Industries' },
+  { id: 'integration', label: 'Integrations' },
+];
 const testimonials = ref([]);
 const plans = ref([]);
 const faqs = ref([]);
@@ -903,6 +1041,16 @@ const emptySettings = () => ({
   features_title: '',
   features_subtitle: '',
   stats_title: '',
+  logos_title: '',
+  highlights_title: '',
+  highlights_subtitle: '',
+  industries_title: '',
+  industries_subtitle: '',
+  integrations_title: '',
+  integrations_subtitle: '',
+  mobile_title: '',
+  mobile_subtitle: '',
+  mobile_body: '',
   testimonials_title: '',
   pricing_title: '',
   pricing_subtitle: '',
@@ -936,6 +1084,7 @@ const showModal = ref(false);
 const editingId = ref(null);
 const featureForm = ref({ icon: '', title: '', description: '', sort_order: 0, is_active: true });
 const statForm = ref({ label: '', value: '', icon: '', sort_order: 0, is_active: true });
+const blockForm = ref({ type: 'highlight', icon: '', title: '', description: '', url: '', sort_order: 0, is_active: true });
 const testimonialForm = ref({
   name: '',
   role: '',
@@ -980,6 +1129,7 @@ const addButtonLabel = computed(() => {
   const labels = {
     features: 'Add Feature',
     stats: 'Add Stat',
+    blocks: 'Add Block',
     testimonials: 'Add Testimonial',
     plans: 'Add Plan',
     faqs: 'Add FAQ',
@@ -994,6 +1144,7 @@ const modalTitle = computed(() => {
   const nouns = {
     features: 'Feature',
     stats: 'Stat',
+    blocks: 'Block',
     testimonials: 'Testimonial',
     plans: 'Plan',
     faqs: 'FAQ',
@@ -1009,6 +1160,10 @@ const deleteLabel = computed(() => {
   if (!t) return '';
   return t.title || t.question || t.label || t.name || `#${t.id}`;
 });
+
+const filteredBlocks = computed(() =>
+  blocks.value.filter((b) => b.type === blockTypeFilter.value)
+);
 
 function slugify(value) {
   return String(value || '')
@@ -1048,6 +1203,7 @@ async function loadCms() {
     assignSettings(data.settings || {});
     features.value = data.features || [];
     stats.value = data.stats || [];
+    blocks.value = data.blocks || [];
     testimonials.value = data.testimonials || [];
     plans.value = data.plans || [];
     faqs.value = data.faqs || [];
@@ -1083,6 +1239,16 @@ function openCreateModal() {
     featureForm.value = { icon: '', title: '', description: '', sort_order: features.value.length + 1, is_active: true };
   } else if (activeTab.value === 'stats') {
     statForm.value = { label: '', value: '', icon: '', sort_order: stats.value.length + 1, is_active: true };
+  } else if (activeTab.value === 'blocks') {
+    blockForm.value = {
+      type: blockTypeFilter.value,
+      icon: '',
+      title: '',
+      description: '',
+      url: '',
+      sort_order: filteredBlocks.value.length + 1,
+      is_active: true,
+    };
   } else if (activeTab.value === 'testimonials') {
     testimonialForm.value = {
       name: '',
@@ -1148,6 +1314,21 @@ function openEditStat(item) {
     icon: item.icon || '',
     sort_order: item.sort_order ?? 0,
     is_active: !!item.is_active,
+  };
+  formError.value = '';
+  showModal.value = true;
+}
+
+function openEditBlock(item) {
+  editingId.value = item.id;
+  blockForm.value = {
+    type: item.type || 'highlight',
+    icon: item.icon || '',
+    title: item.title || '',
+    description: item.description || '',
+    url: item.url || '',
+    is_active: !!item.is_active,
+    sort_order: item.sort_order ?? 0,
   };
   formError.value = '';
   showModal.value = true;
@@ -1264,6 +1445,17 @@ async function saveModal() {
         stats.value.push(data.stat);
         flash(data.message || 'Stat created.');
       }
+    } else if (activeTab.value === 'blocks') {
+      if (editingId.value) {
+        const { data } = await axios.put(`/cms/landing/blocks/${editingId.value}`, blockForm.value);
+        const idx = blocks.value.findIndex((b) => b.id === editingId.value);
+        if (idx !== -1) blocks.value[idx] = data.block;
+        flash(data.message || 'Block updated.');
+      } else {
+        const { data } = await axios.post('/cms/landing/blocks', blockForm.value);
+        blocks.value.push(data.block);
+        flash(data.message || 'Block created.');
+      }
     } else if (activeTab.value === 'testimonials') {
       if (editingId.value) {
         const { data } = await axios.put(`/cms/landing/testimonials/${editingId.value}`, testimonialForm.value);
@@ -1355,6 +1547,10 @@ async function performDelete() {
     } else if (deleteType.value === 'stat') {
       const { data } = await axios.delete(`/cms/landing/stats/${id}`);
       stats.value = stats.value.filter((s) => s.id !== id);
+      message = data.message || message;
+    } else if (deleteType.value === 'block') {
+      const { data } = await axios.delete(`/cms/landing/blocks/${id}`);
+      blocks.value = blocks.value.filter((b) => b.id !== id);
       message = data.message || message;
     } else if (deleteType.value === 'testimonial') {
       const { data } = await axios.delete(`/cms/landing/testimonials/${id}`);

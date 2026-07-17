@@ -66,6 +66,17 @@
                 {{ processingAttendance ? 'Processing...' : 'Check In' }}
               </button>
             </div>
+            <div v-else class="flex flex-wrap items-center gap-2">
+              <router-link
+                to="/profile"
+                class="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white hover:bg-accent-dark"
+              >
+                Go to Profile
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </router-link>
+            </div>
           </div>
         </div>
 
@@ -314,6 +325,17 @@
                 {{ processingAttendance ? 'Processing...' : 'Check In' }}
               </button>
             </div>
+            <div v-else class="flex flex-wrap items-center gap-2">
+              <router-link
+                to="/profile"
+                class="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white hover:bg-accent-dark"
+              >
+                Go to Profile
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </router-link>
+            </div>
           </div>
         </div>
 
@@ -418,30 +440,45 @@
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h2 class="text-base font-semibold text-gray-900">Today’s Attendance</h2>
-              <p class="text-sm text-gray-500 mt-1">
+              <p v-if="hasEmployeeProfile" class="text-sm text-gray-500 mt-1">
                 <template v-if="stats?.my_attendance_today">
                   Checked in at <span class="font-medium text-gray-900">{{ stats.my_attendance_today.check_in }}</span>
                   · {{ calculateDuration(stats.my_attendance_today.check_in) }}
                 </template>
                 <template v-else>Ready when you are — check in to start your day.</template>
               </p>
+              <p v-else class="text-sm text-amber-700 mt-1">
+                No employee profile is linked to this account, so personal check-in is unavailable.
+              </p>
             </div>
-            <button
-              v-if="stats?.my_attendance_today"
-              @click="handleCheckOut"
-              :disabled="processingAttendance"
-              class="px-6 py-3 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
-            >
-              {{ processingAttendance ? 'Processing...' : 'Check Out' }}
-            </button>
-            <button
+            <template v-if="hasEmployeeProfile">
+              <button
+                v-if="stats?.my_attendance_today"
+                @click="handleCheckOut"
+                :disabled="processingAttendance"
+                class="px-6 py-3 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
+              >
+                {{ processingAttendance ? 'Processing...' : 'Check Out' }}
+              </button>
+              <button
+                v-else
+                @click="handleCheckIn"
+                :disabled="processingAttendance"
+                class="px-6 py-3 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
+              >
+                {{ processingAttendance ? 'Processing...' : 'Check In' }}
+              </button>
+            </template>
+            <router-link
               v-else
-              @click="handleCheckIn"
-              :disabled="processingAttendance"
-              class="px-6 py-3 text-sm font-medium text-white bg-accent rounded-lg hover:bg-accent-dark disabled:opacity-50"
+              to="/profile"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-medium text-white hover:bg-accent-dark"
             >
-              {{ processingAttendance ? 'Processing...' : 'Check In' }}
-            </button>
+              Go to Profile
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </router-link>
           </div>
         </div>
 

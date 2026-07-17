@@ -18,10 +18,16 @@ class JobApplication extends Model
         'address',
         'resume_path',
         'cover_letter_path',
+        'cover_letter',
         'expected_salary',
         'available_from',
         'status',
         'notes',
+    ];
+
+    protected $appends = [
+        'applicant_name',
+        'full_name',
     ];
 
     protected function casts(): array
@@ -49,6 +55,11 @@ class JobApplication extends Model
 
     public function getFullNameAttribute(): string
     {
-        return "{$this->first_name} {$this->last_name}";
+        return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    public function getApplicantNameAttribute(): string
+    {
+        return $this->full_name;
     }
 }

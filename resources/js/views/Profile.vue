@@ -80,8 +80,35 @@
         </div>
       </div>
 
-      <div v-if="!hasEmployeeProfile" class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900">
-        No employee profile is linked to this account. Contact HR to complete your employee record.
+      <div v-if="!hasEmployeeProfile" class="rounded-xl border border-amber-200 bg-amber-50 p-5">
+        <p class="text-sm font-semibold text-amber-900">No employee profile linked</p>
+        <p class="mt-1 text-sm text-amber-800">
+          Personal check-in, leave, and payslips need an employee record linked to this account.
+          Ask HR to link your user, or create an employee profile if you have access.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <router-link
+            v-if="canCreateEmployee"
+            to="/employees/create"
+            class="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-dark"
+          >
+            Create employee profile
+          </router-link>
+          <router-link
+            v-if="canManageUsers"
+            to="/admin/user-roles"
+            class="inline-flex items-center rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100"
+          >
+            Manage users
+          </router-link>
+          <router-link
+            v-if="canViewEmployees"
+            to="/employees"
+            class="inline-flex items-center rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100"
+          >
+            View employees
+          </router-link>
+        </div>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
@@ -257,8 +284,14 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useNotification } from '@/composables/useNotification';
+import { usePermissions } from '@/composables/usePermissions';
 
 const { success, error: showError } = useNotification();
+const { can, canAccessModule } = usePermissions();
+
+const canCreateEmployee = computed(() => can('employees.create'));
+const canViewEmployees = computed(() => canAccessModule('employees'));
+const canManageUsers = computed(() => canAccessModule('users') || can('users.manage') || can('users.view'));
 
 const loading = ref(true);
 const saving = ref(false);

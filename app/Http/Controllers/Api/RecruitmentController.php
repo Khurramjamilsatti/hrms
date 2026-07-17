@@ -93,16 +93,68 @@ class RecruitmentController extends Controller
     {
         $validated = $request->validate([
             'job_position_id' => 'required|exists:job_positions,id',
-            'applicant_name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'phone' => 'required|string',
-            'resume_path' => 'nullable|string',
-            'cover_letter' => 'nullable|string',
-            'status' => 'required|in:applied,screening,interview,offered,hired,rejected',
+            'applicant_name' => 'nullable|string|max:255',
+            'first_name' => 'nullable|string|max:120',
+            'last_name' => 'nullable|string|max:120',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:40',
+            'resume_path' => 'nullable|string|max:500',
+            'cover_letter' => 'nullable|string|max:10000',
+            'cover_letter_path' => 'nullable|string|max:500',
+            'expected_salary' => 'nullable|numeric',
+            'available_from' => 'nullable|date',
+            'address' => 'nullable|string|max:1000',
+            'notes' => 'nullable|string|max:5000',
+            'status' => 'nullable|in:applied,screening,interview,offered,hired,rejected',
         ]);
 
-        $application = JobApplication::create($validated);
-        return response()->json($application, 201);
+        [$firstName, $lastName] = $this->splitApplicantName(
+            $validated['applicant_name'] ?? null,
+            $validated['first_name'] ?? null,
+            $validated['last_name'] ?? null
+        );
+
+        if ($firstName === '') {
+            return response()->json([
+                'message' => 'Applicant name is required.',
+                'errors' => ['applicant_name' => ['Applicant name is required.']],
+            ], 422);
+        }
+
+        $application = JobApplication::create([
+            'job_position_id' => $validated['job_position_id'],
+            'first_name' => $firstName,
+            'last_name' => $lastName !== '' ? $lastName : '-',
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'address' => $validated['address'] ?? null,
+            'resume_path' => $validated['resume_path'] ?? null,
+            'cover_letter_path' => $validated['cover_letter_path'] ?? null,
+            'cover_letter' => $validated['cover_letter'] ?? null,
+            'expected_salary' => $validated['expected_salary'] ?? null,
+            'available_from' => $validated['available_from'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'status' => $validated['status'] ?? 'applied',
+        ]);
+
+        return response()->json($application->load('jobPosition'), 201);
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function splitApplicantName(?string $fullName, ?string $firstName, ?string $lastName): array
+    {
+        if (filled($firstName) || filled($lastName)) {
+            return [trim((string) $firstName), trim((string) $lastName)];
+        }
+
+        $parts = preg_split('/\s+/', trim((string) $fullName), 2) ?: [];
+
+        return [
+            trim($parts[0] ?? ''),
+            trim($parts[1] ?? ''),
+        ];
     }
 
     public function updateApplicationStatus(Request $request, JobApplication $application)

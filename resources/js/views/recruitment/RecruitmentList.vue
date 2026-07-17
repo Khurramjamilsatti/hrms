@@ -786,7 +786,12 @@ const saveApplication = async () => {
     activeTab.value = 'applications';
     await loadData();
   } catch (err) {
-    formError.value = err.response?.data?.message || Object.values(err.response?.data?.errors || {}).flat().join(' ') || 'Failed to create application';
+    const raw = err.response?.data?.message
+      || Object.values(err.response?.data?.errors || {}).flat().join(' ')
+      || 'Failed to create application';
+    formError.value = String(raw).includes('Permission denied')
+      ? 'Server storage is not writable (logs/cache). Ask an admin to fix storage permissions, then try again.'
+      : raw;
   } finally {
     saving.value = false;
   }

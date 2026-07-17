@@ -3,9 +3,10 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-900">Payroll Management</h1>
-      <button v-if="isAdminOrManager" @click="showGenerateModal = true" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-        Generate Payroll
+      <button v-if="isAdminOrManager" @click="showGenerateModal = true" :disabled="generating" class="inline-flex items-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow disabled:opacity-60 disabled:cursor-not-allowed">
+        <svg v-if="generating" class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+        <svg v-else class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+        {{ generating ? 'Processing…' : 'Generate Payroll' }}
       </button>
     </div>
 
@@ -156,8 +157,14 @@
                 <div class="flex items-center space-x-2">
                   <button @click="viewPayrollDetails(payroll)" class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">Details</button>
                   <button @click="printPayslip(payroll)" class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-md transition-colors">Print</button>
-                  <button v-if="isAdminOrManager && payroll.status === 'draft'" @click="processPayroll(payroll)" class="px-3 py-1 text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-md transition-colors">Process</button>
-                  <button v-if="isAdminOrManager && payroll.status === 'processed'" @click="markPaid(payroll)" class="px-3 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors">Mark Paid</button>
+                  <button v-if="isAdminOrManager && payroll.status === 'draft'" @click="processPayroll(payroll)" :disabled="rowActionId === payroll.id" class="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                    <svg v-if="rowActionId === payroll.id" class="animate-spin w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                    {{ rowActionId === payroll.id ? 'Processing…' : 'Process' }}
+                  </button>
+                  <button v-if="isAdminOrManager && payroll.status === 'processed'" @click="markPaid(payroll)" :disabled="rowActionId === payroll.id" class="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                    <svg v-if="rowActionId === payroll.id" class="animate-spin w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                    {{ rowActionId === payroll.id ? 'Processing…' : 'Mark Paid' }}
+                  </button>
                 </div>
               </td>
             </tr>
@@ -306,10 +313,10 @@
 
     <!-- Generate Payroll Modal -->
     <div v-if="showGenerateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+      <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h3 class="text-lg font-bold text-gray-900">Generate Monthly Payroll</h3>
-          <button @click="showGenerateModal = false" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+          <button @click="closeGenerateModal" :disabled="generating" class="text-gray-400 hover:text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
         </div>
         <div class="px-6 py-5 space-y-4">
           <p class="text-sm text-gray-600">
@@ -318,22 +325,32 @@
           </p>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Month</label>
-            <select v-model="generateForm.month" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="generateForm.month" :disabled="generating" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100">
               <option value="">Select Month</option>
               <option v-for="m in months" :key="m.value" :value="m.value">{{ m.label }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Year</label>
-            <select v-model="generateForm.year" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <select v-model="generateForm.year" :disabled="generating" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:bg-gray-100">
               <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
             </select>
           </div>
           <div v-if="generateError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ generateError }}</div>
         </div>
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50">
-          <button @click="showGenerateModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
-          <button @click="generatePayroll" :disabled="generating" class="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50">{{ generating ? 'Generating...' : 'Generate' }}</button>
+          <button @click="closeGenerateModal" :disabled="generating" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Cancel</button>
+          <button @click="generatePayroll" :disabled="generating" class="inline-flex items-center px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg v-if="generating" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            {{ generating ? 'Processing…' : 'Generate' }}
+          </button>
+        </div>
+
+        <!-- Processing overlay -->
+        <div v-if="generating" class="absolute inset-0 bg-white/85 backdrop-blur-sm flex flex-col items-center justify-center text-center px-6">
+          <svg class="animate-spin w-12 h-12 text-gray-900 mb-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+          <p class="text-base font-semibold text-gray-900">Processing payroll…</p>
+          <p class="text-sm text-gray-500 mt-1">This may take a moment. Please wait and don’t close this window.</p>
         </div>
       </div>
     </div>
@@ -355,6 +372,7 @@ const pagination = ref(null);
 const showGenerateModal = ref(false);
 const generating = ref(false);
 const generateError = ref(null);
+const rowActionId = ref(null);
 const searchQuery = ref('');
 const showDetailsModal = ref(false);
 const selectedPayroll = ref(null);
@@ -407,6 +425,11 @@ const handleSearch = () => {
   loadPayrolls(1);
 };
 
+const closeGenerateModal = () => {
+  if (generating.value) return;
+  showGenerateModal.value = false;
+};
+
 const generatePayroll = async () => {
   generateError.value = null;
   if (!generateForm.value.month || !generateForm.value.year) { generateError.value = 'Please select month and year'; return; }
@@ -421,9 +444,11 @@ const generatePayroll = async () => {
 };
 
 const processPayroll = async (payroll) => {
+  if (rowActionId.value) return;
+  rowActionId.value = payroll.id;
   try {
     await axios.post(`/payroll/${payroll.id}/process`);
-    loadPayrolls(pagination.value?.current_page || 1);
+    await loadPayrolls(pagination.value?.current_page || 1);
   } catch (err) {
     await alert({
       title: 'Error',
@@ -432,13 +457,17 @@ const processPayroll = async (payroll) => {
       cancelText: 'Close',
       variant: 'danger',
     });
+  } finally {
+    rowActionId.value = null;
   }
 };
 
 const markPaid = async (payroll) => {
+  if (rowActionId.value) return;
+  rowActionId.value = payroll.id;
   try {
     await axios.post(`/payroll/${payroll.id}/mark-paid`, { payment_date: new Date().toISOString().split('T')[0] });
-    loadPayrolls(pagination.value?.current_page || 1);
+    await loadPayrolls(pagination.value?.current_page || 1);
   } catch (err) {
     await alert({
       title: 'Error',
@@ -447,6 +476,8 @@ const markPaid = async (payroll) => {
       cancelText: 'Close',
       variant: 'danger',
     });
+  } finally {
+    rowActionId.value = null;
   }
 };
 

@@ -206,6 +206,14 @@
                 <label class="mb-1 block text-sm font-semibold text-gray-700">Facebook URL</label>
                 <input v-model="settingsForm.social_facebook" type="text" class="field" />
               </div>
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">App Store URL (iOS)</label>
+                <input v-model="settingsForm.app_store_url" type="text" class="field" placeholder="https://apps.apple.com/app/…" />
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-semibold text-gray-700">Google Play URL (Android)</label>
+                <input v-model="settingsForm.play_store_url" type="text" class="field" placeholder="https://play.google.com/store/apps/details?id=…" />
+              </div>
               <div class="md:col-span-2">
                 <label class="mb-1 block text-sm font-semibold text-gray-700">Footer text</label>
                 <textarea v-model="settingsForm.footer_text" rows="2" class="field" />
@@ -916,6 +924,8 @@ const emptySettings = () => ({
   social_linkedin: '',
   social_twitter: '',
   social_facebook: '',
+  app_store_url: '',
+  play_store_url: '',
   footer_text: '',
   is_published: true,
 });

@@ -69,9 +69,8 @@
           </button>
         </form>
 
-        <p class="mt-6 text-center text-sm text-ink-muted">
-          Looking for the app?
-          <router-link to="/login" class="font-semibold text-accent hover:text-accent-dark">Employee login</router-link>
+        <p class="mt-6 text-center text-xs text-ink-muted">
+          Authorized staff only.
         </p>
       </div>
     </div>

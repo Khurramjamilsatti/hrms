@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { HRMS_LOGIN_PATH, CMS_LOGIN_PATH } from './config/authPaths';
+
 window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -7,6 +9,11 @@ window.axios.defaults.baseURL = '/api';
 function isCmsApiUrl(url = '') {
   const path = String(url).replace(/^\/api/, '').replace(/^\//, '');
   return path === 'cms' || path.startsWith('cms/') || path.startsWith('cms?');
+}
+
+function isPublicContactUrl(url = '') {
+  const path = String(url).replace(/^\/api/, '').replace(/^\//, '');
+  return path === 'contact' || path.startsWith('contact/');
 }
 
 // Attach the correct token per API surface (HRMS vs CMS)
@@ -35,20 +42,21 @@ window.axios.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const url = error.config?.url || '';
-      const onCmsLogin = window.location.pathname.startsWith('/cms/login');
-      const onHrmsLogin = window.location.pathname === '/login';
+      const path = window.location.pathname;
+      const onCmsLogin = path.startsWith(CMS_LOGIN_PATH);
+      const onHrmsLogin = path === HRMS_LOGIN_PATH || path.startsWith(`${HRMS_LOGIN_PATH}/`);
 
       if (isCmsApiUrl(url)) {
         localStorage.removeItem('cms_auth_token');
         localStorage.removeItem('cms_user');
         if (!onCmsLogin && !String(url).includes('/cms/login')) {
-          window.location.href = '/cms/login';
+          window.location.href = CMS_LOGIN_PATH;
         }
-      } else {
+      } else if (!isPublicContactUrl(url)) {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user');
         if (!onHrmsLogin && !String(url).includes('/login')) {
-          window.location.href = '/login';
+          window.location.href = HRMS_LOGIN_PATH;
         }
       }
     }

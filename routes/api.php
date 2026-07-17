@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\UserRoleController;
 use App\Http\Controllers\Api\LandingPageController;
 use App\Http\Controllers\Api\Cms\CmsAuthController;
+use App\Http\Controllers\Api\ContactInquiryController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -44,6 +45,13 @@ Route::get('/landing', [LandingPageController::class, 'public']);
 Route::get('/landing/pages', [LandingPageController::class, 'publicPages']);
 Route::get('/landing/pages/{slug}', [LandingPageController::class, 'publicPage']);
 
+// Public contact / demo inquiries (anti-spam challenge)
+Route::prefix('contact')->group(function () {
+    Route::get('/challenge', [ContactInquiryController::class, 'challenge']);
+    Route::post('/challenge/square', [ContactInquiryController::class, 'verifySquare']);
+    Route::post('/', [ContactInquiryController::class, 'store'])->middleware('throttle:10,1');
+});
+
 // CMS auth + content admin (separate from HRMS)
 Route::prefix('cms')->group(function () {
     Route::post('/login', [CmsAuthController::class, 'login']);
@@ -51,6 +59,13 @@ Route::prefix('cms')->group(function () {
     Route::middleware(['auth:sanctum', 'cms'])->group(function () {
         Route::post('/logout', [CmsAuthController::class, 'logout']);
         Route::get('/me', [CmsAuthController::class, 'me']);
+
+        Route::prefix('inquiries')->group(function () {
+            Route::get('/', [ContactInquiryController::class, 'index']);
+            Route::get('/{inquiry}', [ContactInquiryController::class, 'show']);
+            Route::put('/{inquiry}', [ContactInquiryController::class, 'update']);
+            Route::delete('/{inquiry}', [ContactInquiryController::class, 'destroy']);
+        });
 
         Route::prefix('landing')->group(function () {
             Route::get('/', [LandingPageController::class, 'show']);

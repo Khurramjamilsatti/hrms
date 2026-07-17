@@ -264,6 +264,7 @@ import { useAuthStore } from '@/stores/auth';
 import { usePermissionStore } from '@/stores/permission';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import AppLogo from '@/components/AppLogo.vue';
+import { HRMS_LOGIN_PATH } from '@/config/authPaths';
 import axios from 'axios';
 
 const router = useRouter();
@@ -494,7 +495,7 @@ const formatDate = (dateString) => {
 
 const handleLogout = async () => {
   await authStore.logout();
-  router.push('/login');
+  router.push(HRMS_LOGIN_PATH);
 };
 
 onMounted(async () => {

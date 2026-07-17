@@ -27,18 +27,20 @@
             <p class="mt-5 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
               {{ settings.hero_subtitle }}
             </p>
-            <div class="mt-9 flex flex-wrap items-center gap-3">
-              <a :href="primaryCtaHref" class="inline-flex items-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-accent-dark">
-                {{ settings.hero_cta_text || 'Get Started' }}
-              </a>
-              <a
-                v-if="settings.hero_secondary_cta_text"
-                :href="settings.hero_secondary_cta_link || '#pricing'"
-                class="inline-flex items-center rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
-              >
-                {{ settings.hero_secondary_cta_text }}
-              </a>
-            </div>
+          <div class="mt-9 flex flex-wrap items-center gap-3">
+            <router-link
+              to="/contact?intent=demo"
+              class="inline-flex items-center rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-accent-dark"
+            >
+              Book a Demo
+            </router-link>
+            <a
+              href="#pricing"
+              class="inline-flex items-center rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
+            >
+              View Pricing
+            </a>
+          </div>
             <div class="mt-10 flex flex-wrap gap-6 text-sm text-white/50">
               <span class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-gold" /> Role-based access</span>
               <span class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-gold" /> Multi-level approvals</span>
@@ -202,13 +204,13 @@
                 </li>
               </ul>
               <a
-                :href="plan.cta_link || '/login'"
+                :href="plan.cta_link || '/contact?intent=demo'"
                 class="mt-8 inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition"
                 :class="plan.is_featured
                   ? 'bg-accent text-white hover:bg-accent-dark'
                   : 'border border-surface-border bg-surface-muted text-ink hover:bg-surface-card'"
               >
-                {{ plan.cta_text || 'Get started' }}
+                {{ plan.cta_text || 'Book a Demo' }}
               </a>
             </article>
           </div>
@@ -305,17 +307,17 @@
               <h3 class="text-xl font-bold text-ink">{{ settings.cta_title || 'Ready to get started?' }}</h3>
               <p class="mt-2 text-sm text-ink-muted">{{ settings.cta_body }}</p>
               <div class="mt-6 flex flex-wrap gap-3">
-                <a
-                  :href="ctaButtonHref"
+                <router-link
+                  to="/contact?intent=demo"
                   class="inline-flex items-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-dark"
                 >
-                  {{ settings.cta_button_text || 'Sign In' }}
-                </a>
+                  Book a Demo
+                </router-link>
                 <router-link
-                  to="/pages/terms"
+                  to="/contact"
                   class="inline-flex items-center rounded-xl border border-surface-border px-5 py-3 text-sm font-semibold text-ink hover:bg-surface-muted"
                 >
-                  Terms of Service
+                  Contact Us
                 </router-link>
               </div>
             </div>
@@ -327,13 +329,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import axios from 'axios';
-import { useAuthStore } from '@/stores/auth';
 import LandingShell from '@/components/LandingShell.vue';
-
-const authStore = useAuthStore();
-const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 const loading = ref(true);
 const settings = ref({});
@@ -344,16 +342,6 @@ const plans = ref([]);
 const faqs = ref([]);
 const steps = ref([]);
 const pages = ref([]);
-
-const primaryCtaHref = computed(() => {
-  if (isAuthenticated.value) return '/dashboard';
-  return settings.value.hero_cta_link || '/login';
-});
-
-const ctaButtonHref = computed(() => {
-  if (isAuthenticated.value) return '/dashboard';
-  return settings.value.cta_button_link || '/login';
-});
 
 const ICON_PATHS = {
   payroll: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
@@ -396,9 +384,7 @@ async function loadLanding() {
     settings.value = {
       brand_name: 'Payroll Digital',
       hero_title: 'Modern HR & Payroll',
-      hero_subtitle: 'Something went wrong loading this page. You can still sign in.',
-      hero_cta_text: 'Sign In',
-      hero_cta_link: '/login',
+      hero_subtitle: 'Something went wrong loading this page. You can still book a demo.',
     };
   } finally {
     loading.value = false;

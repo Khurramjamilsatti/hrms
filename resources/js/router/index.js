@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { usePermissionStore } from '@/stores/permission';
 import { useCmsAuthStore } from '@/stores/cmsAuth';
+import { HRMS_LOGIN_PATH } from '@/config/authPaths';
 
 const routes = [
   {
@@ -27,6 +28,11 @@ const routes = [
     redirect: '/pages/cookies',
   },
   {
+    path: '/contact',
+    name: 'Contact',
+    component: () => import('@/views/landing/ContactPage.vue'),
+  },
+  {
     path: '/cms/login',
     name: 'CmsLogin',
     component: () => import('@/views/cms/CmsLogin.vue'),
@@ -43,10 +49,19 @@ const routes = [
         name: 'CmsContent',
         component: () => import('@/views/cms/LandingCms.vue'),
       },
+      {
+        path: 'inquiries',
+        name: 'CmsInquiries',
+        component: () => import('@/views/cms/InquiriesList.vue'),
+      },
     ],
   },
   {
     path: '/login',
+    redirect: '/',
+  },
+  {
+    path: '/access/pd-portal-k9m2x',
     name: 'Login',
     component: () => import('@/views/auth/Login.vue'),
     meta: { guest: true }
@@ -375,7 +390,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Handle protected routes
   if (to.meta.requiresAuth && !isAuthenticated) {
-    return next('/login');
+    return next(HRMS_LOGIN_PATH);
   }
 
   // If authenticated and permissions not loaded yet, fetch them
@@ -386,7 +401,7 @@ router.beforeEach(async (to, from, next) => {
       console.error('Failed to fetch permissions:', error);
       // If permission fetch fails, logout and redirect to login
       authStore.logout();
-      return next('/login');
+      return next(HRMS_LOGIN_PATH);
     }
   }
 

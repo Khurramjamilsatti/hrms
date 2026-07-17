@@ -19,6 +19,11 @@ class Announcement extends Model
         'created_by',
     ];
 
+    protected $appends = [
+        'is_active',
+        'expiry_date',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -31,5 +36,15 @@ class Announcement extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function getIsActiveAttribute(): bool
+    {
+        return (bool) $this->is_published;
+    }
+
+    public function getExpiryDateAttribute(): ?string
+    {
+        return $this->end_date?->format('Y-m-d');
     }
 }

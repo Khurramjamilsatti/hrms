@@ -41,7 +41,7 @@
 
     <div v-else-if="announcements.length === 0" class="bg-white rounded-lg shadow border border-gray-200 p-12 text-center">
       <h3 class="text-lg font-semibold text-gray-900 mb-1">No Announcements</h3>
-      <p class="text-gray-500">Click "New Announcement" to post one.</p>
+      <p class="text-gray-500">{{ can('announcements.create') ? 'Click "New Announcement" to post one.' : 'No announcements have been posted yet.' }}</p>
     </div>
 
     <!-- List -->
@@ -122,7 +122,6 @@
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
-                <option value="urgent">Urgent</option>
               </select>
             </div>
             <div>
@@ -263,7 +262,7 @@ const openCreateModal = () => {
 const openEditModal = (announcement) => {
   editingAnnouncement.value = announcement;
   formError.value = null;
-  const priority = ['low', 'medium', 'high', 'urgent'].includes(announcement.priority)
+  const priority = ['low', 'medium', 'high'].includes(announcement.priority)
     ? announcement.priority
     : 'medium';
   form.value = {

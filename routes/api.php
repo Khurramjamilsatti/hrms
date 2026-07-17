@@ -195,7 +195,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Announcements - Permission-based access
     Route::prefix('announcements')->group(function () {
-        Route::get('/', [AnnouncementController::class, 'index'])->middleware('permission:announcements.view');
+        Route::get('/', [AnnouncementController::class, 'index']);
         Route::post('/', [AnnouncementController::class, 'store'])->middleware('permission:announcements.create');
         Route::put('/{announcement}', [AnnouncementController::class, 'update'])->middleware('permission:announcements.update');
         Route::delete('/{announcement}', [AnnouncementController::class, 'destroy'])->middleware('permission:announcements.delete');

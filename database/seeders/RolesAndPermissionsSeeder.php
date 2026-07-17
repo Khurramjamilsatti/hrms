@@ -262,7 +262,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'recruitment.view', 'recruitment.create', 'recruitment.update', 'recruitment.delete', 'recruitment.manage',
                     'performance.view', 'performance.create', 'performance.update', 'performance.manage', 'performance.reviews', 'performance.goals',
                     'assets.view', 'assets.create', 'assets.update', 'assets.delete', 'assets.manage', 'assets.assign',
-                    'announcements.view', 'announcements.create', 'announcements.edit', 'announcements.update', 'announcements.delete',
+                    'announcements.view',
                     'timesheets.view', 'timesheets.create', 'timesheets.update', 'timesheets.submit', 'timesheets.approve', 'timesheets.manage',
                     'onboarding.view', 'onboarding.create', 'onboarding.update', 'onboarding.delete', 'onboarding.manage',
                     'training.view', 'training.create', 'training.update', 'training.delete', 'training.manage', 'training.enroll',

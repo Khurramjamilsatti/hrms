@@ -334,8 +334,8 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.module && isAuthenticated) {
     const module = to.meta.module;
     
-    // Dashboard and profile are always accessible
-    if (module === 'dashboard' || (module === 'employees' && to.name === 'Profile')) {
+    // Dashboard, profile, and announcements are always accessible
+    if (module === 'dashboard' || module === 'announcements' || (module === 'employees' && to.name === 'Profile')) {
       return next();
     }
 

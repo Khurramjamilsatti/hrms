@@ -63,6 +63,8 @@ export const usePermissionStore = defineStore('permission', {
     },
 
     canAccessModule: (state) => (module) => {
+      // Announcements are visible to every authenticated user
+      if (module === 'announcements') return true
       if (state.isSuperAdmin) return true
       if (state.allowedModules.includes(module)) return true
 

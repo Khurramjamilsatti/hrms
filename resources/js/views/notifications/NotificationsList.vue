@@ -159,7 +159,7 @@
                       {{ formatType(item.type) }}
                     </span>
                     <span>{{ relativeTime(item.created_at) }}</span>
-                    <span v-if="item.action_url" class="font-semibold text-accent">Open →</span>
+                    <span v-if="hasNotificationTarget(item)" class="font-semibold text-accent">Open →</span>
                   </div>
                 </div>
                 <span
@@ -212,6 +212,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Pagination from '@/components/Pagination.vue';
 import { useDialog } from '@/composables/useDialog';
+import { hasNotificationTarget, resolveNotificationTarget } from '@/utils/notificationTarget';
 
 const router = useRouter();
 const { confirm, alert } = useDialog();
@@ -389,14 +390,15 @@ async function markAsRead(item) {
 
 async function openNotification(item) {
   await markAsRead(item);
-  if (item.action_url) {
-    const url = String(item.action_url);
-    if (url.startsWith('http')) {
-      window.location.href = url;
-    } else {
-      router.push(url.startsWith('/') ? url : `/${url}`);
-    }
+  const target = resolveNotificationTarget(item);
+  if (!target) return;
+
+  if (/^https?:\/\//i.test(target)) {
+    window.location.href = target;
+    return;
   }
+
+  router.push(target);
 }
 
 async function markAllAsRead() {

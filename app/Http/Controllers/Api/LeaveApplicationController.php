@@ -98,7 +98,7 @@ class LeaveApplicationController extends Controller
                 'type' => 'leave_request',
                 'title' => 'New Leave Request',
                 'message' => "{$employee->full_name} has submitted a leave request for {$validated['total_days']} day(s)",
-                'action_url' => '/leaves',
+                'action_url' => '/leaves?id=' . $leaveApplication->id,
                 'data' => [
                     'leave_application_id' => $leaveApplication->id,
                     'employee_id' => $employee->id,

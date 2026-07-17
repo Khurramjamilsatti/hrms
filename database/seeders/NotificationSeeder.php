@@ -33,19 +33,33 @@ class NotificationSeeder extends Seeder
             for ($i = 0; $i < $notificationsToCreate; $i++) {
                 $notifData = $notificationTypes[array_rand($notificationTypes)];
                 $createdAt = now()->subDays(rand(1, 30))->subHours(rand(0, 23));
-                
+
+                $typeToRoute = [
+                    'leave_approved' => ['/leaves', 'leave'],
+                    'leave_rejected' => ['/leaves', 'leave'],
+                    'payroll_generated' => ['/payroll', 'payroll'],
+                    'timesheet_reminder' => ['/timesheets', 'timesheet'],
+                    'training_enrolled' => ['/training', 'training'],
+                    'shift_assigned' => ['/shifts', 'shift'],
+                    'document_uploaded' => ['/files', 'document'],
+                    'ticket_resolved' => ['/helpdesk', 'ticket'],
+                    'expense_approved' => ['/travel-expenses', 'expense'],
+                    'meeting_reminder' => ['/calendar', 'meeting'],
+                ];
+                [$actionUrl, $resourceType] = $typeToRoute[$notifData['type']] ?? ['/dashboard', 'general'];
+
                 Notification::create([
                     'user_id' => $user->id,
                     'type' => $notifData['type'],
                     'title' => $notifData['title'],
                     'message' => $notifData['message'],
                     'priority' => $notifData['priority'],
-                    'data' => json_encode([
+                    'data' => [
                         'action' => 'view_details',
                         'resource_id' => rand(1, 100),
-                        'resource_type' => ['leave', 'payroll', 'timesheet', 'training', 'expense'][array_rand(['leave', 'payroll', 'timesheet', 'training', 'expense'])]
-                    ]),
-                    'action_url' => ['/', '/leaves', '/payroll', '/timesheets', '/travel-expenses'][array_rand(['/', '/leaves', '/payroll', '/timesheets', '/travel-expenses'])],
+                        'resource_type' => $resourceType,
+                    ],
+                    'action_url' => $actionUrl,
                     'is_read' => rand(0, 10) > 6, // 60-70% unread
                     'read_at' => rand(0, 10) > 6 ? now()->subDays(rand(0, 5)) : null,
                     'created_at' => $createdAt,

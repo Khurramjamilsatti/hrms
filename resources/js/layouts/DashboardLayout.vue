@@ -285,6 +285,7 @@ import { usePermissionStore } from '@/stores/permission';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import AppLogo from '@/components/AppLogo.vue';
 import { HRMS_LOGIN_PATH } from '@/config/authPaths';
+import { resolveNotificationTarget } from '@/utils/notificationTarget';
 import axios from 'axios';
 
 const router = useRouter();
@@ -480,10 +481,16 @@ const handleNotificationClick = async (notification) => {
     notification.is_read = true;
     unreadCount.value = Math.max(0, unreadCount.value - 1);
     showNotifications.value = false;
-    
-    if (notification.action_url) {
-      router.push(notification.action_url);
+
+    const target = resolveNotificationTarget(notification);
+    if (!target) return;
+
+    if (/^https?:\/\//i.test(target)) {
+      window.location.href = target;
+      return;
     }
+
+    router.push(target);
   } catch (error) {
     console.error('Failed to mark notification as read:', error);
   }

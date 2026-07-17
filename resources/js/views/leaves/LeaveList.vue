@@ -111,7 +111,13 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="leave in leaves" :key="leave.id" class="hover:bg-gray-50 transition-colors">
+            <tr
+              v-for="leave in leaves"
+              :key="leave.id"
+              :id="`leave-${leave.id}`"
+              class="hover:bg-gray-50 transition-colors"
+              :class="{ 'bg-accent-soft/50 ring-2 ring-inset ring-accent': highlightedLeaveId === leave.id }"
+            >
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
                   <div class="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center">
@@ -285,7 +291,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
+import { useRoute } from 'vue-router';
 import { usePermissions } from '@/composables/usePermissions';
 import { useNotification } from '@/composables/useNotification';
 import { useDialog } from '@/composables/useDialog';
@@ -293,6 +300,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useEmployeeRecordPicker } from '@/composables/useEmployeeRecordPicker';
 import axios from 'axios';
 
+const route = useRoute();
 const { can } = usePermissions();
 const { success, error: showError } = useNotification();
 const { confirm } = useDialog();
@@ -315,6 +323,7 @@ const selectedLeave = ref(null);
 const rejectRemarks = ref('');
 const submitting = ref(false);
 const formError = ref(null);
+const highlightedLeaveId = ref(null);
 
 const user = computed(() => authStore.user || JSON.parse(localStorage.getItem('user') || '{}'));
 const role = computed(() => user.value?.role || '');
@@ -350,10 +359,22 @@ const loadLeaves = async (page = 1) => {
     const response = await axios.get('/leave-applications', { params });
     leaves.value = response.data.data || [];
     pagination.value = { current_page: response.data.current_page, last_page: response.data.last_page, per_page: response.data.per_page, total: response.data.total };
+    await focusHighlightedLeave();
   } catch (err) {
     error.value = 'Failed to load leave applications';
   } finally {
     loading.value = false;
+  }
+};
+
+const focusHighlightedLeave = async () => {
+  const rawId = route.query.id;
+  if (!rawId) return;
+  highlightedLeaveId.value = Number(rawId) || rawId;
+  await nextTick();
+  const el = document.getElementById(`leave-${highlightedLeaveId.value}`);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 };
 

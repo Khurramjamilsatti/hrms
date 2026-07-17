@@ -192,7 +192,7 @@ const routes = [
         path: 'timesheets/projects',
         name: 'Projects',
         component: () => import('@/views/timesheets/ProjectList.vue'),
-        meta: { module: 'timesheets' }
+        meta: { module: 'timesheets', permissions: ['timesheets.manage', 'timesheets.projects'] }
       },
       // Onboarding
       {

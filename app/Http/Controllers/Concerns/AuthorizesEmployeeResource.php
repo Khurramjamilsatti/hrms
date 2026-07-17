@@ -57,6 +57,11 @@ trait AuthorizesEmployeeResource
                 'approve' => ['timesheets.approve'],
                 'view_all' => [],
             ],
+            'shifts' => [
+                'manage' => ['shifts.manage', 'shifts.create'],
+                'approve' => ['shifts.assign'],
+                'view_all' => [],
+            ],
             'files' => [
                 'manage' => ['files.manage'],
                 'approve' => [],

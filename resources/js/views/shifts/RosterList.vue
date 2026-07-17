@@ -14,6 +14,7 @@
           My Schedule
         </button>
         <button
+          v-if="canManageShifts"
           type="button"
           @click="$router.push('/shifts')"
           class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -21,6 +22,7 @@
           Manage Shifts
         </button>
         <button
+          v-if="can('shifts.create') || can('shifts.manage')"
           type="button"
           @click="openCreate"
           class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
@@ -70,7 +72,12 @@
       </div>
       <h3 class="text-lg font-semibold text-gray-900">No rosters yet</h3>
       <p class="text-sm text-gray-500 mt-1 mb-5">Create a roster to start assigning employee shifts.</p>
-      <button type="button" @click="openCreate" class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800">
+      <button
+        v-if="can('shifts.create') || can('shifts.manage')"
+        type="button"
+        @click="openCreate"
+        class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
+      >
         Create Roster
       </button>
     </div>
@@ -111,6 +118,7 @@
 
         <div class="flex flex-wrap gap-2 mt-5 pt-4 border-t border-gray-100">
           <button
+            v-if="can('shifts.update')"
             type="button"
             @click="editRoster(roster)"
             class="px-3 py-2 text-sm font-medium text-gray-800 bg-gray-100 rounded-lg hover:bg-gray-200"
@@ -118,7 +126,7 @@
             Edit
           </button>
           <button
-            v-if="!isPublished(roster)"
+            v-if="!isPublished(roster) && can('shifts.manage')"
             type="button"
             @click="publishRoster(roster)"
             class="px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800"
@@ -177,9 +185,16 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useDialog } from '@/composables/useDialog';
 import { useNotification } from '@/composables/useNotification';
+import { usePermissions } from '@/composables/usePermissions';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const { confirm } = useDialog();
 const { success, error: showError } = useNotification();
+const { can, canAny } = usePermissions();
+const canManageShifts = computed(() =>
+  canAny(['shifts.assign', 'shifts.manage', 'shifts.create', 'shifts.update', 'shifts.delete'])
+);
 
 const rosters = ref([]);
 const departments = ref([]);
@@ -312,6 +327,10 @@ const formatDate = (date) =>
   date ? new Date(date).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
 
 onMounted(async () => {
+  if (!canManageShifts.value) {
+    router.replace('/shifts/my');
+    return;
+  }
   await Promise.all([fetchRosters(), fetchDepartments()]);
 });
 </script>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\ShiftRoster;
 use App\Models\ShiftAssignment;
@@ -10,6 +11,8 @@ use Illuminate\Http\Request;
 
 class ShiftSchedulingController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     // Rosters
     public function getRosters(Request $request)
     {
@@ -82,11 +85,14 @@ class ShiftSchedulingController extends Controller
     {
         $query = ShiftAssignment::with(['roster', 'employee', 'shift']);
 
+        $this->scopeToAccessibleEmployees($query, $request, 'shifts');
+
         if ($request->filled('roster_id')) {
             $query->where('roster_id', $request->roster_id);
         }
 
         if ($request->filled('employee_id')) {
+            $this->assertCanAccessEmployeeRecord($request, (int) $request->employee_id);
             $query->where('employee_id', $request->employee_id);
         }
 
@@ -120,6 +126,8 @@ class ShiftSchedulingController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        $this->assertCanAccessEmployeeRecord($request, (int) $validated['employee_id'], 'shifts');
+
         $assignment = ShiftAssignment::create($validated);
         return response()->json($assignment->load(['roster', 'employee', 'shift']), 201);
     }
@@ -139,6 +147,7 @@ class ShiftSchedulingController extends Controller
 
         $created = [];
         foreach ($validated['assignments'] as $assignment) {
+            $this->assertCanAccessEmployeeRecord($request, (int) $assignment['employee_id'], 'shifts');
             $assignment['roster_id'] = $validated['roster_id'];
             $created[] = ShiftAssignment::create($assignment);
         }
@@ -149,6 +158,7 @@ class ShiftSchedulingController extends Controller
     public function updateAssignment(Request $request, $id)
     {
         $assignment = ShiftAssignment::findOrFail($id);
+        $this->assertCanAccessEmployeeRecord($request, (int) $assignment->employee_id, 'shifts');
         
         $validated = $request->validate([
             'shift_id' => 'sometimes|exists:shifts,id',
@@ -162,9 +172,10 @@ class ShiftSchedulingController extends Controller
         return response()->json($assignment->load(['roster', 'employee', 'shift']));
     }
 
-    public function deleteAssignment($id)
+    public function deleteAssignment(Request $request, $id)
     {
         $assignment = ShiftAssignment::findOrFail($id);
+        $this->assertCanAccessEmployeeRecord($request, (int) $assignment->employee_id, 'shifts');
         $assignment->delete();
         return response()->json(['message' => 'Shift assignment deleted successfully']);
     }
@@ -188,6 +199,15 @@ class ShiftSchedulingController extends Controller
             $query->where(function ($q) use ($employeeId) {
                 $q->where('requester_id', $employeeId)
                     ->orWhere('swapper_id', $employeeId);
+            });
+        } elseif ($request->user()->hasRole('manager') || $request->user()->hasRole('section_head')) {
+            $ids = $this->accessibleEmployeeIds($request->user());
+            if (empty($ids)) {
+                return response()->json(['data' => []]);
+            }
+            $query->where(function ($q) use ($ids) {
+                $q->whereIn('requester_id', $ids)
+                    ->orWhereIn('swapper_id', $ids);
             });
         }
 

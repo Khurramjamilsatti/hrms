@@ -326,7 +326,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'timesheets.view', 'timesheets.create', 'timesheets.update', 'timesheets.submit', 'timesheets.approve',
                     'training.view',
                     'travel.view', 'travel.create', 'travel.update', 'travel.submit', 'travel.approve', 'travel.expense',
-                    'shifts.view',
+                    'shifts.view', 'shifts.assign',
                     'helpdesk.view', 'helpdesk.create',
                     'files.view', 'files.create', 'files.upload',
                     'calendar.view',

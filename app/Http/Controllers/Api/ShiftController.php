@@ -174,18 +174,20 @@ class ShiftController extends Controller
     /**
      * Get all employees assigned to a specific shift.
      */
-    public function getAssignedEmployees($shiftId)
+    public function getAssignedEmployees(Request $request, $shiftId)
     {
         $shift = Shift::findOrFail($shiftId);
         
-        $assignments = EmployeeShift::with(['employee.department', 'employee.designation'])
+        $query = EmployeeShift::with(['employee.department', 'employee.designation'])
             ->where('shift_id', $shiftId)
-            ->where(function($query) {
-                $query->whereNull('effective_to')
-                      ->orWhere('effective_to', '>=', now());
-            })
-            ->latest()
-            ->paginate(50);
+            ->where(function($q) {
+                $q->whereNull('effective_to')
+                  ->orWhere('effective_to', '>=', now());
+            });
+
+        $this->scopeToAccessibleEmployees($query, $request, 'shifts');
+
+        $assignments = $query->latest()->paginate(50);
 
         return response()->json($assignments);
     }
@@ -260,6 +262,10 @@ class ShiftController extends Controller
             'effective_to' => 'nullable|date|after:effective_from',
         ]);
 
+        foreach ($validated['employee_ids'] as $employeeId) {
+            $this->assertCanAccessEmployeeRecord($request, (int) $employeeId);
+        }
+
         $assignments = [];
         $conflicts = [];
         $errors = [];
@@ -312,11 +318,13 @@ class ShiftController extends Controller
     /**
      * Remove an employee from a shift.
      */
-    public function removeEmployeeAssignment($shiftId, $assignmentId)
+    public function removeEmployeeAssignment(Request $request, $shiftId, $assignmentId)
     {
         $assignment = EmployeeShift::where('shift_id', $shiftId)
             ->where('id', $assignmentId)
             ->firstOrFail();
+
+        $this->assertCanAccessEmployeeRecord($request, (int) $assignment->employee_id);
 
         $assignment->delete();
 
@@ -333,6 +341,8 @@ class ShiftController extends Controller
         $assignment = EmployeeShift::where('shift_id', $shiftId)
             ->where('id', $assignmentId)
             ->firstOrFail();
+
+        $this->assertCanAccessEmployeeRecord($request, (int) $assignment->employee_id);
 
         $validated = $request->validate([
             'effective_from' => 'sometimes|date',

@@ -216,9 +216,11 @@ import { ref, computed, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useNotification } from '@/composables/useNotification';
+import { usePermissions } from '@/composables/usePermissions';
 
 const authStore = useAuthStore();
 const { error: showError, success } = useNotification();
+const { canAny } = usePermissions();
 
 const shifts = ref([]);
 const swapRequests = ref([]);
@@ -229,7 +231,7 @@ const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const employeeId = computed(() => authStore.user?.employee?.id || authStore.user?.employee_id || null);
 const canManage = computed(() =>
-  ['admin', 'super_admin', 'hr_admin', 'manager', 'section_head'].includes(authStore.user?.role)
+  canAny(['shifts.assign', 'shifts.manage', 'shifts.create', 'shifts.update', 'shifts.delete'])
 );
 
 const monthLabel = computed(() => {

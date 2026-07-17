@@ -362,7 +362,7 @@ const pageTitle = computed(() => {
   ];
 
   return allMenuItems.filter((item) => {
-    if (['dashboard', 'profile'].includes(item.name)) {
+    if (['dashboard', 'profile', 'announcements'].includes(item.name)) {
       return true;
     }
 
@@ -379,6 +379,15 @@ const pageTitle = computed(() => {
     }
 
     return true;
+  }).map((item) => {
+    // Employees (view-only) land on personal schedule; managers/HR land on management
+    if (item.name === 'shifts') {
+      const canManageShifts = permissionStore.hasAnyPermission([
+        'shifts.assign', 'shifts.manage', 'shifts.create', 'shifts.update', 'shifts.delete',
+      ]);
+      return { ...item, path: canManageShifts ? '/shifts' : '/shifts/my' };
+    }
+    return item;
   });
 });
 

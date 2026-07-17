@@ -11,7 +11,7 @@
         <h1 class="text-2xl font-bold text-gray-900">Employee Details</h1>
       </div>
       <div v-if="employee" class="flex items-center gap-2">
-        <router-link v-if="isAdminOrManager" :to="`/employees/${employee.id}/salary`"
+        <router-link v-if="canManageSalary" :to="`/employees/${employee.id}/salary`"
           class="inline-flex items-center px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -512,7 +512,17 @@ const docForm = ref({
 });
 
 const user = JSON.parse(localStorage.getItem('user') || '{}');
-const isAdminOrManager = computed(() => user.role === 'admin' || user.role === 'manager');
+const isViewingSelf = computed(() => {
+  if (!employee.value) return false;
+  if (employee.value.user_id && user.id) return Number(employee.value.user_id) === Number(user.id);
+  return Number(employee.value.id) === Number(user.employee?.id);
+});
+// Admins/HR manage anyone's salary; managers only their own — never teammates'
+const canManageSalary = computed(() => {
+  if (['admin', 'hr_admin', 'super_admin'].includes(user.role)) return true;
+  if (user.role === 'manager') return isViewingSelf.value;
+  return false;
+});
 
 const initials = computed(() => {
   if (!employee.value) return '';

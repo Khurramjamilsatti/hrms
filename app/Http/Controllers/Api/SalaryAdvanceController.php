@@ -34,15 +34,18 @@ class SalaryAdvanceController extends Controller
         // Search
         if ($request->has('search')) {
             $search = $request->search;
-            $query->whereHas('employee', function($q) use ($search) {
-                $q->where('first_name', 'ilike', "%{$search}%")
-                  ->orWhere('last_name', 'ilike', "%{$search}%")
-                  ->orWhere('employee_code', 'ilike', "%{$search}%")
-                  ->orWhereHas('user', function($userQuery) use ($search) {
-                      $userQuery->where('email', 'ilike', "%{$search}%")
-                                ->orWhere('name', 'ilike', "%{$search}%");
-                  });
-            })->orWhere('request_number', 'ilike', "%{$search}%");
+            // Group the search conditions so they don't bypass employee scoping
+            $query->where(function ($outer) use ($search) {
+                $outer->whereHas('employee', function ($q) use ($search) {
+                    $q->where('first_name', 'ilike', "%{$search}%")
+                      ->orWhere('last_name', 'ilike', "%{$search}%")
+                      ->orWhere('employee_code', 'ilike', "%{$search}%")
+                      ->orWhereHas('user', function ($userQuery) use ($search) {
+                          $userQuery->where('email', 'ilike', "%{$search}%")
+                                    ->orWhere('name', 'ilike', "%{$search}%");
+                      });
+                })->orWhere('request_number', 'ilike', "%{$search}%");
+            });
         }
 
         $advances = $query->orderBy('created_at', 'desc')->paginate(20);

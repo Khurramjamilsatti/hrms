@@ -140,9 +140,7 @@ class TravelExpenseController extends Controller
     {
         $query = ExpenseClaim::with(['employee', 'travelRequest', 'category', 'approver']);
 
-        if ($request->user()->role === 'employee') {
-            $query->where('employee_id', $request->user()->employee->id);
-        }
+        $this->scopeToAccessibleEmployees($query, $request, 'travel');
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -258,12 +256,7 @@ class TravelExpenseController extends Controller
                     ->orWhereNull('advance_type');
             });
 
-        if ($request->user()->role === 'employee') {
-            if (!$request->user()->employee) {
-                return response()->json(['data' => []]);
-            }
-            $query->where('employee_id', $request->user()->employee->id);
-        }
+        $this->scopeToAccessibleEmployees($query, $request, 'travel');
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -349,9 +342,7 @@ class TravelExpenseController extends Controller
     {
         $query = MileageClaim::with(['employee', 'approver']);
 
-        if ($request->user()->role === 'employee') {
-            $query->where('employee_id', $request->user()->employee->id);
-        }
+        $this->scopeToAccessibleEmployees($query, $request, 'travel');
 
         if ($request->has('status')) {
             $query->where('status', $request->status);

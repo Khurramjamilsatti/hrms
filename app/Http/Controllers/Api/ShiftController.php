@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\Shift;
 use App\Models\EmployeeShift;
@@ -10,6 +11,8 @@ use Illuminate\Validation\Rule;
 
 class ShiftController extends Controller
 {
+    use AuthorizesEmployeeResource;
+
     /**
      * Display a listing of shifts.
      */
@@ -206,6 +209,9 @@ class ShiftController extends Controller
             'effective_to' => 'nullable|date|after:effective_from',
         ]);
 
+        // Managers/section heads may only assign their own team members
+        $this->assertCanAccessEmployeeRecord($request, (int) $validated['employee_id']);
+
         // Check for conflicts
         $conflict = $this->checkShiftConflict(
             $validated['employee_id'],
@@ -390,6 +396,9 @@ class ShiftController extends Controller
                     });
                 });
             });
+
+        // Managers/section heads only see their own team when assigning shifts
+        $this->scopeAccessibleEmployeesList($query, $request);
 
         if ($request->has('search') && $request->search) {
             $search = $request->search;

@@ -209,6 +209,12 @@ const routes = [
         meta: { module: 'employees' }
       },
       {
+        path: 'notifications',
+        name: 'Notifications',
+        component: () => import('@/views/notifications/NotificationsList.vue'),
+        meta: { module: 'notifications' }
+      },
+      {
         path: 'overtime',
         name: 'Overtime',
         component: () => import('@/views/overtime/OvertimeList.vue'),
@@ -409,8 +415,13 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.module && isAuthenticated) {
     const module = to.meta.module;
     
-    // Dashboard, profile, and announcements are always accessible
-    if (module === 'dashboard' || module === 'announcements' || (module === 'employees' && to.name === 'Profile')) {
+    // Dashboard, profile, notifications, and announcements are always accessible
+    if (
+      module === 'dashboard' ||
+      module === 'announcements' ||
+      module === 'notifications' ||
+      (module === 'employees' && to.name === 'Profile')
+    ) {
       return next();
     }
 

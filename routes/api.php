@@ -557,12 +557,12 @@ Route::middleware(['auth:sanctum', 'hrms'])->group(function () {
     Route::prefix('notifications')->group(function () {
         Route::get('/', [NotificationController::class, 'getNotifications']);
         Route::get('/unread-count', [NotificationController::class, 'getUnreadCount']);
-        Route::post('/{notification}/mark-read', [NotificationController::class, 'markAsRead']);
         Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
-        Route::delete('/{notification}', [NotificationController::class, 'deleteNotification']);
         Route::delete('/clear-all', [NotificationController::class, 'clearAll']);
         Route::get('/preferences', [NotificationController::class, 'getPreferences']);
         Route::post('/preferences', [NotificationController::class, 'updatePreferences']);
+        Route::post('/{notification}/mark-read', [NotificationController::class, 'markAsRead']);
+        Route::delete('/{notification}', [NotificationController::class, 'deleteNotification']);
     });
 
     // Organization Chart & Directory - Permission-based access

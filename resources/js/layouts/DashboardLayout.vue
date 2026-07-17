@@ -204,35 +204,55 @@
               </button>
               
               <!-- Notifications Dropdown -->
-              <div v-if="showNotifications" class="absolute right-0 mt-2 w-80 bg-surface-card rounded-xl shadow-soft border border-surface-border max-h-96 overflow-hidden z-50">
-                <div class="p-4 border-b border-surface-border bg-surface-muted">
-                  <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-ink text-sm">Notifications</h3>
-                    <button @click="markAllAsRead" class="text-xs text-accent hover:text-accent-dark font-semibold">Mark all read</button>
+              <div v-if="showNotifications" class="absolute right-0 mt-2 w-[22rem] overflow-hidden rounded-2xl border border-surface-border bg-surface-card shadow-soft z-50">
+                <div class="flex items-center justify-between border-b border-surface-border bg-surface-muted px-4 py-3">
+                  <div>
+                    <h3 class="text-sm font-bold text-ink">Notifications</h3>
+                    <p class="text-[11px] text-ink-muted">{{ unreadCount }} unread</p>
                   </div>
+                  <button
+                    type="button"
+                    class="text-xs font-semibold text-accent hover:text-accent-dark disabled:opacity-40"
+                    :disabled="!unreadCount"
+                    @click="markAllAsRead"
+                  >
+                    Mark all read
+                  </button>
                 </div>
-                <div class="overflow-y-auto max-h-80">
-                  <div v-if="notifications.length === 0" class="p-8 text-center text-ink-muted text-sm">
-                    No notifications
+                <div class="max-h-80 overflow-y-auto">
+                  <div v-if="notifications.length === 0" class="px-6 py-10 text-center">
+                    <p class="text-sm font-medium text-ink">You're all caught up</p>
+                    <p class="mt-1 text-xs text-ink-muted">No unread notifications</p>
                   </div>
-                  <div v-else>
-                    <div
-                      v-for="notification in notifications.slice(0, 10)"
-                      :key="notification.id"
-                      @click="handleNotificationClick(notification)"
-                      class="p-4 border-b border-surface-border hover:bg-surface-muted cursor-pointer transition-colors"
-                      :class="{ 'bg-surface-muted': !notification.is_read }"
-                    >
-                      <div class="flex justify-between items-start mb-1">
-                        <p class="text-sm font-semibold text-ink">{{ notification.title }}</p>
-                        <span class="text-xs text-ink-muted">{{ formatDate(notification.created_at) }}</span>
-                      </div>
-                      <p class="text-xs text-ink-soft">{{ notification.message }}</p>
-                    </div>
-                  </div>
+                  <button
+                    v-for="notification in notifications.slice(0, 8)"
+                    :key="notification.id"
+                    type="button"
+                    class="flex w-full gap-3 border-b border-surface-border px-4 py-3 text-left transition hover:bg-surface-muted"
+                    :class="{ 'bg-accent-soft/40': !notification.is_read }"
+                    @click="handleNotificationClick(notification)"
+                  >
+                    <span
+                      class="mt-1.5 h-2 w-2 shrink-0 rounded-full"
+                      :class="notification.is_read ? 'bg-transparent' : 'bg-accent'"
+                    />
+                    <span class="min-w-0 flex-1">
+                      <span class="flex items-start justify-between gap-2">
+                        <span class="text-sm font-semibold text-ink" :class="{ 'font-bold': !notification.is_read }">
+                          {{ notification.title }}
+                        </span>
+                        <span class="shrink-0 text-[11px] text-ink-muted">{{ formatDate(notification.created_at) }}</span>
+                      </span>
+                      <span class="mt-0.5 line-clamp-2 text-xs text-ink-soft">{{ notification.message }}</span>
+                    </span>
+                  </button>
                 </div>
-                <div class="p-3 border-t border-surface-border bg-surface-muted">
-                  <router-link to="/notifications" class="block text-center text-sm text-accent hover:text-accent-dark font-semibold">
+                <div class="border-t border-surface-border bg-surface-muted p-3">
+                  <router-link
+                    to="/notifications"
+                    class="block rounded-lg py-2 text-center text-sm font-semibold text-accent transition hover:bg-white hover:text-accent-dark"
+                    @click="showNotifications = false"
+                  >
                     View all notifications
                   </router-link>
                 </div>
@@ -323,6 +343,7 @@ const pageTitle = computed(() => {
     '/calendar': 'Calendar',
     '/organization': 'Organization',
     '/profile': 'My Profile',
+    '/notifications': 'Notifications',
     '/admin/roles': 'Roles & Permissions',
     '/admin/user-roles': 'User Role Management',
   };
@@ -447,7 +468,7 @@ const fetchNotifications = async () => {
     const response = await axios.get('/notifications?is_read=false');
     notifications.value = response.data.data || response.data;
     const countResponse = await axios.get('/notifications/unread-count');
-    unreadCount.value = countResponse.data.count || 0;
+    unreadCount.value = countResponse.data.unread_count ?? countResponse.data.count ?? 0;
   } catch (error) {
     console.error('Failed to fetch notifications:', error);
   }

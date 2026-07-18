@@ -13,9 +13,8 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * Minimal dataset so CI feature tests have admin + employee + foreign records.
- */
+// seeder
+ 
 class CiSeeder extends Seeder
 {
     public function run(): void

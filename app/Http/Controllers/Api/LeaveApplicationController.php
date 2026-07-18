@@ -7,8 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\LeaveApplication;
 use App\Models\Employee;
 use App\Models\EmployeeLeaveBalance;
-use App\Models\Notification;
 use App\Models\User;
+use App\Services\NotificationService;
 use App\Services\PayrollGenerationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -17,8 +17,10 @@ class LeaveApplicationController extends Controller
 {
     use AuthorizesEmployeeResource;
 
-    public function __construct(protected PayrollGenerationService $payrollService)
-    {
+    public function __construct(
+        protected PayrollGenerationService $payrollService,
+        protected NotificationService $notifier
+    ) {
     }
 
     public function index(Request $request)
@@ -89,27 +91,45 @@ class LeaveApplicationController extends Controller
 
         $leaveApplication = LeaveApplication::create($validated);
 
-        // Create notification for assigned section head (employee or department)
+        // Notify approvers: assigned section head plus HR/admin (in-app + push)
         $employee = Employee::with(['user', 'department'])->find($validated['employee_id']);
-        $approverUserId = $employee ? $this->leaveSectionHeadApproverId($employee) : null;
-        if ($approverUserId) {
-            Notification::create([
-                'user_id' => $approverUserId,
-                'type' => 'leave_request',
-                'title' => 'New Leave Request',
-                'message' => "{$employee->full_name} has submitted a leave request for {$validated['total_days']} day(s)",
-                'action_url' => '/leaves?id=' . $leaveApplication->id,
-                'data' => [
-                    'leave_application_id' => $leaveApplication->id,
-                    'employee_id' => $employee->id,
-                    'employee_name' => $employee->full_name,
-                    'start_date' => $validated['start_date'],
-                    'end_date' => $validated['end_date'],
-                    'total_days' => $validated['total_days'],
-                ],
-                'priority' => 'normal',
-                'is_read' => false,
-            ]);
+        if ($employee) {
+            $leaveData = [
+                'leave_application_id' => $leaveApplication->id,
+                'employee_id' => $employee->id,
+                'employee_name' => $employee->full_name,
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'],
+                'total_days' => $validated['total_days'],
+            ];
+
+            $approverUserId = $this->leaveSectionHeadApproverId($employee);
+            $approverIds = array_filter([$approverUserId]);
+            $approverIds = array_merge($approverIds, User::whereIn('role', ['hr_admin', 'super_admin', 'admin'])
+                ->where('is_active', true)
+                ->pluck('id')
+                ->all());
+
+            $this->notifier->notifyUsers(
+                array_diff($approverIds, [$user->id]),
+                'leave_request',
+                'New Leave Request',
+                "{$employee->full_name} has submitted a leave request for {$validated['total_days']} day(s)",
+                $leaveData,
+                '/leaves?id=' . $leaveApplication->id
+            );
+
+            // Confirmation to the employee when someone applied on their behalf
+            if ($employee->user_id && $employee->user_id !== $user->id) {
+                $this->notifier->notifyUser(
+                    $employee->user_id,
+                    'leave_request',
+                    'Leave Request Submitted',
+                    "A leave request for {$validated['total_days']} day(s) was submitted on your behalf",
+                    $leaveData,
+                    '/leaves?id=' . $leaveApplication->id
+                );
+            }
         }
 
         return response()->json($leaveApplication->load(['employee.user', 'employee.department', 'leaveType']), 201);
@@ -153,6 +173,30 @@ class LeaveApplicationController extends Controller
                 'first_approved_at' => now(),
                 'first_approval_remarks' => $validated['approval_remarks'] ?? null,
             ]);
+
+            $leaveData = $this->leaveNotificationData($leaveApplication, $employee);
+
+            // Tell the employee their request moved forward
+            $this->notifier->notifyUser(
+                $employee->user_id,
+                'leave_approved',
+                'Leave Approved by Section Head',
+                "Your leave request for {$leaveApplication->total_days} day(s) was approved at first level and is pending final approval",
+                $leaveData,
+                '/leaves?id=' . $leaveApplication->id
+            );
+
+            // Tell final approvers it needs their action
+            $this->notifier->notifyRoles(
+                ['hr_admin', 'super_admin', 'admin'],
+                'leave_request',
+                'Leave Pending Final Approval',
+                "{$employee->full_name}'s leave request ({$leaveApplication->total_days} day(s)) was approved by the section head and awaits final approval",
+                $leaveData,
+                '/leaves?id=' . $leaveApplication->id,
+                'normal',
+                [$user->id]
+            );
 
             return response()->json([
                 'message' => 'Leave approved at first level. Pending admin approval.',
@@ -222,6 +266,16 @@ class LeaveApplicationController extends Controller
         } else {
             return response()->json(['message' => 'Unauthorized to reject this leave'], 403);
         }
+
+        $this->notifier->notifyUser(
+            $employee->user_id,
+            'leave_rejected',
+            'Leave Request Rejected',
+            "Your leave request for {$leaveApplication->total_days} day(s) was rejected" . ($remarks ? ": {$remarks}" : ''),
+            $this->leaveNotificationData($leaveApplication, $employee),
+            '/leaves?id=' . $leaveApplication->id,
+            'high'
+        );
 
         return response()->json($leaveApplication->load(['employee.user', 'employee.department', 'leaveType', 'firstApprover', 'finalApprover']));
     }
@@ -312,9 +366,34 @@ class LeaveApplicationController extends Controller
 
         $this->payrollService->syncLeaveToAttendance($leaveApplication);
 
+        $employee = $leaveApplication->employee;
+        if ($employee) {
+            $this->notifier->notifyUser(
+                $employee->user_id,
+                'leave_approved',
+                'Leave Approved',
+                "Your leave request for {$leaveApplication->total_days} day(s) has been approved",
+                $this->leaveNotificationData($leaveApplication, $employee),
+                '/leaves?id=' . $leaveApplication->id
+            );
+        }
+
         return response()->json([
             'message' => 'Leave approved successfully',
             'leave' => $leaveApplication->load(['employee.user', 'employee.department', 'leaveType', 'firstApprover', 'finalApprover'])
         ]);
+    }
+
+    private function leaveNotificationData(LeaveApplication $leaveApplication, Employee $employee): array
+    {
+        return [
+            'leave_application_id' => $leaveApplication->id,
+            'employee_id' => $employee->id,
+            'employee_name' => $employee->full_name,
+            'start_date' => (string) $leaveApplication->start_date,
+            'end_date' => (string) $leaveApplication->end_date,
+            'total_days' => $leaveApplication->total_days,
+            'status' => $leaveApplication->status,
+        ];
     }
 }

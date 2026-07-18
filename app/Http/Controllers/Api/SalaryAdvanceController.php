@@ -6,12 +6,28 @@ use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\AdvanceRequest;
 use App\Models\Employee;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class SalaryAdvanceController extends Controller
 {
     use AuthorizesEmployeeResource;
+
+    public function __construct(protected NotificationService $notifier)
+    {
+    }
+
+    private function advanceNotificationData(AdvanceRequest $advance): array
+    {
+        return [
+            'advance_request_id' => $advance->id,
+            'request_number' => $advance->request_number,
+            'amount' => $advance->amount,
+            'advance_type' => $advance->advance_type,
+            'status' => $advance->status,
+        ];
+    }
 
     public function index(Request $request)
     {
@@ -90,6 +106,33 @@ class SalaryAdvanceController extends Controller
 
         $advance = AdvanceRequest::create($validated);
 
+        $employee->loadMissing('user');
+        $amountLabel = number_format((float) $advance->amount);
+
+        // Notify approvers (HR/admin)
+        $this->notifier->notifyRoles(
+            ['hr_admin', 'super_admin', 'admin'],
+            'salary_advance_request',
+            'New Salary Advance Request',
+            "{$employee->full_name} has requested a salary advance of {$amountLabel} ({$advance->request_number})",
+            $this->advanceNotificationData($advance) + ['employee_name' => $employee->full_name],
+            '/salary-advances?id=' . $advance->id,
+            'normal',
+            [$request->user()->id]
+        );
+
+        // Confirm to the employee
+        if ($employee->user_id && $employee->user_id !== $request->user()->id) {
+            $this->notifier->notifyUser(
+                $employee->user_id,
+                'salary_advance_request',
+                'Salary Advance Request Submitted',
+                "A salary advance request of {$amountLabel} ({$advance->request_number}) was submitted on your behalf",
+                $this->advanceNotificationData($advance),
+                '/salary-advances?id=' . $advance->id
+            );
+        }
+
         return response()->json([
             'message' => 'Salary advance request created successfully',
             'advance' => $advance->load(['employee.user', 'approver'])
@@ -154,6 +197,15 @@ class SalaryAdvanceController extends Controller
             'rejection_reason' => $validated['remarks'] ?? null,
         ]);
 
+        $this->notifier->notifyUser(
+            $salaryAdvance->employee?->user_id,
+            'salary_advance_approved',
+            'Salary Advance Approved',
+            "Your salary advance request {$salaryAdvance->request_number} of " . number_format((float) $salaryAdvance->amount) . ' has been approved',
+            $this->advanceNotificationData($salaryAdvance),
+            '/salary-advances?id=' . $salaryAdvance->id
+        );
+
         return response()->json([
             'message' => 'Advance request approved successfully',
             'advance' => $salaryAdvance->load(['employee.user', 'approver'])
@@ -176,6 +228,16 @@ class SalaryAdvanceController extends Controller
             'approved_at' => now(),
             'rejection_reason' => $validated['rejection_reason'],
         ]);
+
+        $this->notifier->notifyUser(
+            $salaryAdvance->employee?->user_id,
+            'salary_advance_rejected',
+            'Salary Advance Rejected',
+            "Your salary advance request {$salaryAdvance->request_number} was rejected: {$validated['rejection_reason']}",
+            $this->advanceNotificationData($salaryAdvance),
+            '/salary-advances?id=' . $salaryAdvance->id,
+            'high'
+        );
 
         return response()->json([
             'message' => 'Advance request rejected',
@@ -202,6 +264,15 @@ class SalaryAdvanceController extends Controller
             'payment_reference' => $validated['payment_reference'] ?? null,
             'first_deduction_date' => now()->addMonth()->startOfMonth(),
         ]);
+
+        $this->notifier->notifyUser(
+            $salaryAdvance->employee?->user_id,
+            'salary_advance_paid',
+            'Salary Advance Disbursed',
+            "Your salary advance {$salaryAdvance->request_number} of " . number_format((float) $salaryAdvance->amount) . ' has been paid out',
+            $this->advanceNotificationData($salaryAdvance),
+            '/salary-advances?id=' . $salaryAdvance->id
+        );
 
         return response()->json([
             'message' => 'Advance disbursed successfully',

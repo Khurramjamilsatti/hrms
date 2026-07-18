@@ -553,6 +553,10 @@ Route::middleware(['auth:sanctum', 'hrms'])->group(function () {
         Route::get('/my-events', [CalendarController::class, 'getMyEvents']);
     });
 
+    // Device tokens (mobile push registration)
+    Route::post('/device-tokens', [\App\Http\Controllers\Api\DeviceTokenController::class, 'store']);
+    Route::delete('/device-tokens', [\App\Http\Controllers\Api\DeviceTokenController::class, 'destroy']);
+
     // Notifications
     Route::prefix('notifications')->group(function () {
         Route::get('/', [NotificationController::class, 'getNotifications']);

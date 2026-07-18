@@ -25,3 +25,6 @@ npm-debug.log
 yarn-error.log
 .DS_Store
 Thumbs.db
+
+# Firebase service account (never commit)
+/storage/app/firebase.json

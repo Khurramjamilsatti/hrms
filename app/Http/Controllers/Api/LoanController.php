@@ -6,12 +6,28 @@ use App\Http\Controllers\Concerns\AuthorizesEmployeeResource;
 use App\Http\Controllers\Controller;
 use App\Models\Loan;
 use App\Models\LoanPayment;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LoanController extends Controller
 {
     use AuthorizesEmployeeResource;
+
+    public function __construct(protected NotificationService $notifier)
+    {
+    }
+
+    private function loanNotificationData(Loan $loan): array
+    {
+        return [
+            'loan_id' => $loan->id,
+            'loan_number' => $loan->loan_number,
+            'amount' => $loan->amount,
+            'loan_type' => $loan->loan_type,
+            'status' => $loan->status,
+        ];
+    }
 
     public function index(Request $request)
     {
@@ -96,6 +112,33 @@ class LoanController extends Controller
 
         $loan = Loan::create($validated);
 
+        $employee->loadMissing('user');
+        $amountLabel = number_format((float) $loan->amount);
+
+        // Notify approvers (HR/admin)
+        $this->notifier->notifyRoles(
+            ['hr_admin', 'super_admin', 'admin'],
+            'loan_request',
+            'New Loan Request',
+            "{$employee->full_name} has requested a {$loan->loan_type} loan of {$amountLabel} ({$loan->loan_number})",
+            $this->loanNotificationData($loan) + ['employee_name' => $employee->full_name],
+            "/loans/{$loan->id}",
+            'normal',
+            [$request->user()->id]
+        );
+
+        // Confirm to the employee
+        if ($employee->user_id && $employee->user_id !== $request->user()->id) {
+            $this->notifier->notifyUser(
+                $employee->user_id,
+                'loan_request',
+                'Loan Request Submitted',
+                "A loan request of {$amountLabel} ({$loan->loan_number}) was submitted on your behalf",
+                $this->loanNotificationData($loan),
+                "/loans/{$loan->id}"
+            );
+        }
+
         return response()->json([
             'message' => 'Loan request created successfully',
             'loan' => $loan->load(['employee.user', 'approver'])
@@ -164,6 +207,15 @@ class LoanController extends Controller
             'remarks' => $request->remarks,
         ]);
 
+        $this->notifier->notifyUser(
+            $loan->employee?->user_id,
+            'loan_approved',
+            'Loan Approved',
+            "Your loan request {$loan->loan_number} of " . number_format((float) $loan->amount) . ' has been approved',
+            $this->loanNotificationData($loan),
+            "/loans/{$loan->id}"
+        );
+
         return response()->json([
             'message' => 'Loan approved successfully',
             'loan' => $loan->load(['employee.user', 'approver'])
@@ -184,6 +236,16 @@ class LoanController extends Controller
             'approved_at' => now(),
             'rejection_reason' => $validated['rejection_reason'],
         ]);
+
+        $this->notifier->notifyUser(
+            $loan->employee?->user_id,
+            'loan_rejected',
+            'Loan Request Rejected',
+            "Your loan request {$loan->loan_number} was rejected: {$validated['rejection_reason']}",
+            $this->loanNotificationData($loan),
+            "/loans/{$loan->id}",
+            'high'
+        );
 
         return response()->json([
             'message' => 'Loan rejected',
@@ -206,6 +268,15 @@ class LoanController extends Controller
             'disbursed_date' => $validated['disbursed_date'],
             'payment_method' => $validated['payment_method'],
         ]);
+
+        $this->notifier->notifyUser(
+            $loan->employee?->user_id,
+            'loan_disbursed',
+            'Loan Disbursed',
+            "Your loan {$loan->loan_number} of " . number_format((float) $loan->amount) . ' has been disbursed',
+            $this->loanNotificationData($loan),
+            "/loans/{$loan->id}"
+        );
 
         return response()->json([
             'message' => 'Loan disbursed successfully',

@@ -4,10 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AnnouncementController extends Controller
 {
+    public function __construct(protected NotificationService $notifier)
+    {
+    }
     public function index(Request $request)
     {
         $query = Announcement::query();
@@ -50,6 +55,10 @@ class AnnouncementController extends Controller
             'created_by' => $request->user()->id,
         ]);
 
+        if ($announcement->is_published) {
+            $this->broadcastAnnouncement($announcement, $request->user()->id);
+        }
+
         return response()->json($announcement, 201);
     }
 
@@ -83,9 +92,32 @@ class AnnouncementController extends Controller
             $data['end_date'] = $validated['expiry_date'] ?? $validated['end_date'] ?? null;
         }
 
+        $wasPublished = (bool) $announcement->is_published;
+
         $announcement->update($data);
 
+        // Broadcast when an announcement first becomes published
+        if (!$wasPublished && $announcement->is_published) {
+            $this->broadcastAnnouncement($announcement, $request->user()->id);
+        }
+
         return response()->json($announcement);
+    }
+
+    private function broadcastAnnouncement(Announcement $announcement, int $actorUserId): void
+    {
+        $this->notifier->notifyAllUsers(
+            'announcement',
+            $announcement->title,
+            Str::limit(strip_tags($announcement->content), 180),
+            [
+                'announcement_id' => $announcement->id,
+                'priority' => $announcement->priority,
+            ],
+            '/announcements',
+            $announcement->priority === 'high' ? 'high' : 'normal',
+            [$actorUserId]
+        );
     }
 
     public function destroy(Request $request, Announcement $announcement)

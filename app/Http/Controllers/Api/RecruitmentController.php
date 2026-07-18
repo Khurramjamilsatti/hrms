@@ -7,10 +7,16 @@ use App\Models\Interview;
 use App\Models\JobApplication;
 use App\Models\JobPosition;
 use App\Models\Offer;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class RecruitmentController extends Controller
 {
+    private const RECRUITMENT_ROLES = ['hr_admin', 'super_admin', 'admin'];
+
+    public function __construct(protected NotificationService $notifier)
+    {
+    }
     // Job Positions
     public function getPositions(Request $request)
     {
@@ -137,7 +143,24 @@ class RecruitmentController extends Controller
             'status' => $validated['status'] ?? 'applied',
         ]);
 
-        return response()->json($application->load('jobPosition'), 201);
+        $application->load('jobPosition');
+
+        $this->notifier->notifyRoles(
+            self::RECRUITMENT_ROLES,
+            'recruitment_application',
+            'New Job Application',
+            "{$application->first_name} {$application->last_name} applied for {$application->jobPosition?->title}",
+            [
+                'application_id' => $application->id,
+                'position_id' => $application->job_position_id,
+                'applicant_email' => $application->email,
+            ],
+            '/recruitment',
+            'normal',
+            [$request->user()?->id]
+        );
+
+        return response()->json($application, 201);
     }
 
     /**
@@ -164,7 +187,27 @@ class RecruitmentController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        $previousStatus = $application->status;
         $application->update($validated);
+
+        if ($previousStatus !== $application->status) {
+            $application->loadMissing('jobPosition');
+            $this->notifier->notifyRoles(
+                self::RECRUITMENT_ROLES,
+                'recruitment_status',
+                'Application Status Updated',
+                "{$application->first_name} {$application->last_name} ({$application->jobPosition?->title}) moved from {$previousStatus} to {$application->status}",
+                [
+                    'application_id' => $application->id,
+                    'position_id' => $application->job_position_id,
+                    'status' => $application->status,
+                ],
+                '/recruitment',
+                'normal',
+                [$request->user()?->id]
+            );
+        }
+
         return response()->json($application);
     }
 
@@ -206,11 +249,39 @@ class RecruitmentController extends Controller
         $validated['status'] = $validated['status'] ?? 'scheduled';
 
         $interview = Interview::create($validated);
+        $interview->load(['jobApplication.jobPosition', 'interviewer']);
 
-        return response()->json(
-            $interview->load(['jobApplication.jobPosition', 'interviewer']),
-            201
+        $applicantName = trim("{$interview->jobApplication?->first_name} {$interview->jobApplication?->last_name}");
+        $scheduledAt = $interview->scheduled_at ? date('M j, Y g:i A', strtotime((string) $interview->scheduled_at)) : '';
+        $interviewData = [
+            'interview_id' => $interview->id,
+            'application_id' => $interview->job_application_id,
+            'scheduled_at' => (string) $interview->scheduled_at,
+        ];
+
+        // Notify the assigned interviewer directly
+        $this->notifier->notifyUser(
+            $interview->interviewer_id,
+            'recruitment_interview',
+            'Interview Assigned to You',
+            "You are scheduled to interview {$applicantName} for {$interview->jobApplication?->jobPosition?->title} on {$scheduledAt}",
+            $interviewData,
+            '/recruitment',
+            'high'
         );
+
+        $this->notifier->notifyRoles(
+            self::RECRUITMENT_ROLES,
+            'recruitment_interview',
+            'Interview Scheduled',
+            "Interview with {$applicantName} scheduled on {$scheduledAt}",
+            $interviewData,
+            '/recruitment',
+            'normal',
+            [$request->user()?->id, $interview->interviewer_id]
+        );
+
+        return response()->json($interview, 201);
     }
 
     public function updateInterview(Request $request, Interview $interview)
@@ -228,9 +299,38 @@ class RecruitmentController extends Controller
             'recommendation' => 'nullable|string',
         ]);
 
-        $interview->update($validated);
+        $previousStatus = $interview->status;
+        $previousSchedule = (string) $interview->scheduled_at;
 
-        return response()->json($interview->load(['jobApplication.jobPosition', 'interviewer']));
+        $interview->update($validated);
+        $interview->load(['jobApplication.jobPosition', 'interviewer']);
+
+        $statusChanged = $previousStatus !== $interview->status;
+        $rescheduled = $previousSchedule !== (string) $interview->scheduled_at;
+
+        if ($statusChanged || $rescheduled) {
+            $applicantName = trim("{$interview->jobApplication?->first_name} {$interview->jobApplication?->last_name}");
+            $scheduledAt = $interview->scheduled_at ? date('M j, Y g:i A', strtotime((string) $interview->scheduled_at)) : '';
+            $message = $rescheduled
+                ? "Interview with {$applicantName} was rescheduled to {$scheduledAt}"
+                : "Interview with {$applicantName} is now {$interview->status}";
+
+            $this->notifier->notifyUser(
+                $interview->interviewer_id !== $request->user()?->id ? $interview->interviewer_id : null,
+                'recruitment_interview',
+                'Interview Updated',
+                $message,
+                [
+                    'interview_id' => $interview->id,
+                    'application_id' => $interview->job_application_id,
+                    'status' => $interview->status,
+                    'scheduled_at' => (string) $interview->scheduled_at,
+                ],
+                '/recruitment'
+            );
+        }
+
+        return response()->json($interview);
     }
 
     // Offers
@@ -267,8 +367,26 @@ class RecruitmentController extends Controller
         $validated['status'] = $validated['status'] ?? 'sent';
 
         $offer = Offer::create($validated);
+        $offer->load(['jobApplication.jobPosition']);
 
-        return response()->json($offer->load(['jobApplication.jobPosition']), 201);
+        $applicantName = trim("{$offer->jobApplication?->first_name} {$offer->jobApplication?->last_name}");
+
+        $this->notifier->notifyRoles(
+            self::RECRUITMENT_ROLES,
+            'recruitment_offer',
+            'Job Offer Created',
+            "An offer of " . number_format((float) $offer->offered_salary) . " was extended to {$applicantName} for {$offer->jobApplication?->jobPosition?->title}",
+            [
+                'offer_id' => $offer->id,
+                'application_id' => $offer->job_application_id,
+                'status' => $offer->status,
+            ],
+            '/recruitment',
+            'normal',
+            [$request->user()?->id]
+        );
+
+        return response()->json($offer, 201);
     }
 
     public function updateOffer(Request $request, Offer $offer)
@@ -283,8 +401,29 @@ class RecruitmentController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
+        $previousStatus = $offer->status;
         $offer->update($validated);
+        $offer->load(['jobApplication.jobPosition']);
 
-        return response()->json($offer->load(['jobApplication.jobPosition']));
+        if ($previousStatus !== $offer->status) {
+            $applicantName = trim("{$offer->jobApplication?->first_name} {$offer->jobApplication?->last_name}");
+
+            $this->notifier->notifyRoles(
+                self::RECRUITMENT_ROLES,
+                'recruitment_offer',
+                'Offer ' . ucfirst($offer->status),
+                "The offer for {$applicantName} ({$offer->jobApplication?->jobPosition?->title}) is now {$offer->status}",
+                [
+                    'offer_id' => $offer->id,
+                    'application_id' => $offer->job_application_id,
+                    'status' => $offer->status,
+                ],
+                '/recruitment',
+                $offer->status === 'accepted' ? 'high' : 'normal',
+                [$request->user()?->id]
+            );
+        }
+
+        return response()->json($offer);
     }
 }

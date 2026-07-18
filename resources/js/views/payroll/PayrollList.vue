@@ -561,6 +561,9 @@ const printPayslip = async (payroll) => {
     <style>
       body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:32px;max-width:720px;margin:0 auto}
       h1{font-size:22px;margin:0 0 4px} h2{font-size:14px;color:#555;font-weight:normal;margin:0 0 24px}
+      .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+      .brand img{width:72px;height:72px;object-fit:contain}
+      .brand h1{margin:0}.brand p{font-size:13px;color:#555;margin:4px 0 0}
       .meta{display:flex;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #111}
       .meta div{font-size:13px;line-height:1.6} table{width:100%;border-collapse:collapse;font-size:13px}
       .section{margin-top:20px} .section h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px;color:#444}
@@ -568,8 +571,10 @@ const printPayslip = async (payroll) => {
       .total strong{font-size:20px} .footer{margin-top:32px;font-size:11px;color:#777;text-align:center}
       @media print{body{padding:16px} button{display:none}}
     </style></head><body>
-    <h1>Payslip</h1>
-    <h2>Payroll Digital · Salary Statement</h2>
+    <div class="brand">
+      <img src="/images/payroll-digital-logo.png" alt="Payroll Digital">
+      <div><h1>Payslip</h1><p>Salary Statement</p></div>
+    </div>
     <div class="meta">
       <div><strong>${emp}</strong><br>Code: ${payroll.employee?.employee_code || '—'}<br>Department: ${payroll.employee?.department?.name || '—'}</div>
       <div style="text-align:right">Period: <strong>${period}</strong><br>Status: ${capitalise(payroll.status)}<br>Working Days: ${payroll.working_days || 0} · Present: ${payroll.present_days || 0}</div>

@@ -458,7 +458,13 @@
               <div class="relative w-full max-w-[260px]">
                 <div class="rounded-[2rem] border-4 border-brand bg-brand p-3 shadow-soft">
                   <div class="overflow-hidden rounded-[1.5rem] bg-surface-card">
-                    <div class="bg-accent px-4 py-3 text-center text-xs font-bold text-white">Payroll Digital</div>
+                    <div class="flex items-center justify-center bg-brand px-4 py-2">
+                      <img
+                        :src="'/images/payroll-digital-logo.png'"
+                        alt="Payroll Digital"
+                        class="h-12 w-12 object-contain"
+                      >
+                    </div>
                     <div class="space-y-3 p-4">
                       <div class="rounded-lg bg-surface-muted p-3">
                         <p class="text-[10px] font-semibold uppercase text-ink-muted">Today</p>

@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payroll Digital</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/images/payroll-digital-logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="/images/payroll-digital-logo.png">
+    <meta property="og:image" content="{{ url('/images/payroll-digital-logo.png') }}">
     <script>
       (function () {
         try {

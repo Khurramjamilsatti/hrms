@@ -10,6 +10,7 @@ use App\Models\EmployeeLeaveBalance;
 use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\PayrollGenerationService;
+use App\Services\ShortLeaveSyncService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -19,14 +20,15 @@ class LeaveApplicationController extends Controller
 
     public function __construct(
         protected PayrollGenerationService $payrollService,
-        protected NotificationService $notifier
+        protected NotificationService $notifier,
+        protected ShortLeaveSyncService $shortLeaveSync
     ) {
     }
 
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = LeaveApplication::with(['employee.user', 'employee.department', 'leaveType', 'firstApprover', 'finalApprover']);
+        $query = LeaveApplication::with(['employee.user', 'employee.department', 'leaveType', 'firstApprover', 'finalApprover', 'shortLeave']);
 
         $this->scopeToAccessibleEmployees($query, $request, 'leaves');
 
@@ -58,6 +60,12 @@ class LeaveApplicationController extends Controller
             'reason' => 'required|string',
             'document_path' => 'nullable|string',
         ]);
+
+        if ($this->shortLeaveSync->isSystemLeaveType((int) $validated['leave_type_id'])) {
+            return response()->json([
+                'message' => 'Short leaves and exemptions must be submitted from the Short Leaves & Exemptions module.',
+            ], 422);
+        }
 
         $user = $request->user()->loadMissing('employee');
         $canApplyForOthers = $user->hasPermission('leaves.manage');
@@ -173,6 +181,7 @@ class LeaveApplicationController extends Controller
                 'first_approved_at' => now(),
                 'first_approval_remarks' => $validated['approval_remarks'] ?? null,
             ]);
+            $this->shortLeaveSync->syncShortLeave($leaveApplication);
 
             $leaveData = $this->leaveNotificationData($leaveApplication, $employee);
 
@@ -277,6 +286,8 @@ class LeaveApplicationController extends Controller
             'high'
         );
 
+        $this->shortLeaveSync->syncShortLeave($leaveApplication);
+
         return response()->json($leaveApplication->load(['employee.user', 'employee.department', 'leaveType', 'firstApprover', 'finalApprover']));
     }
 
@@ -294,7 +305,9 @@ class LeaveApplicationController extends Controller
             return response()->json(['message' => 'Only pending or approved leave can be cancelled'], 400);
         }
 
-        $wasFinallyApproved = $leaveApplication->status === 'approved'
+        $isSyncedShortLeave = $this->shortLeaveSync->isSyncedLeave($leaveApplication);
+        $wasFinallyApproved = ! $isSyncedShortLeave
+            && $leaveApplication->status === 'approved'
             && $leaveApplication->approval_level === 'final_approved';
 
         if ($wasFinallyApproved) {
@@ -317,6 +330,7 @@ class LeaveApplicationController extends Controller
             'status' => 'cancelled',
             'approval_level' => 'cancelled'
         ]);
+        $this->shortLeaveSync->syncShortLeave($leaveApplication);
 
         return response()->json($leaveApplication);
     }
@@ -353,18 +367,22 @@ class LeaveApplicationController extends Controller
             'final_approval_remarks' => $remarks,
         ]);
 
-        $balance = EmployeeLeaveBalance::where('employee_id', $leaveApplication->employee_id)
-            ->where('leave_type_id', $leaveApplication->leave_type_id)
-            ->where('year', Carbon::parse($leaveApplication->start_date)->year)
-            ->first();
+        if (! $this->shortLeaveSync->isSyncedLeave($leaveApplication)) {
+            $balance = EmployeeLeaveBalance::where('employee_id', $leaveApplication->employee_id)
+                ->where('leave_type_id', $leaveApplication->leave_type_id)
+                ->where('year', Carbon::parse($leaveApplication->start_date)->year)
+                ->first();
 
-        if ($balance) {
-            $balance->used_days += $leaveApplication->total_days;
-            $balance->remaining_days -= $leaveApplication->total_days;
-            $balance->save();
+            if ($balance) {
+                $balance->used_days += $leaveApplication->total_days;
+                $balance->remaining_days -= $leaveApplication->total_days;
+                $balance->save();
+            }
+
+            $this->payrollService->syncLeaveToAttendance($leaveApplication);
         }
 
-        $this->payrollService->syncLeaveToAttendance($leaveApplication);
+        $this->shortLeaveSync->syncShortLeave($leaveApplication);
 
         $employee = $leaveApplication->employee;
         if ($employee) {

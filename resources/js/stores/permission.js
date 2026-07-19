@@ -8,19 +8,19 @@ import { useAuthStore } from '@/stores/auth'
  */
 const ROLE_DEFAULT_MODULES = {
   manager: [
-    'dashboard', 'employees', 'attendance', 'leaves', 'overtime', 'payroll',
+    'dashboard', 'employees', 'attendance', 'leaves', 'short_leaves', 'overtime', 'payroll',
     'departments', 'performance', 'assets', 'announcements', 'timesheets',
     'training', 'travel', 'shifts', 'helpdesk', 'files', 'calendar',
     'organization', 'loans', 'salary_advances', 'notifications',
   ],
   section_head: [
-    'dashboard', 'employees', 'attendance', 'leaves', 'overtime',
+    'dashboard', 'employees', 'attendance', 'leaves', 'short_leaves', 'overtime',
     'departments', 'performance', 'announcements', 'timesheets',
     'training', 'travel', 'shifts', 'helpdesk', 'files', 'calendar',
     'organization', 'notifications',
   ],
   employee: [
-    'dashboard', 'employees', 'attendance', 'leaves', 'overtime', 'payroll',
+    'dashboard', 'employees', 'attendance', 'leaves', 'short_leaves', 'overtime', 'payroll',
     'performance', 'announcements', 'timesheets', 'training', 'travel',
     'shifts', 'helpdesk', 'files', 'calendar', 'organization', 'loans',
     'salary_advances', 'notifications',

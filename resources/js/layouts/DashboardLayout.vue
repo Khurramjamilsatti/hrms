@@ -50,6 +50,10 @@
             <svg v-else-if="item.name === 'leave-settings'" class="w-5 h-5" :class="isActive(item.path) ? 'text-white' : 'text-white/60'" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/>
             </svg>
+            <!-- Short Leaves Icon -->
+            <svg v-else-if="item.name === 'short-leaves'" class="w-5 h-5" :class="isActive(item.path) ? 'text-white' : 'text-white/60'" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+            </svg>
             <!-- Payroll Icon -->
             <svg v-else-if="item.name === 'payroll'" class="w-5 h-5" :class="isActive(item.path) ? 'text-white' : 'text-white/60'" fill="currentColor" viewBox="0 0 24 24">
               <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
@@ -319,6 +323,7 @@ const pageTitle = computed(() => {
     '/attendance': 'Attendance',
     '/leaves': 'Leave Management',
     '/leave-settings': 'Leave Settings',
+    '/short-leaves': 'Short Leaves & Exemptions',
     '/payroll': 'Payroll',
     '/salary-components': 'Salary Components',
     '/loans': 'Loans',
@@ -365,6 +370,7 @@ const pageTitle = computed(() => {
     { name: 'overtime', path: '/overtime', label: 'Overtime', icon: '⏰', module: 'overtime' },
     { name: 'leaves', path: '/leaves', label: 'Leave Requests', icon: '🏖️', module: 'leaves' },
     { name: 'leave-settings', path: '/leave-settings', label: 'Leave Settings', icon: '📋', module: 'leaves', permissions: ['leaves.manage'] },
+    { name: 'short-leaves', path: '/short-leaves', label: 'Short Leaves & Exemptions', icon: '⏳', module: 'short_leaves' },
     { name: 'payroll', path: '/payroll', label: 'Payroll', icon: '💰', module: 'payroll' },
     { name: 'salary-components', path: '/salary-components', label: 'Salary Components', icon: '💼', module: 'salary_components', permissions: ['salary_components.view', 'salary_components.manage'] },
     { name: 'loans', path: '/loans', label: 'Loans', icon: '💵', module: 'loans' },
@@ -432,7 +438,7 @@ const menuSections = computed(() => {
     },
     {
       title: 'Workforce',
-      items: allItems.filter(item => ['employees', 'attendance', 'overtime', 'leaves', 'leave-settings', 'timesheets', 'shifts'].includes(item.name))
+      items: allItems.filter(item => ['employees', 'attendance', 'overtime', 'leaves', 'leave-settings', 'short-leaves', 'timesheets', 'shifts'].includes(item.name))
     },
     {
       title: 'Compensation',

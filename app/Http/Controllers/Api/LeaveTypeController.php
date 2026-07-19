@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\EmployeeLeaveBalance;
 use App\Models\LeaveType;
+use App\Services\ShortLeaveSyncService;
 use Illuminate\Http\Request;
 
 class LeaveTypeController extends Controller
@@ -14,7 +15,8 @@ class LeaveTypeController extends Controller
         $query = LeaveType::query();
 
         if (!$request->boolean('all')) {
-            $query->where('is_active', true);
+            $query->where('is_active', true)
+                ->whereNotIn('name', array_values(ShortLeaveSyncService::TYPE_NAMES));
         }
 
         $leaveTypes = $query->orderBy('name')->get();

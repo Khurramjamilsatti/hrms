@@ -41,6 +41,12 @@ class RolesAndPermissionsSeeder extends Seeder
             ['name' => 'Cancel Leave', 'slug' => 'leaves.cancel', 'module' => 'leaves', 'action' => 'cancel'],
             ['name' => 'Manage Leave Types & Balances', 'slug' => 'leaves.manage', 'module' => 'leaves', 'action' => 'manage'],
 
+            // Short Leaves & Exemptions
+            ['name' => 'View Short Leaves & Exemptions', 'slug' => 'short_leaves.view', 'module' => 'short_leaves', 'action' => 'view'],
+            ['name' => 'Apply Short Leave / Exemption', 'slug' => 'short_leaves.apply', 'module' => 'short_leaves', 'action' => 'apply'],
+            ['name' => 'Approve Short Leave / Exemption', 'slug' => 'short_leaves.approve', 'module' => 'short_leaves', 'action' => 'approve'],
+            ['name' => 'Manage Short Leaves & Exemptions', 'slug' => 'short_leaves.manage', 'module' => 'short_leaves', 'action' => 'manage'],
+
             // Overtime
             ['name' => 'View Overtime', 'slug' => 'overtime.view', 'module' => 'overtime', 'action' => 'view'],
             ['name' => 'Create Overtime', 'slug' => 'overtime.create', 'module' => 'overtime', 'action' => 'create'],
@@ -225,6 +231,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'employees.view', 'employees.create', 'employees.edit', 'employees.update', 'employees.delete',
                     'attendance.view', 'attendance.checkin', 'attendance.manage', 'attendance.reports',
                     'leaves.view', 'leaves.apply', 'leaves.approve', 'leaves.reject', 'leaves.cancel', 'leaves.manage',
+                    'short_leaves.view', 'short_leaves.apply', 'short_leaves.approve', 'short_leaves.manage',
                     'overtime.view', 'overtime.create', 'overtime.approve',
                     'payroll.view', 'payroll.generate', 'payroll.create', 'payroll.process', 'payroll.manage',
                     'departments.view', 'departments.create', 'departments.edit', 'departments.update', 'departments.delete',
@@ -260,6 +267,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'employees.view', 'employees.create', 'employees.edit', 'employees.update', 'employees.delete',
                     'attendance.view', 'attendance.checkin', 'attendance.manage', 'attendance.reports',
                     'leaves.view', 'leaves.apply', 'leaves.approve', 'leaves.reject', 'leaves.cancel', 'leaves.manage',
+                    'short_leaves.view', 'short_leaves.apply', 'short_leaves.approve', 'short_leaves.manage',
                     'overtime.view', 'overtime.create', 'overtime.approve',
                     'payroll.view', 'payroll.generate', 'payroll.create', 'payroll.process', 'payroll.manage',
                     'departments.view', 'departments.create', 'departments.edit', 'departments.update', 'departments.delete',
@@ -295,6 +303,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'employees.view', 'employees.view_own',
                     'attendance.view', 'attendance.checkin', 'attendance.reports',
                     'leaves.view', 'leaves.apply', 'leaves.approve', 'leaves.reject', 'leaves.cancel',
+                    'short_leaves.view', 'short_leaves.apply', 'short_leaves.approve',
                     'overtime.view', 'overtime.create', 'overtime.approve',
                     'departments.view',
                     'performance.view', 'performance.reviews',
@@ -321,6 +330,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'employees.view', 'employees.view_own',
                     'attendance.view', 'attendance.checkin', 'attendance.reports',
                     'leaves.view', 'leaves.apply', 'leaves.approve', 'leaves.reject', 'leaves.cancel',
+                    'short_leaves.view', 'short_leaves.apply', 'short_leaves.approve',
                     'overtime.view', 'overtime.create', 'overtime.approve',
                     'payroll.view_own',
                     'departments.view',
@@ -351,6 +361,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'employees.view_own',
                     'attendance.view', 'attendance.checkin',
                     'leaves.view', 'leaves.apply', 'leaves.cancel',
+                    'short_leaves.view', 'short_leaves.apply',
                     'overtime.view', 'overtime.create',
                     'payroll.view_own',
                     'performance.view',

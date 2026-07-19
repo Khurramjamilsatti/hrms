@@ -32,6 +32,11 @@ trait AuthorizesEmployeeResource
                 'approve' => ['leaves.approve', 'leaves.reject'],
                 'view_all' => [],
             ],
+            'short_leaves' => [
+                'manage' => ['short_leaves.manage'],
+                'approve' => ['short_leaves.approve'],
+                'view_all' => [],
+            ],
             'payroll' => [
                 'manage' => ['payroll.manage', 'payroll.generate', 'payroll.create', 'payroll.process'],
                 'approve' => [],

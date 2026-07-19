@@ -10,6 +10,7 @@ class LeaveApplication extends Model
     use HasFactory;
 
     protected $fillable = [
+        'short_leave_id',
         'employee_id',
         'leave_type_id',
         'start_date',
@@ -46,6 +47,11 @@ class LeaveApplication extends Model
     public function leaveType()
     {
         return $this->belongsTo(LeaveType::class);
+    }
+
+    public function shortLeave()
+    {
+        return $this->belongsTo(ShortLeave::class);
     }
 
     public function firstApprover()

@@ -4,6 +4,7 @@ const MODULE_PATHS = [
   '/attendance',
   '/leaves',
   '/leave-settings',
+  '/short-leaves',
   '/payroll',
   '/salary-components',
   '/loans',
@@ -34,6 +35,7 @@ const MODULE_PATHS = [
 ];
 
 const TYPE_ROUTES = [
+  { match: /short_leave|exemption/, path: '/short-leaves', idKeys: ['short_leave_id'] },
   { match: /leave/, path: '/leaves', idKeys: ['leave_application_id', 'leave_id'] },
   { match: /payroll|salary(?!_advance|_component)/, path: '/payroll', idKeys: ['payroll_id'] },
   { match: /salary_advance|advance_request/, path: '/salary-advances', idKeys: ['advance_id', 'advance_request_id'] },
@@ -59,6 +61,8 @@ const TYPE_ROUTES = [
 
 const RESOURCE_TYPE_ROUTES = {
   leave: '/leaves',
+  short_leave: '/short-leaves',
+  exemption: '/short-leaves',
   payroll: '/payroll',
   timesheet: '/timesheets',
   training: '/training',

@@ -180,6 +180,17 @@ Route::middleware(['auth:sanctum', 'hrms'])->group(function () {
             ->middleware('permission:leaves.cancel');
     });
 
+    // Short Leaves & Exemptions - Permission-based access
+    Route::prefix('short-leaves')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\ShortLeaveController::class, 'index'])->middleware('permission:short_leaves.view');
+        Route::post('/', [\App\Http\Controllers\Api\ShortLeaveController::class, 'store'])->middleware('permission:short_leaves.apply');
+        Route::get('/{shortLeave}', [\App\Http\Controllers\Api\ShortLeaveController::class, 'show'])->middleware('permission:short_leaves.view');
+        Route::post('/{shortLeave}/approve', [\App\Http\Controllers\Api\ShortLeaveController::class, 'approve'])->middleware('permission:short_leaves.approve');
+        Route::post('/{shortLeave}/reject', [\App\Http\Controllers\Api\ShortLeaveController::class, 'reject'])->middleware('permission:short_leaves.approve');
+        Route::post('/{shortLeave}/cancel', [\App\Http\Controllers\Api\ShortLeaveController::class, 'cancel'])->middleware('permission:short_leaves.view');
+        Route::delete('/{shortLeave}', [\App\Http\Controllers\Api\ShortLeaveController::class, 'destroy'])->middleware('permission:short_leaves.view');
+    });
+
     // Overtime Requests
     Route::prefix('overtime-requests')->group(function () {
         Route::get('/', [OvertimeRequestController::class, 'index'])->middleware('permission:overtime.view');

@@ -125,6 +125,12 @@ const routes = [
         meta: { module: 'leaves', permissions: ['leaves.manage'] }
       },
       {
+        path: 'short-leaves',
+        name: 'ShortLeaves',
+        component: () => import('@/views/short-leaves/ShortLeaveList.vue'),
+        meta: { module: 'short_leaves' }
+      },
+      {
         path: 'payroll',
         name: 'Payroll',
         component: () => import('@/views/payroll/PayrollList.vue'),

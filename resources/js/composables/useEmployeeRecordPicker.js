@@ -9,6 +9,7 @@ const MODULE_CREATE_FOR_OTHERS_PERMISSIONS = {
   loans: ['loans.manage'],
   salary_advances: ['salary_advances.approve'],
   leaves: ['leaves.manage'],
+  short_leaves: ['short_leaves.manage'],
   travel: ['travel.manage'],
   overtime: ['overtime.approve'],
   timesheets: ['timesheets.manage'],

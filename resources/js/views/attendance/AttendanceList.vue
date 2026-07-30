@@ -1,5 +1,5 @@
 <template>
-  <div class="attendance-page relative min-h-[calc(100vh-4rem)] -m-6 p-4 md:p-8 overflow-hidden">
+  <div class="attendance-page relative min-h-[calc(100vh-4rem)] -m-6 p-4 md:p-8 overflow-x-hidden">
     <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#f7f4fc] via-[#fff8f8] to-[#f3f0fa]"></div>
     <div class="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full bg-accent/10 blur-3xl"></div>
     <div class="pointer-events-none absolute top-40 -left-20 h-64 w-64 rounded-full bg-brand/5 blur-3xl"></div>
@@ -43,9 +43,9 @@
       <!-- Calendar Report -->
       <template v-if="viewMode === 'calendar'">
         <!-- Employee picker -->
-        <div v-if="canSelectEmployee" class="mb-5 rounded-3xl border border-white/70 bg-white/80 backdrop-blur-sm shadow-[0_10px_40px_rgba(30,20,51,0.06)] p-4 md:p-5">
+        <div v-if="canSelectEmployee" class="relative z-30 mb-5 rounded-3xl border border-white/70 bg-white/80 backdrop-blur-sm shadow-[0_10px_40px_rgba(30,20,51,0.06)] p-4 md:p-5">
           <label class="block text-sm font-semibold text-ink mb-2">View employee calendar</label>
-          <div class="relative">
+          <div class="relative z-40">
             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
@@ -59,7 +59,7 @@
             />
             <div
               v-if="showEmployeeDropdown && filteredEmployees.length"
-              class="absolute z-40 w-full mt-2 bg-white border border-surface-border rounded-2xl shadow-xl max-h-64 overflow-y-auto"
+              class="absolute left-0 right-0 top-full z-50 mt-2 bg-white border border-surface-border rounded-2xl shadow-2xl max-h-64 overflow-y-auto"
             >
               <button
                 v-if="currentEmployeeId"
@@ -87,7 +87,7 @@
         </div>
 
         <!-- Month + filters + stats shell -->
-        <div class="rounded-[28px] border border-white/80 bg-white/85 backdrop-blur-sm shadow-[0_18px_50px_rgba(30,20,51,0.08)] overflow-hidden mb-5">
+        <div class="relative z-10 rounded-[28px] border border-white/80 bg-white/85 backdrop-blur-sm shadow-[0_18px_50px_rgba(30,20,51,0.08)] overflow-hidden mb-5">
           <!-- Month navigation -->
           <div class="px-4 md:px-6 py-4 md:py-5 flex items-center justify-between gap-3 bg-gradient-to-r from-brand via-brand-soft to-[#3a2a5c] text-white">
             <button
@@ -145,14 +145,51 @@
               </div>
             </div>
 
-            <!-- Loading / error -->
+            <!-- Loading / error / link prompt -->
             <div v-if="loading" class="rounded-3xl border border-surface-border bg-surface/70 p-14 text-center">
               <div class="mx-auto mb-3 h-10 w-10 rounded-full border-2 border-accent/30 border-t-accent animate-spin"></div>
               <div class="text-ink-muted font-medium">Loading attendance calendar...</div>
             </div>
-            <div v-else-if="error" class="rounded-2xl border border-red-200 bg-red-50 text-red-700 px-4 py-3">
-              {{ error }}
-              <button @click="loadCalendar" class="ml-2 underline text-sm font-semibold">Retry</button>
+            <div v-else-if="needsEmployeeLink" class="rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-8 md:p-10 text-center">
+              <div class="mx-auto mb-4 h-14 w-14 rounded-2xl bg-amber-100 text-amber-700 inline-flex items-center justify-center">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+              </div>
+              <h3 class="text-xl font-bold text-ink">No employee profile linked</h3>
+              <p class="mt-2 text-sm text-ink-muted max-w-md mx-auto">
+                {{ error || 'Your account is not linked to an employee record, so personal attendance cannot be loaded.' }}
+              </p>
+              <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  @click="openLinkPopup"
+                  class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-accent hover:bg-accent-dark text-white text-sm font-bold shadow-lg shadow-accent/25 transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                  Link with employee
+                </button>
+                <button
+                  type="button"
+                  @click="loadCalendar"
+                  class="inline-flex items-center px-5 py-3 rounded-2xl border border-surface-border bg-white text-ink-soft text-sm font-semibold hover:bg-surface-muted transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+              <p v-if="canSelectEmployee" class="mt-4 text-xs text-ink-muted">
+                Or use the employee search above to view another team member’s calendar.
+              </p>
+            </div>
+            <div v-else-if="error" class="rounded-2xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 flex flex-wrap items-center gap-3">
+              <span class="flex-1">{{ error }}</span>
+              <button @click="loadCalendar" class="underline text-sm font-semibold">Retry</button>
+              <button
+                v-if="!currentEmployeeId"
+                type="button"
+                @click="openLinkPopup"
+                class="px-3 py-1.5 rounded-lg bg-accent text-white text-sm font-semibold"
+              >
+                Link with employee
+              </button>
             </div>
 
             <!-- Month grid calendar -->
@@ -320,6 +357,96 @@
             </div>
           </div>
         </Transition>
+
+        <!-- Link employee popup -->
+        <Transition name="popup">
+          <div
+            v-if="showLinkPopup"
+            class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-brand/40 backdrop-blur-[2px] p-0 sm:p-4"
+            @click.self="closeLinkPopup"
+          >
+            <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden animate-popup">
+              <div class="h-1.5 w-12 rounded-full bg-surface-border mx-auto mt-3 sm:hidden"></div>
+              <div class="px-5 pt-5 pb-4 border-b border-surface-border flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="text-xl font-bold text-ink">Link with employee</h3>
+                  <p class="text-sm text-ink-muted mt-1">Select your employee record to connect it with this login.</p>
+                </div>
+                <button type="button" @click="closeLinkPopup" class="rounded-xl bg-surface-muted hover:bg-surface-border p-2 transition-colors" aria-label="Close">
+                  <svg class="w-5 h-5 text-ink-muted" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+              </div>
+
+              <div class="px-5 py-4 space-y-4">
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                  </div>
+                  <input
+                    v-model="linkSearch"
+                    @input="filterLinkableEmployees"
+                    type="text"
+                    placeholder="Search by name or employee code..."
+                    class="w-full pl-10 pr-4 py-3 border border-surface-border rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/40"
+                  />
+                </div>
+
+                <div v-if="linkLoading" class="py-10 text-center text-ink-muted text-sm">Loading employees...</div>
+                <div v-else-if="linkError" class="rounded-xl border border-red-200 bg-red-50 text-red-700 px-3 py-2 text-sm">{{ linkError }}</div>
+                <div v-else-if="!filteredLinkableEmployees.length" class="py-10 text-center text-ink-muted text-sm">
+                  No unlinked employee records found. Ask HR to create your employee profile first.
+                </div>
+                <div v-else class="max-h-72 overflow-y-auto space-y-2 pr-1">
+                  <button
+                    v-for="emp in filteredLinkableEmployees"
+                    :key="emp.id"
+                    type="button"
+                    @click="linkCandidateId = emp.id"
+                    class="w-full text-left rounded-2xl border px-4 py-3 transition-all"
+                    :class="linkCandidateId === emp.id
+                      ? 'border-accent bg-accent/5 ring-2 ring-accent/20'
+                      : 'border-surface-border hover:border-accent/40 hover:bg-surface-muted'"
+                  >
+                    <div class="flex items-center justify-between gap-3">
+                      <div>
+                        <div class="text-sm font-bold text-ink">{{ emp.full_name }}</div>
+                        <div class="text-xs text-ink-muted mt-0.5">
+                          {{ emp.employee_code }}
+                          <span v-if="emp.department"> · {{ emp.department }}</span>
+                          <span v-if="emp.designation"> · {{ emp.designation }}</span>
+                        </div>
+                      </div>
+                      <span
+                        class="h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                        :class="linkCandidateId === emp.id ? 'border-accent bg-accent' : 'border-surface-border'"
+                      >
+                        <svg v-if="linkCandidateId === emp.id" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div class="px-5 py-4 bg-surface/80 border-t border-surface-border flex gap-3">
+                <button
+                  type="button"
+                  @click="closeLinkPopup"
+                  class="flex-1 px-4 py-3 text-sm font-semibold text-ink-soft bg-white border border-surface-border rounded-2xl hover:bg-surface-muted transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  :disabled="!linkCandidateId || linking"
+                  @click="confirmLinkEmployee"
+                  class="flex-1 px-4 py-3 text-sm font-bold text-white bg-accent hover:bg-accent-dark rounded-2xl shadow-lg shadow-accent/25 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {{ linking ? 'Linking...' : 'Link employee' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition>
       </template>
 
       <!-- Legacy all-records list for team/HR -->
@@ -410,6 +537,15 @@ const calendarData = ref(null);
 const statusFilter = ref('');
 const showDayPopup = ref(false);
 const selectedDayDetail = ref(null);
+const showLinkPopup = ref(false);
+const linkableEmployees = ref([]);
+const filteredLinkableEmployees = ref([]);
+const linkSearch = ref('');
+const linkCandidateId = ref(null);
+const linkLoading = ref(false);
+const linking = ref(false);
+const linkError = ref(null);
+const needsEmployeeLink = ref(false);
 
 const now = new Date();
 const selectedMonth = ref(now.getMonth() + 1);
@@ -659,11 +795,14 @@ function shiftMonth(delta) {
 async function loadCalendar() {
   if (!selectedEmployeeId.value && !currentEmployeeId.value) {
     error.value = 'No employee profile linked. Select an employee to view attendance.';
+    needsEmployeeLink.value = true;
+    calendarData.value = null;
     return;
   }
 
   loading.value = true;
   error.value = null;
+  needsEmployeeLink.value = false;
   try {
     const params = {
       month: selectedMonth.value,
@@ -674,11 +813,86 @@ async function loadCalendar() {
     const response = await axios.get('/attendance/calendar', { params });
     calendarData.value = response.data;
     selectedEmployeeId.value = response.data.employee?.id || selectedEmployeeId.value;
+    needsEmployeeLink.value = false;
   } catch (err) {
-    error.value = err.response?.data?.message || 'Failed to load attendance calendar';
+    const message = err.response?.data?.message || 'Failed to load attendance calendar';
+    error.value = message;
     calendarData.value = null;
+    if (!currentEmployeeId.value && /employee profile|select an employee|linked/i.test(message)) {
+      needsEmployeeLink.value = true;
+    }
   } finally {
     loading.value = false;
+  }
+}
+
+async function openLinkPopup() {
+  showLinkPopup.value = true;
+  linkCandidateId.value = null;
+  linkSearch.value = '';
+  linkError.value = null;
+  await loadLinkableEmployees();
+}
+
+function closeLinkPopup() {
+  showLinkPopup.value = false;
+  linkCandidateId.value = null;
+  linkSearch.value = '';
+  linkError.value = null;
+}
+
+async function loadLinkableEmployees() {
+  linkLoading.value = true;
+  linkError.value = null;
+  try {
+    const response = await axios.get('/profile/linkable-employees');
+    linkableEmployees.value = Array.isArray(response.data) ? response.data : [];
+    filteredLinkableEmployees.value = linkableEmployees.value;
+  } catch (err) {
+    linkError.value = err.response?.data?.message || 'Failed to load linkable employees';
+    linkableEmployees.value = [];
+    filteredLinkableEmployees.value = [];
+  } finally {
+    linkLoading.value = false;
+  }
+}
+
+function filterLinkableEmployees() {
+  const q = linkSearch.value.toLowerCase().trim();
+  if (!q) {
+    filteredLinkableEmployees.value = linkableEmployees.value;
+    return;
+  }
+  filteredLinkableEmployees.value = linkableEmployees.value.filter((emp) => {
+    const name = String(emp.full_name || '').toLowerCase();
+    const code = String(emp.employee_code || '').toLowerCase();
+    return name.includes(q) || code.includes(q) || String(emp.id).includes(q);
+  });
+}
+
+async function confirmLinkEmployee() {
+  if (!linkCandidateId.value) return;
+  linking.value = true;
+  linkError.value = null;
+  try {
+    const response = await axios.post('/profile/link-employee', {
+      employee_id: linkCandidateId.value,
+    });
+    if (response.data?.user) {
+      authStore.user = response.data.user;
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    } else {
+      await authStore.fetchUser();
+    }
+    selectedEmployeeId.value = authStore.user?.employee?.id || linkCandidateId.value;
+    closeLinkPopup();
+    needsEmployeeLink.value = false;
+    error.value = null;
+    await loadCalendar();
+  } catch (err) {
+    linkError.value = err.response?.data?.message || 'Failed to link employee profile';
+  } finally {
+    linking.value = false;
   }
 }
 
@@ -716,6 +930,7 @@ function selectEmployee(emp) {
   selectedEmployeeId.value = emp.id;
   employeeSearch.value = '';
   showEmployeeDropdown.value = false;
+  needsEmployeeLink.value = false;
   loadCalendar();
 }
 

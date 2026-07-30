@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\Employee;
 use App\Models\EmployeeLeaveBalance;
 use App\Models\EmployeeOnboardingTask;
 use App\Models\LeaveApplication;
@@ -252,6 +253,87 @@ class AuthController extends Controller
             'pending_requests' => $pendingRequests,
             'completed_tasks' => $completedTasks,
             'total_documents' => $totalDocuments,
+        ]);
+    }
+
+    /**
+     * Employees that can be linked to a user account (no user_id yet).
+     */
+    public function linkableEmployees(Request $request)
+    {
+        $user = $request->user()->loadMissing('employee');
+        $canManageEmployees = $user->hasPermission('employees.update')
+            || $user->hasPermission('employees.edit')
+            || in_array($user->role, ['super_admin', 'hr_admin', 'admin'], true);
+
+        if ($user->employee && ! $canManageEmployees) {
+            return response()->json(['message' => 'Your account is already linked to an employee profile.'], 403);
+        }
+
+        $query = Employee::query()
+            ->with(['department:id,name', 'designation:id,title'])
+            ->whereNull('user_id')
+            ->where(function ($q) {
+                $q->whereNull('employment_status')
+                    ->orWhere('employment_status', 'active');
+            });
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'ilike', "%{$search}%")
+                    ->orWhere('last_name', 'ilike', "%{$search}%")
+                    ->orWhere('employee_code', 'ilike', "%{$search}%")
+                    ->orWhereRaw("concat(first_name, ' ', last_name) ilike ?", ["%{$search}%"]);
+            });
+        }
+
+        $employees = $query->orderBy('first_name')->orderBy('last_name')->limit(100)->get()->map(function ($employee) {
+            return [
+                'id' => $employee->id,
+                'full_name' => $employee->full_name,
+                'employee_code' => $employee->employee_code,
+                'department' => $employee->department?->name,
+                'designation' => $employee->designation?->title,
+            ];
+        });
+
+        return response()->json($employees);
+    }
+
+    /**
+     * Link the authenticated user to an unlinked employee profile.
+     */
+    public function linkEmployee(Request $request)
+    {
+        $user = $request->user()->loadMissing('employee');
+
+        if ($user->employee) {
+            return response()->json(['message' => 'Your account is already linked to an employee profile.'], 422);
+        }
+
+        $validated = $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+        ]);
+
+        $employee = Employee::findOrFail($validated['employee_id']);
+
+        if ($employee->user_id) {
+            return response()->json(['message' => 'This employee is already linked to another user account.'], 422);
+        }
+
+        $employee->update(['user_id' => $user->id]);
+
+        $freshUser = $user->fresh()->load([
+            'employee.department',
+            'employee.designation',
+            'employee.manager',
+        ]);
+
+        return response()->json([
+            'message' => 'Employee profile linked successfully',
+            'user' => $freshUser,
+            'employee' => $freshUser->employee,
         ]);
     }
 }

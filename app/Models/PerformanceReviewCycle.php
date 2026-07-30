@@ -18,12 +18,19 @@ class PerformanceReviewCycle extends Model
         'status',
     ];
 
+    protected $appends = ['name'];
+
     protected function casts(): array
     {
         return [
             'start_date' => 'date',
             'end_date' => 'date',
         ];
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->attributes['title'] ?? null;
     }
 
     public function reviews()

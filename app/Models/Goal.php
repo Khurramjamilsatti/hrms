@@ -22,12 +22,19 @@ class Goal extends Model
         'set_by',
     ];
 
+    protected $appends = ['progress_percentage'];
+
     protected function casts(): array
     {
         return [
             'start_date' => 'date',
             'target_date' => 'date',
         ];
+    }
+
+    public function getProgressPercentageAttribute(): int
+    {
+        return (int) ($this->attributes['progress'] ?? 0);
     }
 
     public function employee()

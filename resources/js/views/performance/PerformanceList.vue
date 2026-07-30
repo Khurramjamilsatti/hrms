@@ -179,21 +179,24 @@
 
     <!-- Create/Edit Review Modal -->
     <div v-if="showReviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden flex flex-col">
-        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto flex flex-col">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
           <h3 class="text-lg font-bold text-gray-900">{{ editingReview ? 'Edit Review' : 'Create Review' }}</h3>
           <button @click="showReviewModal = false" class="text-gray-400 hover:text-gray-600">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
           </button>
         </div>
-        <div class="px-6 py-5 space-y-4 overflow-y-auto">
+        <div class="px-6 py-5 space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Employee *</label>
-              <select v-model="reviewForm.employee_id" :disabled="!!editingReview" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100">
-                <option value="">Select employee</option>
-                <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ getEmployeeName(emp) }}</option>
-              </select>
+              <SearchableSelect
+                v-model="reviewForm.employee_id"
+                :options="employeeOptions"
+                :disabled="!!editingReview"
+                placeholder="Select employee..."
+                search-placeholder="Search by name or code..."
+              />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Cycle *</label>
@@ -288,7 +291,7 @@
 
     <!-- Create/Edit Goal Modal -->
     <div v-if="showGoalModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-visible">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h3 class="text-lg font-bold text-gray-900">{{ editingGoal ? 'Edit Goal' : 'Add Goal' }}</h3>
           <button @click="showGoalModal = false" class="text-gray-400 hover:text-gray-600">
@@ -298,10 +301,13 @@
         <div class="px-6 py-5 space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Employee *</label>
-            <select v-model="goalForm.employee_id" :disabled="!!editingGoal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-gray-100">
-              <option value="">Select employee</option>
-              <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ getEmployeeName(emp) }}</option>
-            </select>
+            <SearchableSelect
+              v-model="goalForm.employee_id"
+              :options="employeeOptions"
+              :disabled="!!editingGoal"
+              placeholder="Select employee..."
+              search-placeholder="Search by name or code..."
+            />
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1">Title *</label>
@@ -440,6 +446,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { usePermissions } from '@/composables/usePermissions';
+import SearchableSelect from '@/components/SearchableSelect.vue';
 import axios from 'axios';
 
 const { can } = usePermissions();
@@ -514,7 +521,20 @@ const extractList = (payload) => {
 };
 
 const getEmployeeName = (emp) =>
-  emp?.user?.name || `${emp?.first_name || ''} ${emp?.last_name || ''}`.trim() || 'N/A';
+  emp?.full_name || emp?.user?.name || `${emp?.first_name || ''} ${emp?.last_name || ''}`.trim() || 'N/A';
+
+const empLabel = (emp) => {
+  const name = getEmployeeName(emp);
+  const code = emp?.employee_code ? ` (${emp.employee_code})` : '';
+  return `${name}${code}`;
+};
+
+const employeeOptions = computed(() =>
+  employees.value.map((emp) => ({
+    value: emp.id,
+    label: empLabel(emp),
+  }))
+);
 
 const formatDate = (date) => {
   if (!date) return '—';

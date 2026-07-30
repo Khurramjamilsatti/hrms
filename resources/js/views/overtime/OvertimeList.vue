@@ -90,7 +90,7 @@
 
     <!-- Create Modal -->
     <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-visible">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h3 class="text-lg font-bold text-gray-900">Request Overtime</h3>
           <button @click="showForm = false" class="text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
@@ -99,12 +99,12 @@
           <div class="px-6 py-5 space-y-4">
             <div v-if="needsEmployeePicker">
               <label class="block text-sm font-semibold text-gray-700 mb-1">Employee</label>
-              <select v-model="form.employee_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
-                <option value="">Select employee</option>
-                <option v-for="emp in employees" :key="emp.id" :value="emp.id">
-                  {{ empLabel(emp) }}
-                </option>
-              </select>
+              <SearchableSelect
+                v-model="form.employee_id"
+                :options="employeeOptions"
+                placeholder="Select employee..."
+                search-placeholder="Search by name or code..."
+              />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Date</label>
@@ -156,6 +156,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useDialog } from '@/composables/useDialog';
 import { usePermissions } from '@/composables/usePermissions';
 import { useEmployeeRecordPicker } from '@/composables/useEmployeeRecordPicker';
+import SearchableSelect from '@/components/SearchableSelect.vue';
 
 const authStore = useAuthStore();
 const { alert } = useDialog();
@@ -179,6 +180,13 @@ const actionLoading = ref(false);
 const filters = reactive({ status: '' });
 
 const form = reactive({ employee_id: '', date: '', hours: '', reason: '' });
+
+const employeeOptions = computed(() =>
+  employees.value.map((emp) => ({
+    value: emp.id,
+    label: empLabel(emp),
+  }))
+);
 
 const canApprove = computed(() => can('overtime.approve'));
 
@@ -239,6 +247,10 @@ const openCreateModal = () => {
 
 const submitRequest = async () => {
   formError.value = null;
+  if (needsEmployeePicker.value && !form.employee_id) {
+    formError.value = 'Please select an employee';
+    return;
+  }
   const employeeCheck = validateEmployeeForSubmit(form);
   if (!employeeCheck.valid) {
     formError.value = employeeCheck.message;

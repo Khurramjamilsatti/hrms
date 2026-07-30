@@ -370,7 +370,14 @@
               <div class="px-5 pt-5 pb-4 border-b border-surface-border flex items-start justify-between gap-3">
                 <div>
                   <h3 class="text-xl font-bold text-ink">Link with employee</h3>
-                  <p class="text-sm text-ink-muted mt-1">Select your employee record to connect it with this login.</p>
+                  <p class="text-sm text-ink-muted mt-1">
+                    <template v-if="canCreateEmployeeProfile">
+                      Link an existing employee to this login, or create a new employee profile from your account.
+                    </template>
+                    <template v-else>
+                      Select your employee record to connect it with this login.
+                    </template>
+                  </p>
                 </div>
                 <button type="button" @click="closeLinkPopup" class="rounded-xl bg-surface-muted hover:bg-surface-border p-2 transition-colors" aria-label="Close">
                   <svg class="w-5 h-5 text-ink-muted" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
@@ -378,6 +385,25 @@
               </div>
 
               <div class="px-5 py-4 space-y-4">
+                <div
+                  v-if="canCreateEmployeeProfile"
+                  class="rounded-2xl border border-accent/20 bg-accent/5 p-4"
+                >
+                  <div class="text-sm font-bold text-ink">Create employee from this account</div>
+                  <p class="text-xs text-ink-muted mt-1">
+                    Creates a new employee profile using your name and links it to this login.
+                  </p>
+                  <button
+                    type="button"
+                    :disabled="creatingEmployee"
+                    @click="createEmployeeFromAccount"
+                    class="mt-3 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand-soft transition-colors disabled:opacity-50"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    {{ creatingEmployee ? 'Creating...' : 'Create employee profile' }}
+                  </button>
+                </div>
+
                 <div class="relative">
                   <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -393,8 +419,13 @@
 
                 <div v-if="linkLoading" class="py-10 text-center text-ink-muted text-sm">Loading employees...</div>
                 <div v-else-if="linkError" class="rounded-xl border border-red-200 bg-red-50 text-red-700 px-3 py-2 text-sm">{{ linkError }}</div>
-                <div v-else-if="!filteredLinkableEmployees.length" class="py-10 text-center text-ink-muted text-sm">
-                  No unlinked employee records found. Ask HR to create your employee profile first.
+                <div v-else-if="!filteredLinkableEmployees.length" class="py-8 text-center text-ink-muted text-sm">
+                  <template v-if="canCreateEmployeeProfile">
+                    No matching employees found. You can create a new employee profile above, or refine your search.
+                  </template>
+                  <template v-else>
+                    No unlinked employee records found. Ask HR to create your employee profile first.
+                  </template>
                 </div>
                 <div v-else class="max-h-72 overflow-y-auto space-y-2 pr-1">
                   <button
@@ -414,6 +445,10 @@
                           {{ emp.employee_code }}
                           <span v-if="emp.department"> · {{ emp.department }}</span>
                           <span v-if="emp.designation"> · {{ emp.designation }}</span>
+                        </div>
+                        <div v-if="emp.is_linked" class="text-[11px] text-amber-700 mt-1">
+                          Currently linked to {{ emp.linked_user?.name || emp.linked_user?.email || 'another user' }}
+                          <span v-if="canCreateEmployeeProfile"> — linking will move it to your account</span>
                         </div>
                       </div>
                       <span
@@ -544,8 +579,10 @@ const linkSearch = ref('');
 const linkCandidateId = ref(null);
 const linkLoading = ref(false);
 const linking = ref(false);
+const creatingEmployee = ref(false);
 const linkError = ref(null);
 const needsEmployeeLink = ref(false);
+const canCreateEmployeeProfile = ref(false);
 
 const now = new Date();
 const selectedMonth = ref(now.getMonth() + 1);
@@ -846,12 +883,20 @@ async function loadLinkableEmployees() {
   linkError.value = null;
   try {
     const response = await axios.get('/profile/linkable-employees');
-    linkableEmployees.value = Array.isArray(response.data) ? response.data : [];
+    const payload = response.data;
+    if (Array.isArray(payload)) {
+      linkableEmployees.value = payload;
+      canCreateEmployeeProfile.value = authStore.isAdmin || authStore.isSuperAdmin;
+    } else {
+      linkableEmployees.value = payload.employees || [];
+      canCreateEmployeeProfile.value = Boolean(payload.can_create);
+    }
     filteredLinkableEmployees.value = linkableEmployees.value;
   } catch (err) {
     linkError.value = err.response?.data?.message || 'Failed to load linkable employees';
     linkableEmployees.value = [];
     filteredLinkableEmployees.value = [];
+    canCreateEmployeeProfile.value = authStore.isAdmin || authStore.isSuperAdmin;
   } finally {
     linkLoading.value = false;
   }
@@ -870,29 +915,54 @@ function filterLinkableEmployees() {
   });
 }
 
+async function applyLinkedUser(response) {
+  if (response.data?.user) {
+    authStore.user = response.data.user;
+    localStorage.setItem('user', JSON.stringify(response.data.user));
+  } else {
+    await authStore.fetchUser();
+  }
+  selectedEmployeeId.value = authStore.user?.employee?.id || null;
+  closeLinkPopup();
+  needsEmployeeLink.value = false;
+  error.value = null;
+  await loadCalendar();
+}
+
 async function confirmLinkEmployee() {
   if (!linkCandidateId.value) return;
+  const selected = linkableEmployees.value.find((e) => e.id === linkCandidateId.value);
+  if (selected?.is_linked && canCreateEmployeeProfile.value) {
+    const ok = window.confirm(
+      `This employee is already linked to ${selected.linked_user?.name || 'another user'}. Move the link to your account?`
+    );
+    if (!ok) return;
+  }
+
   linking.value = true;
   linkError.value = null;
   try {
     const response = await axios.post('/profile/link-employee', {
       employee_id: linkCandidateId.value,
     });
-    if (response.data?.user) {
-      authStore.user = response.data.user;
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-    } else {
-      await authStore.fetchUser();
-    }
-    selectedEmployeeId.value = authStore.user?.employee?.id || linkCandidateId.value;
-    closeLinkPopup();
-    needsEmployeeLink.value = false;
-    error.value = null;
-    await loadCalendar();
+    await applyLinkedUser(response);
   } catch (err) {
     linkError.value = err.response?.data?.message || 'Failed to link employee profile';
   } finally {
     linking.value = false;
+  }
+}
+
+async function createEmployeeFromAccount() {
+  creatingEmployee.value = true;
+  linkError.value = null;
+  try {
+    const response = await axios.post('/profile/create-employee');
+    await applyLinkedUser(response);
+  } catch (err) {
+    linkError.value = err.response?.data?.message || 'Failed to create employee profile';
+  } finally {
+    creatingEmployee.value = false;
   }
 }
 

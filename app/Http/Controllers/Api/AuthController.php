@@ -257,26 +257,29 @@ class AuthController extends Controller
     }
 
     /**
-     * Employees that can be linked to a user account (no user_id yet).
+     * Employees that can be linked to a user account.
+     * Regular users see unlinked employees only.
+     * HR/admin/super admin can search all employees (including already linked).
      */
     public function linkableEmployees(Request $request)
     {
         $user = $request->user()->loadMissing('employee');
-        $canManageEmployees = $user->hasPermission('employees.update')
-            || $user->hasPermission('employees.edit')
-            || in_array($user->role, ['super_admin', 'hr_admin', 'admin'], true);
+        $canManageEmployees = $this->userCanManageEmployeeLinks($user);
 
         if ($user->employee && ! $canManageEmployees) {
             return response()->json(['message' => 'Your account is already linked to an employee profile.'], 403);
         }
 
         $query = Employee::query()
-            ->with(['department:id,name', 'designation:id,title'])
-            ->whereNull('user_id')
+            ->with(['department:id,name', 'designation:id,title', 'user:id,name,email'])
             ->where(function ($q) {
                 $q->whereNull('employment_status')
                     ->orWhere('employment_status', 'active');
             });
+
+        if (! $canManageEmployees) {
+            $query->whereNull('user_id');
+        }
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -286,6 +289,9 @@ class AuthController extends Controller
                     ->orWhere('employee_code', 'ilike', "%{$search}%")
                     ->orWhereRaw("concat(first_name, ' ', last_name) ilike ?", ["%{$search}%"]);
             });
+        } elseif ($canManageEmployees) {
+            // Prefer unlinked first for admins when no search term
+            $query->orderByRaw('CASE WHEN user_id IS NULL THEN 0 ELSE 1 END');
         }
 
         $employees = $query->orderBy('first_name')->orderBy('last_name')->limit(100)->get()->map(function ($employee) {
@@ -295,18 +301,30 @@ class AuthController extends Controller
                 'employee_code' => $employee->employee_code,
                 'department' => $employee->department?->name,
                 'designation' => $employee->designation?->title,
+                'is_linked' => (bool) $employee->user_id,
+                'linked_user' => $employee->user ? [
+                    'id' => $employee->user->id,
+                    'name' => $employee->user->name,
+                    'email' => $employee->user->email,
+                ] : null,
             ];
         });
 
-        return response()->json($employees);
+        return response()->json([
+            'employees' => $employees,
+            'can_create' => $canManageEmployees,
+            'can_relink' => $canManageEmployees,
+        ]);
     }
 
     /**
-     * Link the authenticated user to an unlinked employee profile.
+     * Link the authenticated user to an employee profile.
+     * HR/admin/super admin may reassign an already-linked employee to themselves.
      */
     public function linkEmployee(Request $request)
     {
         $user = $request->user()->loadMissing('employee');
+        $canManageEmployees = $this->userCanManageEmployeeLinks($user);
 
         if ($user->employee) {
             return response()->json(['message' => 'Your account is already linked to an employee profile.'], 422);
@@ -318,12 +336,88 @@ class AuthController extends Controller
 
         $employee = Employee::findOrFail($validated['employee_id']);
 
-        if ($employee->user_id) {
+        if ($employee->user_id && ! $canManageEmployees) {
             return response()->json(['message' => 'This employee is already linked to another user account.'], 422);
+        }
+
+        if ($employee->user_id && (int) $employee->user_id === (int) $user->id) {
+            return response()->json(['message' => 'This employee is already linked to your account.'], 422);
         }
 
         $employee->update(['user_id' => $user->id]);
 
+        return $this->linkedEmployeeResponse($user, 'Employee profile linked successfully');
+    }
+
+    /**
+     * Create a new employee profile for the authenticated HR/admin/super admin user.
+     */
+    public function createEmployeeProfile(Request $request)
+    {
+        $user = $request->user()->loadMissing('employee');
+
+        if (! $this->userCanManageEmployeeLinks($user)) {
+            return response()->json(['message' => 'Only HR Admin or Super Admin can create an employee profile this way.'], 403);
+        }
+
+        if ($user->employee) {
+            return response()->json(['message' => 'Your account is already linked to an employee profile.'], 422);
+        }
+
+        $validated = $request->validate([
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'department_id' => 'nullable|exists:departments,id',
+            'designation_id' => 'nullable|exists:designations,id',
+            'joining_date' => 'nullable|date',
+            'employment_type' => 'nullable|in:full_time,part_time,contract,intern',
+        ]);
+
+        $nameParts = preg_split('/\s+/', trim((string) $user->name), 2);
+        $firstName = $validated['first_name'] ?? ($nameParts[0] ?: 'Admin');
+        $lastName = $validated['last_name'] ?? ($nameParts[1] ?? 'User');
+
+        $maxCode = Employee::withTrashed()
+            ->where('employee_code', 'like', 'EMP%')
+            ->pluck('employee_code')
+            ->map(function ($code) {
+                return (int) preg_replace('/\D/', '', (string) $code);
+            })
+            ->max();
+
+        $employeeCode = 'EMP' . str_pad((string) (($maxCode ?: 0) + 1), 4, '0', STR_PAD_LEFT);
+
+        while (Employee::withTrashed()->where('employee_code', $employeeCode)->exists()) {
+            $maxCode++;
+            $employeeCode = 'EMP' . str_pad((string) ($maxCode + 1), 4, '0', STR_PAD_LEFT);
+        }
+
+        Employee::create([
+            'user_id' => $user->id,
+            'employee_code' => $employeeCode,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'department_id' => $validated['department_id'] ?? null,
+            'designation_id' => $validated['designation_id'] ?? null,
+            'joining_date' => $validated['joining_date'] ?? now()->toDateString(),
+            'employment_type' => $validated['employment_type'] ?? 'full_time',
+            'employment_status' => 'active',
+            'country' => 'Pakistan',
+        ]);
+
+        return $this->linkedEmployeeResponse($user, 'Employee profile created and linked successfully');
+    }
+
+    private function userCanManageEmployeeLinks(User $user): bool
+    {
+        return $user->hasPermission('employees.create')
+            || $user->hasPermission('employees.update')
+            || $user->hasPermission('employees.edit')
+            || in_array($user->role, ['super_admin', 'hr_admin', 'admin'], true);
+    }
+
+    private function linkedEmployeeResponse(User $user, string $message)
+    {
         $freshUser = $user->fresh()->load([
             'employee.department',
             'employee.designation',
@@ -331,7 +425,7 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Employee profile linked successfully',
+            'message' => $message,
             'user' => $freshUser,
             'employee' => $freshUser->employee,
         ]);

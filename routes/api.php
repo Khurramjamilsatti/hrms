@@ -112,6 +112,7 @@ Route::middleware(['auth:sanctum', 'hrms'])->group(function () {
     Route::get('/profile/stats', [AuthController::class, 'profileStats']);
     Route::get('/profile/linkable-employees', [AuthController::class, 'linkableEmployees']);
     Route::post('/profile/link-employee', [AuthController::class, 'linkEmployee']);
+    Route::post('/profile/create-employee', [AuthController::class, 'createEmployeeProfile']);
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);

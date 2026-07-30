@@ -130,8 +130,17 @@
         </div>
       </div>
 
+      <!-- Loading / error -->
+      <div v-if="loading" class="bg-white rounded-2xl border border-gray-200 p-12 text-center text-gray-500 mb-4">
+        Loading attendance calendar...
+      </div>
+      <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4">
+        {{ error }}
+        <button @click="loadCalendar" class="ml-2 underline text-sm">Retry</button>
+      </div>
+
       <!-- Month grid calendar -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-3 md:p-4 mb-4">
+      <div v-else class="bg-white rounded-2xl shadow-sm border border-gray-200 p-3 md:p-4">
         <div class="grid grid-cols-7 gap-1 mb-2">
           <div v-for="day in weekDays" :key="day" class="text-center text-[11px] font-semibold text-gray-500 py-1">{{ day }}</div>
         </div>
@@ -141,8 +150,8 @@
             :key="cell.key"
             type="button"
             :disabled="!cell.inMonth"
-            @click="cell.inMonth && (selectedDay = cell.date)"
-            class="relative min-h-[52px] md:min-h-[64px] rounded-xl p-1 text-left transition-all border"
+            @click="openDayPopup(cell)"
+            class="relative min-h-[52px] md:min-h-[72px] rounded-xl p-1.5 text-left transition-all border"
             :class="cellClass(cell)"
           >
             <div class="text-xs font-bold" :class="cell.inMonth ? 'text-gray-900' : 'text-gray-300'">{{ cell.day }}</div>
@@ -156,69 +165,95 @@
         </div>
       </div>
 
-      <!-- Loading / error -->
-      <div v-if="loading" class="bg-white rounded-2xl border border-gray-200 p-12 text-center text-gray-500">
-        Loading attendance calendar...
-      </div>
-      <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4">
-        {{ error }}
-        <button @click="loadCalendar" class="ml-2 underline text-sm">Retry</button>
-      </div>
-
-      <!-- Day list (screenshot style) -->
-      <div v-else class="space-y-3">
-        <div
-          v-for="day in filteredDays"
-          :id="`day-${day.date}`"
-          :key="day.date"
-          class="bg-white rounded-2xl shadow-sm border border-gray-200 px-4 py-3 flex items-center gap-3 transition-shadow"
-          :class="{ 'ring-2 ring-accent shadow-md': selectedDay === day.date }"
-          @click="selectedDay = day.date"
-        >
-          <!-- Date -->
-          <div class="w-12 shrink-0 text-center">
-            <div class="text-2xl font-bold text-gray-900 leading-none">{{ day.day }}</div>
-            <div class="text-xs text-gray-500 mt-1">{{ day.weekday }}</div>
+      <!-- Day detail popup -->
+      <div
+        v-if="showDayPopup && selectedDayDetail"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+        @click.self="closeDayPopup"
+      >
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-gray-100 flex items-start justify-between gap-3">
+            <div>
+              <div class="text-lg font-bold text-gray-900">{{ formatDate(selectedDayDetail.date) }}</div>
+              <div class="text-xs text-gray-500 mt-0.5">{{ calendarData?.employee?.full_name }}</div>
+            </div>
+            <button type="button" @click="closeDayPopup" class="text-gray-400 hover:text-gray-600 p-1" aria-label="Close">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
           </div>
 
-          <!-- Times or weekend -->
-          <div class="flex-1 min-w-0">
-            <template v-if="day.status === 'weekend'">
-              <div class="text-sm font-medium text-gray-500">Weekend</div>
+          <div class="px-5 py-4 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-500">Status</span>
+              <span class="px-3 py-1 rounded-full text-xs font-semibold capitalize" :class="statusBadgeClass(selectedDayDetail.status)">
+                {{ statusLabel(selectedDayDetail.status) }}
+              </span>
+            </div>
+
+            <template v-if="selectedDayDetail.status === 'weekend'">
+              <p class="text-sm text-gray-600">This day is marked as a weekend.</p>
             </template>
-            <template v-else-if="day.status === 'upcoming'">
-              <div class="text-sm text-gray-400">Upcoming</div>
+            <template v-else-if="selectedDayDetail.status === 'upcoming'">
+              <p class="text-sm text-gray-600">No attendance yet for this upcoming date.</p>
             </template>
             <template v-else>
-              <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
-                <div class="flex items-center gap-1.5 text-sm">
-                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-green-100 text-green-700">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                  </span>
-                  <span class="font-medium text-gray-800">{{ formatTime(day.check_in) }}</span>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="rounded-xl bg-green-50 border border-green-100 p-3">
+                  <div class="flex items-center gap-1.5 text-xs font-semibold text-green-700 mb-1">
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-green-100">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </span>
+                    Check-in
+                  </div>
+                  <div class="text-base font-bold text-gray-900">{{ formatTime(selectedDayDetail.check_in) }}</div>
                 </div>
-                <div class="flex items-center gap-1.5 text-sm">
-                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-red-100 text-red-600">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                  </span>
-                  <span class="font-medium text-gray-800">{{ formatTime(day.check_out) }}</span>
+                <div class="rounded-xl bg-red-50 border border-red-100 p-3">
+                  <div class="flex items-center gap-1.5 text-xs font-semibold text-red-600 mb-1">
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-red-100">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    </span>
+                    Check-out
+                  </div>
+                  <div class="text-base font-bold text-gray-900">{{ formatTime(selectedDayDetail.check_out) }}</div>
                 </div>
               </div>
-              <div v-if="day.working_hours" class="text-xs text-gray-500 mt-1">{{ day.working_hours }}h worked</div>
+
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500">Working hours</span>
+                <span class="font-semibold text-gray-900">{{ selectedDayDetail.working_hours || 0 }}h</span>
+              </div>
+              <div v-if="selectedDayDetail.overtime_hours" class="flex items-center justify-between text-sm">
+                <span class="text-gray-500">Overtime</span>
+                <span class="font-semibold text-blue-600">+{{ selectedDayDetail.overtime_hours }}h</span>
+              </div>
+              <div v-if="selectedDayDetail.sessions_count > 1" class="flex items-center justify-between text-sm">
+                <span class="text-gray-500">Sessions</span>
+                <span class="font-semibold text-gray-900">{{ selectedDayDetail.sessions_count }}</span>
+              </div>
+              <div v-if="selectedDayDetail.remarks" class="text-sm">
+                <div class="text-gray-500 mb-1">Remarks</div>
+                <p class="text-gray-800 bg-gray-50 rounded-lg px-3 py-2">{{ selectedDayDetail.remarks }}</p>
+              </div>
+
+              <div v-if="selectedDayDetail.sessions?.length > 1" class="border-t border-gray-100 pt-3 space-y-2">
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Sessions</div>
+                <div
+                  v-for="(session, index) in selectedDayDetail.sessions"
+                  :key="session.id || index"
+                  class="flex items-center justify-between text-sm bg-gray-50 rounded-lg px-3 py-2"
+                >
+                  <span class="text-gray-600">#{{ index + 1 }} · {{ formatTime(session.check_in) }} – {{ formatTime(session.check_out) }}</span>
+                  <span class="font-medium text-gray-900">{{ session.working_hours || 0 }}h</span>
+                </div>
+              </div>
             </template>
           </div>
 
-          <!-- Status badge -->
-          <span
-            class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold capitalize"
-            :class="statusBadgeClass(day.status)"
-          >
-            {{ statusLabel(day.status) }}
-          </span>
-        </div>
-
-        <div v-if="!filteredDays.length" class="bg-white rounded-2xl border border-gray-200 p-10 text-center text-gray-500">
-          No days match this filter.
+          <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-end">
+            <button type="button" @click="closeDayPopup" class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent-dark rounded-lg transition-colors">
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </template>
@@ -295,7 +330,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { usePermissions } from '@/composables/usePermissions';
@@ -308,7 +343,8 @@ const loading = ref(false);
 const error = ref(null);
 const calendarData = ref(null);
 const statusFilter = ref('');
-const selectedDay = ref(null);
+const showDayPopup = ref(false);
+const selectedDayDetail = ref(null);
 
 const now = new Date();
 const selectedMonth = ref(now.getMonth() + 1);
@@ -374,12 +410,6 @@ const daysByDate = computed(() => {
   return map;
 });
 
-const filteredDays = computed(() => {
-  const days = [...(calendarData.value?.days || [])].reverse();
-  if (!statusFilter.value) return days;
-  return days.filter((d) => d.status === statusFilter.value);
-});
-
 const calendarCells = computed(() => {
   const year = selectedYear.value;
   const month = selectedMonth.value - 1;
@@ -423,8 +453,9 @@ function buildCell(date, inMonth) {
 
 function cellClass(cell) {
   if (!cell.inMonth) return 'border-transparent bg-transparent cursor-default';
-  const base = 'border-gray-100 hover:border-accent/40 hover:shadow-sm cursor-pointer';
-  if (selectedDay.value === cell.date) return `${base} bg-accent/10 border-accent ring-1 ring-accent`;
+  const dimmed = statusFilter.value && cell.status !== statusFilter.value;
+  const base = `border-gray-100 hover:border-accent/40 hover:shadow-sm cursor-pointer ${dimmed ? 'opacity-35' : ''}`;
+  if (selectedDayDetail.value?.date === cell.date && showDayPopup.value) return `${base} bg-accent/10 border-accent ring-1 ring-accent`;
   if (cell.isToday) return `${base} bg-gray-50 border-gray-200`;
   if (cell.status === 'absent') return `${base} bg-red-50/60`;
   if (cell.status === 'late') return `${base} bg-amber-50/70`;
@@ -432,6 +463,26 @@ function cellClass(cell) {
   if (cell.status === 'on_leave') return `${base} bg-indigo-50/60`;
   if (cell.status === 'weekend') return `${base} bg-gray-50`;
   return `${base} bg-white`;
+}
+
+function openDayPopup(cell) {
+  if (!cell.inMonth) return;
+  selectedDayDetail.value = daysByDate.value[cell.date] || {
+    date: cell.date,
+    day: cell.day,
+    status: 'upcoming',
+    check_in: null,
+    check_out: null,
+    working_hours: 0,
+    overtime_hours: 0,
+    sessions: [],
+  };
+  showDayPopup.value = true;
+}
+
+function closeDayPopup() {
+  showDayPopup.value = false;
+  selectedDayDetail.value = null;
 }
 
 function statusDot(status) {
@@ -561,13 +612,10 @@ function selectEmployee(emp) {
 }
 
 watch([selectedMonth, selectedYear], () => {
-  if (viewMode.value === 'calendar') loadCalendar();
-});
-
-watch(selectedDay, async (date) => {
-  if (!date) return;
-  await nextTick();
-  document.getElementById(`day-${date}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (viewMode.value === 'calendar') {
+    closeDayPopup();
+    loadCalendar();
+  }
 });
 
 // List view

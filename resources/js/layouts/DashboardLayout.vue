@@ -186,7 +186,7 @@
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Header -->
-      <header class="bg-brand sticky top-0 z-10 shadow-soft">
+      <header class="bg-brand sticky top-0 z-40 shadow-soft">
         <div class="flex items-center justify-between px-6 py-4">
           <h2 class="text-2xl font-bold text-white">{{ pageTitle }}</h2>
           

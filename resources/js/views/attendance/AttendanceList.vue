@@ -43,9 +43,9 @@
       <!-- Calendar Report -->
       <template v-if="viewMode === 'calendar'">
         <!-- Employee picker -->
-        <div v-if="canSelectEmployee" class="relative z-30 mb-5 rounded-3xl border border-white/70 bg-white/80 backdrop-blur-sm shadow-[0_10px_40px_rgba(30,20,51,0.06)] p-4 md:p-5">
+        <div v-if="canSelectEmployee" class="relative z-[2] mb-5 rounded-3xl border border-white/70 bg-white/80 backdrop-blur-sm shadow-[0_10px_40px_rgba(30,20,51,0.06)] p-4 md:p-5">
           <label class="block text-sm font-semibold text-ink mb-2">View employee calendar</label>
-          <div class="relative z-40">
+          <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
@@ -59,7 +59,7 @@
             />
             <div
               v-if="showEmployeeDropdown && filteredEmployees.length"
-              class="absolute left-0 right-0 top-full z-50 mt-2 bg-white border border-surface-border rounded-2xl shadow-2xl max-h-64 overflow-y-auto"
+              class="absolute left-0 right-0 top-full z-10 mt-2 bg-white border border-surface-border rounded-2xl shadow-2xl max-h-64 overflow-y-auto"
             >
               <button
                 v-if="currentEmployeeId"
@@ -87,7 +87,7 @@
         </div>
 
         <!-- Month + filters + stats shell -->
-        <div class="relative z-10 rounded-[28px] border border-white/80 bg-white/85 backdrop-blur-sm shadow-[0_18px_50px_rgba(30,20,51,0.08)] overflow-hidden mb-5">
+        <div class="relative z-[1] rounded-[28px] border border-white/80 bg-white/85 backdrop-blur-sm shadow-[0_18px_50px_rgba(30,20,51,0.08)] overflow-hidden mb-5">
           <!-- Month navigation -->
           <div class="px-4 md:px-6 py-4 md:py-5 flex items-center justify-between gap-3 bg-gradient-to-r from-brand via-brand-soft to-[#3a2a5c] text-white">
             <button

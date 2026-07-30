@@ -465,6 +465,8 @@ class TravelExpenseController extends Controller
 
     public function storeTravelPolicy(Request $request)
     {
+        $this->assertCanManageTravelPolicies($request);
+
         $validated = $request->validate([
             'policy_name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -490,6 +492,8 @@ class TravelExpenseController extends Controller
 
     public function updateTravelPolicy(Request $request, $id)
     {
+        $this->assertCanManageTravelPolicies($request);
+
         $policy = TravelPolicy::findOrFail($id);
         
         $validated = $request->validate([
@@ -513,5 +517,29 @@ class TravelExpenseController extends Controller
 
         $policy->update($validated);
         return response()->json($policy);
+    }
+
+    public function destroyTravelPolicy(Request $request, $id)
+    {
+        $this->assertCanManageTravelPolicies($request);
+
+        $policy = TravelPolicy::findOrFail($id);
+        $policy->delete();
+
+        return response()->json(['message' => 'Travel policy deleted successfully']);
+    }
+
+    /**
+     * Only HR Admin and Super Admin may create, edit, or delete travel policies.
+     */
+    private function assertCanManageTravelPolicies(Request $request): void
+    {
+        $user = $request->user();
+
+        if ($user->isSuperAdmin() || $user->isHRAdmin()) {
+            return;
+        }
+
+        abort(403, 'Only HR Admin or Super Admin can manage travel policies.');
     }
 }

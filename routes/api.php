@@ -358,6 +358,7 @@ Route::middleware(['auth:sanctum', 'hrms'])->group(function () {
         Route::get('/travel-policies', [TravelExpenseController::class, 'getTravelPolicies'])->middleware('permission:travel.view');
         Route::post('/travel-policies', [TravelExpenseController::class, 'storeTravelPolicy'])->middleware('permission:travel.manage');
         Route::put('/travel-policies/{travelPolicy}', [TravelExpenseController::class, 'updateTravelPolicy'])->middleware('permission:travel.manage');
+        Route::delete('/travel-policies/{travelPolicy}', [TravelExpenseController::class, 'destroyTravelPolicy'])->middleware('permission:travel.manage');
         
         Route::post('/expense-categories', [TravelExpenseController::class, 'storeExpenseCategory'])->middleware('permission:travel.manage');
         

@@ -8,7 +8,11 @@
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           View Policies
         </button>
-        <button @click="openModal(activeTab)" class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow">
+        <button
+          v-if="activeTab !== 'policies' || canManagePolicies"
+          @click="openModal(activeTab)"
+          class="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors shadow"
+        >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
           New {{ getTabLabel() }}
         </button>
@@ -435,7 +439,9 @@
       <div v-if="policies.length === 0" class="p-12 text-center">
         <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
         <h3 class="text-lg font-semibold text-gray-900 mb-1">No Travel Policies</h3>
-        <p class="text-gray-500">Click "New Policy" to create one.</p>
+        <p class="text-gray-500">
+          {{ canManagePolicies ? 'Click "New Policy" to create one.' : 'Ask HR Admin to configure travel policies.' }}
+        </p>
       </div>
       <div v-else>
         <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
@@ -477,8 +483,21 @@
                     <button @click="viewDetails(policy)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="View">
                       <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </button>
-                    <button @click="editPolicy(policy)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Edit">
+                    <button
+                      v-if="canManagePolicies"
+                      @click="editPolicy(policy)"
+                      class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      title="Edit"
+                    >
                       <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button
+                      v-if="canManagePolicies"
+                      @click="deletePolicy(policy)"
+                      class="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete"
+                    >
+                      <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                   </div>
                 </td>
@@ -1369,7 +1388,10 @@ const {
   applyOwnEmployeeToForm,
   currentEmployeeId,
 } = useEmployeeRecordPicker('travel');
-const activeTab = ref('travel');
+
+const canManagePolicies = computed(() =>
+  ['hr_admin', 'super_admin'].includes(authStore.user?.role)
+);const activeTab = ref('travel');
 const loading = ref(false);
 const error = ref(null);
 const submitting = ref(false);
@@ -1618,6 +1640,10 @@ const openModal = (type) => {
     resetMileageForm();
     showMileageModal.value = true;
   } else if (type === 'policies') {
+    if (!canManagePolicies.value) {
+      showError('Only HR Admin or Super Admin can manage travel policies.');
+      return;
+    }
     resetPolicyForm();
     showPolicyModal.value = true;
   }
@@ -1852,6 +1878,11 @@ const submitMileageClaim = async () => {
 };
 
 const submitPolicy = async () => {
+  if (!canManagePolicies.value) {
+    showError('Only HR Admin or Super Admin can manage travel policies.');
+    return;
+  }
+
   submitting.value = true;
   try {
     const payload = { ...policyForm };
@@ -1969,6 +2000,11 @@ const editMileageClaim = (claim) => {
 };
 
 const editPolicy = (policy) => {
+  if (!canManagePolicies.value) {
+    showError('Only HR Admin or Super Admin can manage travel policies.');
+    return;
+  }
+
   editingPolicy.value = policy;
   policyForm.policy_name = policy.policy_name;
   policyForm.description = policy.description || '';
@@ -1987,6 +2023,30 @@ const editPolicy = (policy) => {
   policyForm.finance_approval_threshold = policy.finance_approval_threshold || '';
   policyForm.is_active = policy.is_active;
   showPolicyModal.value = true;
+};
+
+const deletePolicy = async (policy) => {
+  if (!canManagePolicies.value) {
+    showError('Only HR Admin or Super Admin can manage travel policies.');
+    return;
+  }
+
+  if (!(await confirm({
+    title: 'Delete Travel Policy',
+    message: `Delete "${policy.policy_name}"? This cannot be undone.`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  }))) return;
+
+  try {
+    await axios.delete(`/travel-expenses/travel-policies/${policy.id}`);
+    success('Travel policy deleted successfully!');
+    loadPolicies();
+  } catch (err) {
+    showError('Failed to delete travel policy: ' + (err.response?.data?.message || 'Unknown error'));
+    console.error('Delete error:', err);
+  }
 };
 
 const getTabLabel = () => {

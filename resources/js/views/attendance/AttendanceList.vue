@@ -1,359 +1,625 @@
 <template>
-  <div class="p-6">
+  <div class="p-4 md:p-6 max-w-5xl mx-auto">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">Attendance Management</h1>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-lg shadow border border-gray-200 p-5">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Present Today</p>
-            <h3 class="text-2xl font-bold text-gray-900">{{ stats.present }}</h3>
-          </div>
-          <div class="bg-gray-100 rounded-lg p-3">
-            <svg class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-          </div>
-        </div>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Attendance Report</h1>
+        <p class="text-sm text-gray-500 mt-1">
+          {{ calendarData?.employee?.full_name || 'Your attendance' }}
+          <span v-if="calendarData?.employee?.employee_code" class="text-gray-400">· {{ calendarData.employee.employee_code }}</span>
+        </p>
       </div>
-
-      <div class="bg-white rounded-lg shadow border border-gray-200 p-5">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Late Arrivals</p>
-            <h3 class="text-2xl font-bold text-gray-900">{{ stats.late }}</h3>
-          </div>
-          <div class="bg-gray-100 rounded-lg p-3">
-            <svg class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow border border-gray-200 p-5">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">On Leave</p>
-            <h3 class="text-2xl font-bold text-gray-900">{{ stats.on_leave }}</h3>
-          </div>
-          <div class="bg-gray-100 rounded-lg p-3">
-            <svg class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow border border-gray-200 p-5">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">Absent</p>
-            <h3 class="text-2xl font-bold text-gray-900">{{ stats.absent }}</h3>
-          </div>
-          <div class="bg-gray-100 rounded-lg p-3">
-            <svg class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>
-            </svg>
-          </div>
-        </div>
+      <div class="flex items-center gap-2">
+        <button
+          v-if="canViewTeamRecords"
+          @click="viewMode = viewMode === 'calendar' ? 'list' : 'calendar'"
+          class="px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          {{ viewMode === 'calendar' ? 'All Records' : 'Calendar' }}
+        </button>
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="bg-white rounded-lg shadow border border-gray-200 p-4 mb-5">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
-          <input 
-            v-model="filters.date" 
-            type="date" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-            @change="loadAttendance"
+    <!-- Calendar Report -->
+    <template v-if="viewMode === 'calendar'">
+      <!-- Employee picker (managers / section heads / HR) -->
+      <div v-if="canSelectEmployee" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-4">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Employee</label>
+        <div class="relative">
+          <input
+            v-model="employeeSearch"
+            @input="filterEmployees"
+            @focus="showEmployeeDropdown = true"
+            type="text"
+            placeholder="Search by name or employee ID..."
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent"
           />
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-          <select 
-            v-model="filters.status" 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-            @change="loadAttendance"
+          <div
+            v-if="showEmployeeDropdown && filteredEmployees.length"
+            class="absolute z-40 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
           >
-            <option value="">All Status</option>
-            <option value="present">Present</option>
-            <option value="late">Late</option>
-            <option value="half_day">Half Day</option>
-            <option value="on_leave">On Leave</option>
-            <option value="absent">Absent</option>
-          </select>
+            <button
+              v-if="currentEmployeeId"
+              type="button"
+              @click="selectEmployee({ id: currentEmployeeId, full_name: 'Me (current user)', employee_code: '' })"
+              class="w-full text-left px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100"
+            >
+              <div class="text-sm font-medium text-accent">Me (current user)</div>
+            </button>
+            <button
+              v-for="emp in filteredEmployees"
+              :key="emp.id"
+              type="button"
+              @click="selectEmployee(emp)"
+              class="w-full text-left px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100 last:border-0"
+            >
+              <div class="text-sm font-medium text-gray-900">{{ emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() }}</div>
+              <div class="text-xs text-gray-500">{{ emp.employee_code }} · {{ emp.department?.name || 'N/A' }}</div>
+            </button>
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Search Employee</label>
-          <input 
-            v-model="filters.search" 
-            type="text" 
-            placeholder="Search by name or code..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-            @input="loadAttendance"
-          />
+        <div v-if="selectedEmployeeLabel" class="mt-2 text-xs text-gray-500">
+          Showing: <span class="font-semibold text-gray-800">{{ selectedEmployeeLabel }}</span>
         </div>
-        <div class="flex items-end">
-          <button 
-            @click="resetFilters"
-            class="w-full px-4 py-2 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors"
+      </div>
+
+      <!-- Month navigation -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 px-4 py-3 mb-4 flex items-center justify-between">
+        <button
+          type="button"
+          @click="shiftMonth(-1)"
+          class="w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors"
+          aria-label="Previous month"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="text-lg font-bold text-gray-900">{{ monthLabel }}</div>
+        <button
+          type="button"
+          @click="shiftMonth(1)"
+          class="w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors"
+          aria-label="Next month"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Status filter chips -->
+      <div class="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+        <button
+          v-for="chip in statusChips"
+          :key="chip.value"
+          type="button"
+          @click="statusFilter = chip.value"
+          class="shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors"
+          :class="statusFilter === chip.value
+            ? 'bg-accent text-white shadow'
+            : 'bg-accent/10 text-accent hover:bg-accent/20'"
+        >
+          {{ chip.label }}
+        </button>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 px-3 py-4 mb-4">
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 text-center">
+          <div>
+            <div class="text-xs text-gray-500 mb-1">Present</div>
+            <div class="text-xl font-bold text-green-600">{{ summary.present }}</div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500 mb-1">Absent</div>
+            <div class="text-xl font-bold text-red-600">{{ summary.absent }}</div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500 mb-1">Late</div>
+            <div class="text-xl font-bold text-amber-500">{{ summary.late }}</div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500 mb-1">Half</div>
+            <div class="text-xl font-bold text-yellow-600">{{ summary.half_day }}</div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500 mb-1">Leave</div>
+            <div class="text-xl font-bold text-indigo-600">{{ summary.on_leave }}</div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500 mb-1">Hrs</div>
+            <div class="text-xl font-bold text-accent">{{ summary.working_hours }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month grid calendar -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-3 md:p-4 mb-4">
+        <div class="grid grid-cols-7 gap-1 mb-2">
+          <div v-for="day in weekDays" :key="day" class="text-center text-[11px] font-semibold text-gray-500 py-1">{{ day }}</div>
+        </div>
+        <div class="grid grid-cols-7 gap-1">
+          <button
+            v-for="cell in calendarCells"
+            :key="cell.key"
+            type="button"
+            :disabled="!cell.inMonth"
+            @click="cell.inMonth && (selectedDay = cell.date)"
+            class="relative min-h-[52px] md:min-h-[64px] rounded-xl p-1 text-left transition-all border"
+            :class="cellClass(cell)"
           >
-            Reset Filters
+            <div class="text-xs font-bold" :class="cell.inMonth ? 'text-gray-900' : 'text-gray-300'">{{ cell.day }}</div>
+            <div v-if="cell.inMonth && cell.status && cell.status !== 'upcoming'" class="mt-1">
+              <span class="inline-block w-2 h-2 rounded-full" :class="statusDot(cell.status)"></span>
+              <div class="hidden md:block text-[10px] leading-tight mt-0.5 truncate" :class="statusTextClass(cell.status)">
+                {{ statusLabel(cell.status) }}
+              </div>
+            </div>
           </button>
         </div>
       </div>
-    </div>
 
-    <div v-if="loading" class="bg-white rounded-lg shadow border border-gray-200 p-12 text-center">
-      <div class="text-gray-600">Loading attendance records...</div>
-    </div>
+      <!-- Loading / error -->
+      <div v-if="loading" class="bg-white rounded-2xl border border-gray-200 p-12 text-center text-gray-500">
+        Loading attendance calendar...
+      </div>
+      <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4">
+        {{ error }}
+        <button @click="loadCalendar" class="ml-2 underline text-sm">Retry</button>
+      </div>
 
-    <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-      {{ error }}
-    </div>
+      <!-- Day list (screenshot style) -->
+      <div v-else class="space-y-3">
+        <div
+          v-for="day in filteredDays"
+          :id="`day-${day.date}`"
+          :key="day.date"
+          class="bg-white rounded-2xl shadow-sm border border-gray-200 px-4 py-3 flex items-center gap-3 transition-shadow"
+          :class="{ 'ring-2 ring-accent shadow-md': selectedDay === day.date }"
+          @click="selectedDay = day.date"
+        >
+          <!-- Date -->
+          <div class="w-12 shrink-0 text-center">
+            <div class="text-2xl font-bold text-gray-900 leading-none">{{ day.day }}</div>
+            <div class="text-xs text-gray-500 mt-1">{{ day.weekday }}</div>
+          </div>
 
-    <!-- Attendance Table -->
-    <div v-else class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-gray-100 border-b border-gray-300">
-            <tr>
-              <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date</th>
-              <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Employee</th>
-              <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Sessions</th>
-              <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Total Hours</th>
-              <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Remarks</th>
-              <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Details</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <template v-for="attendance in attendances" :key="attendance.id">
-              <!-- Main Row -->
-              <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="text-sm font-semibold text-gray-900">{{ formatDate(attendance.date) }}</span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <div class="text-sm font-semibold text-gray-900">{{ attendance.employee?.full_name }}</div>
-                    <div class="text-xs text-gray-500">{{ attendance.employee?.employee_code }}</div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">
-                    {{ attendance.sessions_count }} {{ attendance.sessions_count === 1 ? 'Session' : 'Sessions' }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <span class="text-sm font-semibold text-gray-900">{{ attendance.total_working_hours || 0 }}h</span>
-                    <span v-if="attendance.total_overtime_hours > 0" class="ml-1 text-xs text-blue-600">(+{{ attendance.total_overtime_hours }}h OT)</span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">
-                  <span :class="{
-                    'inline-flex px-2.5 py-1 text-xs font-semibold rounded-full': true,
-                    'bg-green-100 text-green-700': attendance.status === 'present',
-                    'bg-amber-100 text-amber-700': attendance.status === 'late',
-                    'bg-blue-100 text-blue-700': attendance.status === 'half_day',
-                    'bg-gray-100 text-gray-700': attendance.status === 'on_leave',
-                    'bg-red-100 text-red-700': attendance.status === 'absent',
-                  }">
-                    {{ attendance.status?.replace('_', ' ') }}
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <span class="text-sm text-gray-600">{{ attendance.remarks || '-' }}</span>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <button 
-                    @click="toggleSessionDetails(attendance.id)"
-                    class="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                  >
-                    {{ expandedRows.has(attendance.id) ? 'Hide' : 'Show' }}
-                  </button>
-                </td>
-              </tr>
-              
-              <!-- Expanded Session Details -->
-              <tr v-if="expandedRows.has(attendance.id)" class="bg-gray-50">
-                <td colspan="7" class="px-6 py-4">
-                  <div class="bg-white rounded-lg border border-gray-200 p-4">
-                    <h4 class="text-sm font-semibold text-gray-900 mb-3">Session Details</h4>
-                    <div class="space-y-2">
-                      <div 
-                        v-for="(session, index) in attendance.sessions" 
-                        :key="session.id"
-                        class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                      >
-                        <div class="flex items-center space-x-4">
-                          <span class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
-                            {{ index + 1 }}
-                          </span>
-                          <div>
-                            <div class="text-sm font-medium text-gray-900">
-                              Check-in: <span class="text-blue-600">{{ session.check_in || '-' }}</span>
-                            </div>
-                            <div class="text-sm text-gray-600">
-                              Check-out: <span class="text-gray-900">{{ session.check_out || 'In Progress' }}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="text-right">
-                          <div class="text-sm font-semibold text-gray-900">{{ session.working_hours || 0 }}h</div>
-                          <div v-if="session.overtime_hours > 0" class="text-xs text-blue-600">+{{ session.overtime_hours }}h OT</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
+          <!-- Times or weekend -->
+          <div class="flex-1 min-w-0">
+            <template v-if="day.status === 'weekend'">
+              <div class="text-sm font-medium text-gray-500">Weekend</div>
             </template>
-          </tbody>
-        </table>
+            <template v-else-if="day.status === 'upcoming'">
+              <div class="text-sm text-gray-400">Upcoming</div>
+            </template>
+            <template v-else>
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <div class="flex items-center gap-1.5 text-sm">
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-green-100 text-green-700">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  </span>
+                  <span class="font-medium text-gray-800">{{ formatTime(day.check_in) }}</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-sm">
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-red-100 text-red-600">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                  </span>
+                  <span class="font-medium text-gray-800">{{ formatTime(day.check_out) }}</span>
+                </div>
+              </div>
+              <div v-if="day.working_hours" class="text-xs text-gray-500 mt-1">{{ day.working_hours }}h worked</div>
+            </template>
+          </div>
+
+          <!-- Status badge -->
+          <span
+            class="shrink-0 px-3 py-1 rounded-full text-xs font-semibold capitalize"
+            :class="statusBadgeClass(day.status)"
+          >
+            {{ statusLabel(day.status) }}
+          </span>
+        </div>
+
+        <div v-if="!filteredDays.length" class="bg-white rounded-2xl border border-gray-200 p-10 text-center text-gray-500">
+          No days match this filter.
+        </div>
+      </div>
+    </template>
+
+    <!-- Legacy all-records list for team/HR -->
+    <template v-else>
+      <div class="bg-white rounded-lg shadow border border-gray-200 p-4 mb-5">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+            <input v-model="listFilters.date" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" @change="loadAttendanceList" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+            <select v-model="listFilters.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" @change="loadAttendanceList">
+              <option value="">All Status</option>
+              <option value="present">Present</option>
+              <option value="late">Late</option>
+              <option value="half_day">Half Day</option>
+              <option value="on_leave">On Leave</option>
+              <option value="absent">Absent</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Search Employee</label>
+            <input v-model="listFilters.search" type="text" placeholder="Search by name or code..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" @input="loadAttendanceList" />
+          </div>
+          <div class="flex items-end">
+            <button @click="resetListFilters" class="w-full px-4 py-2 bg-accent hover:bg-accent-dark text-white font-medium rounded-lg transition-colors">Reset Filters</button>
+          </div>
+        </div>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="pagination" class="px-6 py-4 bg-gray-100 border-t border-gray-300 flex items-center justify-between">
-        <div class="text-sm text-gray-600">
-          Showing <span class="font-semibold text-gray-900">{{ ((pagination.current_page - 1) * pagination.per_page) + 1 }}</span> to 
-          <span class="font-semibold text-gray-900">{{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}</span> of 
-          <span class="font-semibold text-gray-900">{{ pagination.total }}</span> records
+      <div v-if="listLoading" class="bg-white rounded-lg shadow border border-gray-200 p-12 text-center text-gray-600">Loading attendance records...</div>
+      <div v-else-if="listError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{{ listError }}</div>
+      <div v-else class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-100 border-b border-gray-300">
+              <tr>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Employee</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Sessions</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Total Hours</th>
+                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="row in attendances" :key="row.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 text-sm font-semibold text-gray-900">{{ formatDate(row.date) }}</td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-semibold text-gray-900">{{ row.employee?.full_name }}</div>
+                  <div class="text-xs text-gray-500">{{ row.employee?.employee_code }}</div>
+                </td>
+                <td class="px-6 py-4 text-sm">{{ row.sessions_count }}</td>
+                <td class="px-6 py-4 text-sm font-semibold">{{ row.total_working_hours || 0 }}h</td>
+                <td class="px-6 py-4 text-center">
+                  <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full capitalize" :class="statusBadgeClass(row.status)">{{ statusLabel(row.status) }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="flex items-center space-x-2">
-          <button
-            @click="loadPage(pagination.current_page - 1)"
-            :disabled="pagination.current_page === 1"
-            class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            :class="pagination.current_page === 1 ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'"
-          >
-            Previous
-          </button>
-          <button
-            @click="loadPage(pagination.current_page + 1)"
-            :disabled="pagination.current_page === pagination.last_page"
-            class="px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            :class="pagination.current_page === pagination.last_page ? 'bg-gray-300 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'"
-          >
-            Next
-          </button>
+        <div v-if="pagination" class="px-6 py-4 bg-gray-100 border-t flex items-center justify-between">
+          <div class="text-sm text-gray-600">{{ pagination.total }} records</div>
+          <div class="flex gap-2">
+            <button @click="loadAttendanceList(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="px-4 py-2 text-sm rounded-lg disabled:opacity-50 bg-accent text-white">Previous</button>
+            <button @click="loadAttendanceList(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="px-4 py-2 text-sm rounded-lg disabled:opacity-50 bg-accent text-white">Next</button>
+          </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
+import { usePermissions } from '@/composables/usePermissions';
 
-const attendances = ref([]);
+const authStore = useAuthStore();
+const { canAny } = usePermissions();
+
+const viewMode = ref('calendar');
 const loading = ref(false);
 const error = ref(null);
-const pagination = ref(null);
-const showCheckInModal = ref(false);
-const expandedRows = ref(new Set());
+const calendarData = ref(null);
+const statusFilter = ref('');
+const selectedDay = ref(null);
 
-const filters = ref({
-  date: '', // Empty by default to show all records
-  status: '',
-  search: ''
-});
+const now = new Date();
+const selectedMonth = ref(now.getMonth() + 1);
+const selectedYear = ref(now.getFullYear());
 
-const stats = computed(() => {
-  const list = attendances.value || [];
-  return {
-    present: list.filter(a => a.status === 'present').length,
-    late: list.filter(a => a.status === 'late').length,
-    on_leave: list.filter(a => a.status === 'on_leave').length,
-    absent: list.filter(a => a.status === 'absent').length
-  };
-});
+const currentEmployeeId = computed(() => authStore.user?.employee?.id || null);
+const selectedEmployeeId = ref(currentEmployeeId.value);
 
-const toggleSessionDetails = (attendanceId) => {
-  if (expandedRows.value.has(attendanceId)) {
-    expandedRows.value.delete(attendanceId);
-  } else {
-    expandedRows.value.add(attendanceId);
+const canSelectEmployee = computed(() =>
+  authStore.isAdmin ||
+  authStore.isManager ||
+  canAny(['attendance.manage', 'attendance.reports'])
+);
+
+const canViewTeamRecords = computed(() => canSelectEmployee.value);
+
+const employees = ref([]);
+const filteredEmployees = ref([]);
+const employeeSearch = ref('');
+const showEmployeeDropdown = ref(false);
+
+const selectedEmployeeLabel = computed(() => {
+  if (!selectedEmployeeId.value) return '';
+  if (selectedEmployeeId.value === currentEmployeeId.value) {
+    return calendarData.value?.employee?.full_name
+      ? `${calendarData.value.employee.full_name} (you)`
+      : 'You';
   }
-};
+  return calendarData.value?.employee
+    ? `${calendarData.value.employee.full_name} (${calendarData.value.employee.employee_code})`
+    : '';
+});
 
-const loadAttendance = async (page = 1) => {
+const monthLabel = computed(() => {
+  return new Date(selectedYear.value, selectedMonth.value - 1, 1)
+    .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+});
+
+const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+const statusChips = [
+  { value: '', label: 'All' },
+  { value: 'present', label: 'Present' },
+  { value: 'late', label: 'Late' },
+  { value: 'absent', label: 'Absent' },
+  { value: 'half_day', label: 'Half day' },
+  { value: 'on_leave', label: 'Leave' },
+  { value: 'weekend', label: 'Weekend' },
+];
+
+const summary = computed(() => ({
+  present: calendarData.value?.summary?.present ?? 0,
+  absent: calendarData.value?.summary?.absent ?? 0,
+  late: calendarData.value?.summary?.late ?? 0,
+  half_day: calendarData.value?.summary?.half_day ?? 0,
+  on_leave: calendarData.value?.summary?.on_leave ?? 0,
+  working_hours: calendarData.value?.summary?.working_hours ?? 0,
+}));
+
+const daysByDate = computed(() => {
+  const map = {};
+  (calendarData.value?.days || []).forEach((d) => { map[d.date] = d; });
+  return map;
+});
+
+const filteredDays = computed(() => {
+  const days = [...(calendarData.value?.days || [])].reverse();
+  if (!statusFilter.value) return days;
+  return days.filter((d) => d.status === statusFilter.value);
+});
+
+const calendarCells = computed(() => {
+  const year = selectedYear.value;
+  const month = selectedMonth.value - 1;
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+  const cells = [];
+
+  for (let i = 0; i < first.getDay(); i++) {
+    const d = new Date(year, month, -i);
+    cells.unshift(buildCell(d, false));
+  }
+  for (let day = 1; day <= last.getDate(); day++) {
+    cells.push(buildCell(new Date(year, month, day), true));
+  }
+  while (cells.length % 7 !== 0) {
+    const next = cells.length - (first.getDay() + last.getDate()) + 1;
+    cells.push(buildCell(new Date(year, month + 1, next), false));
+  }
+  return cells;
+});
+
+function toDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function buildCell(date, inMonth) {
+  const key = toDateKey(date);
+  const dayData = daysByDate.value[key];
+  return {
+    key: `${inMonth ? 'in' : 'out'}-${key}`,
+    date: key,
+    day: date.getDate(),
+    inMonth,
+    status: dayData?.status || null,
+    isToday: dayData?.is_today || false,
+  };
+}
+
+function cellClass(cell) {
+  if (!cell.inMonth) return 'border-transparent bg-transparent cursor-default';
+  const base = 'border-gray-100 hover:border-accent/40 hover:shadow-sm cursor-pointer';
+  if (selectedDay.value === cell.date) return `${base} bg-accent/10 border-accent ring-1 ring-accent`;
+  if (cell.isToday) return `${base} bg-gray-50 border-gray-200`;
+  if (cell.status === 'absent') return `${base} bg-red-50/60`;
+  if (cell.status === 'late') return `${base} bg-amber-50/70`;
+  if (cell.status === 'present') return `${base} bg-green-50/60`;
+  if (cell.status === 'on_leave') return `${base} bg-indigo-50/60`;
+  if (cell.status === 'weekend') return `${base} bg-gray-50`;
+  return `${base} bg-white`;
+}
+
+function statusDot(status) {
+  return {
+    present: 'bg-green-500',
+    late: 'bg-amber-500',
+    absent: 'bg-red-500',
+    half_day: 'bg-yellow-500',
+    on_leave: 'bg-indigo-500',
+    weekend: 'bg-gray-400',
+    upcoming: 'bg-gray-300',
+  }[status] || 'bg-gray-300';
+}
+
+function statusBadgeClass(status) {
+  return {
+    present: 'bg-green-100 text-green-700',
+    late: 'bg-red-50 text-red-600',
+    absent: 'bg-red-50 text-red-600',
+    half_day: 'bg-yellow-100 text-yellow-700',
+    on_leave: 'bg-indigo-100 text-indigo-700',
+    weekend: 'bg-gray-100 text-gray-600',
+    upcoming: 'bg-gray-50 text-gray-400',
+  }[status] || 'bg-gray-100 text-gray-600';
+}
+
+function statusTextClass(status) {
+  return {
+    present: 'text-green-700',
+    late: 'text-amber-700',
+    absent: 'text-red-600',
+    half_day: 'text-yellow-700',
+    on_leave: 'text-indigo-700',
+    weekend: 'text-gray-500',
+  }[status] || 'text-gray-500';
+}
+
+function statusLabel(status) {
+  if (!status) return '—';
+  if (status === 'on_leave') return 'Leave';
+  if (status === 'half_day') return 'Half day';
+  return status.replace('_', ' ');
+}
+
+function formatTime(value) {
+  if (!value) return '-';
+  const str = String(value);
+  return str.length >= 8 ? str.slice(0, 8) : str;
+}
+
+function formatDate(date) {
+  return new Date(date).toLocaleDateString('en-US', {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+  });
+}
+
+function shiftMonth(delta) {
+  let m = selectedMonth.value + delta;
+  let y = selectedYear.value;
+  if (m < 1) { m = 12; y -= 1; }
+  if (m > 12) { m = 1; y += 1; }
+  selectedMonth.value = m;
+  selectedYear.value = y;
+}
+
+async function loadCalendar() {
+  if (!selectedEmployeeId.value && !currentEmployeeId.value) {
+    error.value = 'No employee profile linked. Select an employee to view attendance.';
+    return;
+  }
+
   loading.value = true;
   error.value = null;
-  
   try {
     const params = {
-      page,
-      date: filters.value.date,
-      status: filters.value.status,
-      search: filters.value.search
+      month: selectedMonth.value,
+      year: selectedYear.value,
     };
-    
-    const response = await axios.get('/attendance', { params });
+    if (selectedEmployeeId.value) params.employee_id = selectedEmployeeId.value;
+
+    const response = await axios.get('/attendance/calendar', { params });
+    calendarData.value = response.data;
+    selectedEmployeeId.value = response.data.employee?.id || selectedEmployeeId.value;
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Failed to load attendance calendar';
+    calendarData.value = null;
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function loadEmployees() {
+  if (!canSelectEmployee.value) return;
+  try {
+    let response;
+    try {
+      response = await axios.get('/employees/dropdown');
+    } catch {
+      response = await axios.get('/employees', { params: { per_page: 100 } });
+    }
+    employees.value = Array.isArray(response.data) ? response.data : (response.data.data || []);
+    filteredEmployees.value = employees.value;
+  } catch (err) {
+    console.error('Failed to load employees', err);
+  }
+}
+
+function filterEmployees() {
+  const q = employeeSearch.value.toLowerCase().trim();
+  if (!q) {
+    filteredEmployees.value = employees.value;
+    return;
+  }
+  filteredEmployees.value = employees.value.filter((emp) => {
+    const name = (emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`).toLowerCase();
+    const code = String(emp.employee_code || '').toLowerCase();
+    const id = String(emp.id || '');
+    return name.includes(q) || code.includes(q) || id.includes(q);
+  });
+}
+
+function selectEmployee(emp) {
+  selectedEmployeeId.value = emp.id;
+  employeeSearch.value = '';
+  showEmployeeDropdown.value = false;
+  loadCalendar();
+}
+
+watch([selectedMonth, selectedYear], () => {
+  if (viewMode.value === 'calendar') loadCalendar();
+});
+
+watch(selectedDay, async (date) => {
+  if (!date) return;
+  await nextTick();
+  document.getElementById(`day-${date}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+// List view
+const attendances = ref([]);
+const listLoading = ref(false);
+const listError = ref(null);
+const pagination = ref(null);
+const listFilters = ref({ date: '', status: '', search: '' });
+
+async function loadAttendanceList(page = 1) {
+  listLoading.value = true;
+  listError.value = null;
+  try {
+    const response = await axios.get('/attendance', {
+      params: {
+        page,
+        date: listFilters.value.date,
+        status: listFilters.value.status,
+        search: listFilters.value.search,
+      },
+    });
     attendances.value = response.data.data || [];
     pagination.value = {
       current_page: response.data.current_page,
       last_page: response.data.last_page,
       per_page: response.data.per_page,
-      total: response.data.total
+      total: response.data.total,
     };
   } catch (err) {
-    error.value = 'Failed to load attendance records';
-    console.error('Failed to load attendance:', err);
+    listError.value = 'Failed to load attendance records';
   } finally {
-    loading.value = false;
+    listLoading.value = false;
   }
-};
+}
 
-const loadPage = (page) => {
-  loadAttendance(page);
-};
+function resetListFilters() {
+  listFilters.value = { date: '', status: '', search: '' };
+  loadAttendanceList();
+}
 
-const resetFilters = () => {
-  filters.value = {
-    date: '', // Empty to show all records
-    status: '',
-    search: ''
-  };
-  loadAttendance();
-};
-
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('en-US', { 
-    weekday: 'short', 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
-  });
-};
-
-const getShift = (attendance) => {
-  if (!attendance.check_in) return 'N/A';
-  
-  const checkInTime = new Date('2000-01-01 ' + attendance.check_in);
-  const hour = checkInTime.getHours();
-  
-  if (hour < 12) return 'Morning';
-  if (hour < 18) return 'Afternoon';
-  return 'Evening';
-};
-
-const isLate = (attendance) => {
-  if (!attendance.check_in || attendance.status !== 'late') return false;
-  return true;
-};
+watch(viewMode, (mode) => {
+  if (mode === 'list') loadAttendanceList();
+  else loadCalendar();
+});
 
 onMounted(() => {
-  loadAttendance();
+  selectedEmployeeId.value = currentEmployeeId.value;
+  loadCalendar();
+  loadEmployees();
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest?.('.relative')) showEmployeeDropdown.value = false;
+  });
 });
 </script>

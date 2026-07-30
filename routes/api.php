@@ -151,6 +151,7 @@ Route::middleware(['auth:sanctum', 'hrms'])->group(function () {
         Route::post('/check-in', [AttendanceController::class, 'checkIn'])->middleware('permission:attendance.checkin');
         Route::post('/check-out', [AttendanceController::class, 'checkOut'])->middleware('permission:attendance.checkin');
         Route::get('/summary', [AttendanceController::class, 'summary'])->middleware('permission:attendance.view');
+        Route::get('/calendar', [AttendanceController::class, 'calendar'])->middleware('permission:attendance.view');
         Route::get('/{attendance}', [AttendanceController::class, 'show'])->middleware('permission:attendance.view');
         Route::put('/{attendance}', [AttendanceController::class, 'update'])->middleware('permission:attendance.manage');
         Route::delete('/{attendance}', [AttendanceController::class, 'destroy'])->middleware('permission:attendance.manage');

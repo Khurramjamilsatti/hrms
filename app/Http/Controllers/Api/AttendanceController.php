@@ -335,4 +335,129 @@ class AttendanceController extends Controller
             'total_overtime_hours' => $attendances->sum('overtime_hours'),
         ]);
     }
+
+    /**
+     * Full-month day calendar for one employee (defaults to the current user).
+     */
+    public function calendar(Request $request)
+    {
+        $user = $request->user()->loadMissing('employee');
+
+        $validated = $request->validate([
+            'employee_id' => 'nullable|exists:employees,id',
+            'month' => 'nullable|integer|min:1|max:12',
+            'year' => 'nullable|integer|min:2000|max:2100',
+        ]);
+
+        $employeeId = $validated['employee_id'] ?? $user->employee?->id;
+        if (!$employeeId) {
+            return response()->json([
+                'message' => 'No employee profile is linked to your account. Please select an employee.',
+            ], 422);
+        }
+
+        $this->assertCanAccessEmployeeRecord($request, (int) $employeeId, 'attendance');
+
+        $month = (int) ($validated['month'] ?? now()->month);
+        $year = (int) ($validated['year'] ?? now()->year);
+        $start = Carbon::create($year, $month, 1)->startOfDay();
+        $end = $start->copy()->endOfMonth();
+        $today = Carbon::today();
+
+        $employee = Employee::with(['user', 'department', 'designation'])->findOrFail($employeeId);
+
+        $sessions = Attendance::where('employee_id', $employeeId)
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->orderByRaw('check_in ASC NULLS LAST')
+            ->get()
+            ->groupBy(fn ($row) => Carbon::parse($row->date)->toDateString());
+
+        $days = [];
+        $summary = [
+            'present' => 0,
+            'absent' => 0,
+            'late' => 0,
+            'half_day' => 0,
+            'on_leave' => 0,
+            'weekend' => 0,
+            'working_hours' => 0,
+            'overtime_hours' => 0,
+        ];
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $dateStr = $date->toDateString();
+            $daySessions = $sessions->get($dateStr, collect());
+            $isWeekend = $date->isWeekend();
+            $first = $daySessions->first();
+
+            $checkIn = $daySessions->pluck('check_in')->filter()->first();
+            $checkOut = $daySessions->pluck('check_out')->filter()->last();
+            $workingHours = round((float) $daySessions->sum('working_hours'), 2);
+            $overtimeHours = round((float) $daySessions->sum('overtime_hours'), 2);
+
+            if ($first) {
+                $status = $first->status ?: ($isWeekend ? 'weekend' : 'absent');
+                $isWeekend = (bool) ($first->is_weekend || $first->is_sunday || $isWeekend);
+                if ($isWeekend && in_array($status, ['absent', null, ''], true) && !$checkIn) {
+                    $status = 'weekend';
+                }
+            } elseif ($isWeekend) {
+                $status = 'weekend';
+            } elseif ($date->gt($today)) {
+                $status = 'upcoming';
+            } else {
+                $status = 'absent';
+            }
+
+            if ($status === 'weekend') {
+                $summary['weekend']++;
+            } elseif (isset($summary[$status])) {
+                $summary[$status]++;
+            }
+
+            $summary['working_hours'] += $workingHours;
+            $summary['overtime_hours'] += $overtimeHours;
+
+            $days[] = [
+                'date' => $dateStr,
+                'day' => $date->day,
+                'weekday' => $date->format('D'),
+                'status' => $status,
+                'is_weekend' => $isWeekend,
+                'is_today' => $date->isSameDay($today),
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'working_hours' => $workingHours,
+                'overtime_hours' => $overtimeHours,
+                'sessions_count' => $daySessions->count(),
+                'remarks' => $first?->remarks,
+                'sessions' => $daySessions->map(fn ($session) => [
+                    'id' => $session->id,
+                    'check_in' => $session->check_in,
+                    'check_out' => $session->check_out,
+                    'working_hours' => $session->working_hours,
+                    'overtime_hours' => $session->overtime_hours,
+                    'status' => $session->status,
+                ])->values()->all(),
+            ];
+        }
+
+        $summary['working_hours'] = round($summary['working_hours'], 2);
+        $summary['overtime_hours'] = round($summary['overtime_hours'], 2);
+
+        return response()->json([
+            'employee' => [
+                'id' => $employee->id,
+                'full_name' => $employee->full_name,
+                'employee_code' => $employee->employee_code,
+                'department' => $employee->department?->name,
+                'designation' => $employee->designation?->name,
+            ],
+            'month' => $month,
+            'year' => $year,
+            'month_label' => $start->format('F Y'),
+            'summary' => $summary,
+            'days' => $days,
+        ]);
+    }
 }
